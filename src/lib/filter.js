@@ -1,7 +1,7 @@
 'use strict';
 
 var appname = "filter";
-var log = require('_/logging.js')(appname);
+var log = require('_/util/logging.js')(appname);
 
 var fs = require('fs');
 var util = require('util');
@@ -9,7 +9,7 @@ var path = require('path');
 var findit = require('findit');
 var url_utils = require('url');
 
-var queue = require('_/queue.js');
+var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 //==BEGIN here

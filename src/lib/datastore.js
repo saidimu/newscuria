@@ -1,13 +1,13 @@
 'use strict';
 
 var appname = "datastore";
-var log = require('_/logging.js')(appname);
+var log = require('_/util/logging.js')(appname);
 
 var _ = require('lodash');
 var fs = require('fs');
 var util = require('util');
 
-var queue = require('_/queue.js');
+var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var datastore_api = require('_/util/datastore-api.js');

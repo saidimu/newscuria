@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 'use strict';
 
 var appname = "websockets";
-var log = require('_/logging.js')(appname);
+var log = require('_/util/logging.js')(appname);
 
 var fs = require('fs');
 var util = require('util');
@@ -25,7 +25,7 @@ var util = require('util');
 var app = require('http').createServer(http_handler);
 var io = require('socket.io')(app);
 
-var queue = require('_/queue.js');
+var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var websocket_events = {
