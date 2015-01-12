@@ -1,0 +1,43 @@
+{
+  "name": "newscuria",
+  "version": "0.0.1",
+  "description": "newscuria",
+  "main": "main.js",
+  "apidoc": {
+    "title": "newscuria API docs",
+    "url": "https://api.newscuria.com/v0.1"
+  },
+  "dependencies": {
+    "readability-api": "^0.3.0",
+    "sanitize-html": "^1.1.5",
+    "lodash": "^2.4.1",
+    "request": "^2.36.0",
+    "elasticsearch": "^2.3.1",
+    "node-cassandra-cql": "^0.4.4",
+    "calais": "^0.1.6",
+    "socket.io": "^1.0.6",
+    "bloomd": "^0.2.2",
+    "tldjs": "^1.5.0",
+    "parse-domain": "^0.1.2",
+    "nsqjs": "^0.7.0",
+    "bunyan": "^1.0.0",
+    "bunyan-syslog": "^0.2.2",
+    "limiter": "^1.0.5",
+    "adm-zip": "^0.4.4",
+    "findit": "^2.0.0",
+    "fast-csv": "^0.4.4",
+    "raven": "^0.7.2",
+    "js-yaml": "^3.2.5",
+    "config": "^1.10.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:saidimu/newscuria.git"
+  },
+  "author": "saidimu apale <saidimu@gmail.com>",
+  "license": "GPLv3.0"
+}
