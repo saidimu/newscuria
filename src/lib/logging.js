@@ -30,7 +30,7 @@ function get_logger(name) {
         stream: bsyslog.createBunyanStream({
           name: hostname,
           type: config.get('type'),
-          facility: config.get('facility'),
+          facility: bsyslog.local0,
           host: config.get('host'),
           port: config.get('port')
         })

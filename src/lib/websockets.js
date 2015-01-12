@@ -44,7 +44,7 @@ app.listen(8080, function onAppListen() {
   log.info({
     address: address.address,
     port: address.port
-  }, "Listening on %s:%j");
+  }, "Listening...");
 });
 
 // connect to the message queue
