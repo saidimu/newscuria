@@ -14,7 +14,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 'use strict';
 
 var appname = "queue";
-var log = require('_/logging.js')(appname);
+var log = require('_/util/logging.js')(appname);
 
 var nsq = require('nsqjs');
 var util = require('util');

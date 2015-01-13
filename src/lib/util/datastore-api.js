@@ -14,7 +14,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 'use strict';
 
 var appname = "datastore-api";
-var log = require('_/logging.js')(appname);
+var log = require('_/util/logging.js')(appname);
 
 var cql = require('node-cassandra-cql');
 
