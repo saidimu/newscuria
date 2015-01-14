@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>realtimer</title>
+</head>
+
+<body>
+	<script src="/socket.io/socket.io.js"></script>
+
+	<script type="javascript">
+		var socket = io('http://localhost:8080/');
+
+		socket.on('status', function (data) {
+			console.log(data);
+			socket.emit('url', { url: 'http://some.url.com/' });
+		});
+	</script>
+
+</body>
+</html>
+

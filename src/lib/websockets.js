@@ -138,7 +138,7 @@ function emit(event, message) {
 
 
 function http_handler (req, res) {
-	fs.readFile(__dirname + '/realtime.html', function (err, data) {
+	fs.readFile(__dirname + '/util/websockets.html', function (err, data) {
 		if (err) {
 		  res.writeHead(500);
 		  return res.end('Error loading realtime.html');
