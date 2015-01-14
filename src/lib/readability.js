@@ -19,7 +19,7 @@ var log = require('_/util/logging.js')(appname);
 var util = require('util');
 var readability_api = require('_/util/readability-api.js');
 
-var queue = require('./util/queue.js');
+var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var datastore_api = require('_/util/datastore-api.js');

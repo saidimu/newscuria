@@ -20,7 +20,7 @@ var util = require('util');
 var datastore_api = require('_/util/datastore-api.js');
 var opencalais_api = require('_/util/opencalais-api.js');
 
-var queue = require('./util/queue.js');
+var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 

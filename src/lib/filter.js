@@ -16,12 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 var appname = "filter";
 var log = require('_/util/logging.js')(appname);
 
-var fs = require('fs');
-var util = require('util');
-var path = require('path');
-var findit = require('findit');
-var url_utils = require('url');
-
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
