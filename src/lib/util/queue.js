@@ -48,6 +48,8 @@ function connect(callback) {
     log.info("nsqd Writer ready.");
 
     writer = nsqd_writer;
+    
+    callback(undefined);
   });//writer.on
 
   nsqd_writer.on('closed', function() {
