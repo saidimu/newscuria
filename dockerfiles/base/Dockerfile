@@ -28,14 +28,14 @@ RUN ln -s -f /bin/true /usr/bin/chfn
 ## 9. Install Node JS
 ## 10. Clean up APT.
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886 && \
-	echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections && \
-	echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" >> /etc/apt/sources.list.d/webupd8.list && \
-  apt-get -qq update > /dev/null && \
-	apt-get -yqq upgrade > /dev/null &&  \
-  apt-get -yqq install vim.tiny wget zip unzip build-essential curl software-properties-common scons oracle-java7-set-default nodejs > /dev/null && \
-  apt-add-repository -y ppa:chris-lea/node.js > /dev/null && \
-	apt-get -qq update > /dev/null && \
-	apt-get -yqq install nodejs > /dev/null && \
-  apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections && \
+    echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" >> /etc/apt/sources.list.d/webupd8.list && \
+    apt-get -qq update > /dev/null && \
+    apt-get -yqq upgrade > /dev/null &&  \
+    apt-get -yqq install vim.tiny wget zip unzip build-essential curl software-properties-common scons oracle-java7-set-default nodejs > /dev/null && \
+    apt-add-repository -y ppa:chris-lea/node.js > /dev/null && \
+    apt-get -qq update > /dev/null && \
+    apt-get -yqq install nodejs > /dev/null && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 CMD [""]

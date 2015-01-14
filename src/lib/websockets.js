@@ -35,7 +35,7 @@ var websocket_events = {
   ENTITIES: 'entities'
 };//websocket_events
 
-var websocket = undefined;
+var websocket;
 
 //==BEGIN here
 app.listen(8080, function onAppListen() {
@@ -81,6 +81,10 @@ function start() {
 
 function url_msg_processor(msg)	{
 	log.info({
+    websockets_msg: msg
+  }, "RECEIVED from websocket.");
+
+  console.log({
     websockets_msg: msg
   }, "RECEIVED from websocket.");
 
