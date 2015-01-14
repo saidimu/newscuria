@@ -49,17 +49,17 @@ function listen_to_readability()  {
   var topic = topics.READABILITY;
   var channel = "opencalais";
 
-  queue.read_message(topic, channel, function onReadMessage(err, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error("Error geting message from queue!");
     } else {
-      process_readability_message(message);
+      process_readability_message(json, message);
     }//if-else
   });
 }//listen_to_readability()
 
 
-function process_readability_message(msg)	{
+function process_readability_message(json, message)	{
 	var RateLimiter = require('limiter').RateLimiter;
 
 	// 'second', 'minute', 'day', or a number of milliseconds
@@ -82,7 +82,10 @@ function process_readability_message(msg)	{
 
 		} else {
 
-      get_opencalais(msg);
+      get_opencalais(json);
+
+      message.finish();
+
     }//if-else
 	});
 
@@ -90,7 +93,9 @@ function process_readability_message(msg)	{
 
 
 
-function get_opencalais(readability)	{
+function get_opencalais(json)	{
+  var readability = json;
+
   var url = readability.url || '';
 
   log.info({

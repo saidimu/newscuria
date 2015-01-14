@@ -81,7 +81,7 @@ function read_message(topic, channel, callback)	{
     // get JSON message payload
     try {
       var json = message.json();
-      callback(undefined, json);
+      callback(undefined, json, message);
 
     } catch(err)  {
       log.error({
@@ -91,7 +91,7 @@ function read_message(topic, channel, callback)	{
         queue_msg: message,
       }, "Error geting message from queue!");
 
-      callback(err, message);
+      callback(err, undefined, message);
     }//try-catcg
   });
 

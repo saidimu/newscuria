@@ -54,11 +54,11 @@ function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
   var channel = "datastore";
 
-  queue.read_message(topic, channel, function onReadMessage(err, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error("Error geting message from queue!");
     } else {
-      process_url_received_message(message);
+      process_url_received_message(json, message);
     }//if-else
   });
 }//listen_to_urls_received()
@@ -68,11 +68,11 @@ function listen_to_readability()  {
   var topic = topics.READABILITY;
   var channel = "datastore";
 
-  queue.read_message(topic, channel, function onReadMessage(err, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error("Error geting message from queue!");
     } else {
-      process_readability_message(message);
+      process_readability_message(json, message);
     }//if-else
   });
 }//listen_to_readability()
@@ -82,18 +82,18 @@ function listen_to_opencalais()  {
   var topic = topics.OPENCALAIS;
   var channel = "datastore";
 
-  queue.read_message(topic, channel, function onReadMessage(err, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error("Error geting message from queue!");
     } else {
-      process_opencalais_message(message);
+      process_opencalais_message(json, message);
     }//if-else
   });
 }//listen_to_opencalais()
 
 
-function process_url_received_message(msg) {
-  var url = msg.url || '';
+function process_url_received_message(json, message) {
+  var url = json.url || '';
 
   var insert_stmt = "INSERT INTO nuzli.received_urls (url, latest_received_date) VALUES (?, ?)";
   var received_date = new Date().toISOString();
@@ -112,11 +112,13 @@ function process_url_received_message(msg) {
     }//if
   });
 
+  message.finish();
+
 }//process_url_received_message()
 
 
-function process_readability_message(msg) {
-  var readability = msg;
+function process_readability_message(json, message) {
+  var readability = json;
 
   var url = readability.url;
   var date_published = readability.date_published || "1970-01-01 00:00:00 +0000";
@@ -150,11 +152,13 @@ function process_readability_message(msg) {
       "domain_urls"
   );//save_domain_metadata
 
+  message.finish();
+
 }//process_readability_message() {
 
 
-function process_opencalais_message(msg) {
-  var opencalais = msg;
+function process_opencalais_message(json, message) {
+  var opencalais = json;
   var url = opencalais.url || '';
   var date_published = opencalais.date_published;
 
@@ -172,6 +176,8 @@ function process_opencalais_message(msg) {
     date_published,
     "opencalais"
   );//save_document
+
+  message.finish();
 
 }//process_opencalais_message() {
 

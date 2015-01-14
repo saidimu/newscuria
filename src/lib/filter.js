@@ -45,20 +45,22 @@ function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
   var channel = "filter";
 
-  queue.read_message(topic, channel, function onReadMessage(err, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error("Error geting message from queue!");
     } else {
-      process_url_received_message(message);
+      process_url_received_message(json, message);
     }//if-else
   });
 }//listen_to_urls_received
 
 
-function process_url_received_message(msg)  {
-  var url = msg.url || '';
+function process_url_received_message(json, message)  {
+  var url = json.url || '';
 
   publish_url_approved(url);
+
+  message.finish();
 }//process_url_received_message
 
 

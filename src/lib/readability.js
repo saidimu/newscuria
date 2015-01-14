@@ -49,17 +49,17 @@ function listen_to_urls_approved()  {
   var topic = topics.URLS_APPROVED;
   var channel = "readability";
 
-  queue.read_message(topic, channel, function onReadMessage(err, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error("Error geting message from queue!");
     } else {
-      process_url_approved_message(message);
+      process_url_approved_message(json, message);
     }//if-else
   });
 }//listen_to_urls_approved
 
 
-function process_url_approved_message(msg)	{
+function process_url_approved_message(json, message)	{
 	var RateLimiter = require('limiter').RateLimiter;
 
 	// 'second', 'minute', 'day', or a number of milliseconds
@@ -82,9 +82,11 @@ function process_url_approved_message(msg)	{
 
 		} else {
 
-      var url = msg.url || '';
+      var url = json.url || '';
 
       get_readability(url);
+
+      message.finish();
 
     }//if-else
 	});
