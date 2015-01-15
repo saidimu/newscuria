@@ -230,23 +230,29 @@ function process_api_response(opencalais)	{
 }//process_api_response
 
 
-function fetch_opencalais_content(payload, callback)	{
-	var url = payload.url;
-	var text = payload.text;
+function fetch_opencalais_content(readability, callback)	{
+	var url = readability.url;
+	var text = readability.text;
 
 	if(!url)	{
-		log.error("EMPTY url: '%s'", url);
+		log.error({
+      readability: readability,
+    }, "EMPTY url in Readability object.");
+
 		return;
 	}//if
 
-	if(!text)	{
-		log.error("EMPTY text in payload: '%s'", payload);
-		return;
-	}//if
+  if(!text)	{
+    log.error({
+     readability: readability,
+    }, "EMPTY text in Readability object.");
 
-    try {
-	    opencalais_api.fetch_nlp_content(text, callback);
-    } catch(error)  {
-        log.error({err: error});
-    }//try-catch
+    return;
+  }//if
+
+  try {
+    opencalais_api.fetch_nlp_content(text, callback);
+  } catch(error)  {
+    log.error({err: error});
+  }//try-catch
 }//fetch_opencalais_content
