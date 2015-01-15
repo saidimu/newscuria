@@ -232,12 +232,12 @@ function process_api_response(opencalais)	{
 
 function fetch_opencalais_content(readability, callback)	{
 	var url = readability.url;
-	var text = readability.text;
+	var text = readability.text || readability.plaintext;
 
 	if(!url)	{
 		log.error({
       readability: readability,
-    }, "EMPTY url in Readability object.");
+    }, "Cannot fetch Opencalais content becuase of EMPTY url in Readability object.");
 
 		return;
 	}//if
@@ -245,7 +245,7 @@ function fetch_opencalais_content(readability, callback)	{
   if(!text)	{
     log.error({
      readability: readability,
-    }, "EMPTY text in Readability object.");
+    }, "Cannot fetch Opencalais content becuase of EMPTY text in Readability object.");
 
     return;
   }//if
