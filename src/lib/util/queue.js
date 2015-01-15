@@ -134,9 +134,9 @@ function read_message(topic, channel, callback)	{
 
 
 function publish_message(topic, message)	{
-  log.info({
+  log.debug({
     topic: topic,
-    payload: message,
+    // payload: message,
   }, "Publishing message.");
 
 	writer.publish(topic, message);
