@@ -84,6 +84,7 @@ function read_message(topic, channel, callback)	{
       callback(undefined, json, message);
 
     } catch(err)  {
+      message.body = '';  // hide verbose message body from logging
       log.error({
         topic: topic,
         channel: channel,

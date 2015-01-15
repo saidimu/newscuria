@@ -108,23 +108,23 @@ function listen_to_entities()	{
   var topic = topics.ENTITIES;
   var channel = "websockets";
 
-  queue.read_message(topic, channel, function onReadMessage(err, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error("Error geting message from queue!");
     } else {
-      process_entities(message);
+      process_entities(json, message);
     }//if-else
   });
 
 }//listen_to_entities
 
 
-function process_entities(msg)	{
-	var entities = msg;
+function process_entities(json, message)	{
+	var entities = json;
 
 	emit(websocket_events.ENTITIES, entities);
 
-	msg.finish();
+	message.finish();
 }//process_entities
 
 
