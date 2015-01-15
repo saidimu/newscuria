@@ -47,7 +47,7 @@ function start()    {
   listen_to_urls_received();
   listen_to_readability();
   listen_to_opencalais();
-}//start()
+}//start
 
 
 function listen_to_urls_received()  {
@@ -61,7 +61,7 @@ function listen_to_urls_received()  {
       process_url_received_message(json, message);
     }//if-else
   });
-}//listen_to_urls_received()
+}//listen_to_urls_received
 
 
 function listen_to_readability()  {
@@ -75,7 +75,7 @@ function listen_to_readability()  {
       process_readability_message(json, message);
     }//if-else
   });
-}//listen_to_readability()
+}//listen_to_readability
 
 
 function listen_to_opencalais()  {
@@ -89,7 +89,7 @@ function listen_to_opencalais()  {
       process_opencalais_message(json, message);
     }//if-else
   });
-}//listen_to_opencalais()
+}//listen_to_opencalais
 
 
 function process_url_received_message(json, message) {
@@ -114,53 +114,54 @@ function process_url_received_message(json, message) {
 
   message.finish();
 
-}//process_url_received_message()
+}//process_url_received_message
 
 
 function process_readability_message(json, message) {
   var readability = json;
 
   var url = readability.url;
-  var date_published = readability.date_published || "1970-01-01 00:00:00 +0000";
+//  var date_published = readability.date_published || "1970-01-01 00:00:00 +0000";
+  var date_published = readability.date_published || null;
   var author = readability.author || "";
   var domain = readability.domain || "";
   var word_count = readability.word_count || 0;
 
   // save Readability object to datastore
   save_document(
-      readability,
-      url,
-      date_published,
-      "readability"
+    readability,
+    url,
+    date_published,
+    "readability"
   );//save_document
 
   // save author metadata to datastore
   save_author_metadata(
-      author,
-      url,
-      word_count,
-      date_published,
-      "author_urls"
+    author,
+    url,
+    word_count,
+    date_published,
+    "author_urls"
   );//save_author_metadata
 
   // save domain metadata to datastore
   save_domain_metadata(
-      domain,
-      url,
-      word_count,
-      date_published,
-      "domain_urls"
+    domain,
+    url,
+    word_count,
+    date_published,
+    "domain_urls"
   );//save_domain_metadata
 
   message.finish();
 
-}//process_readability_message() {
+}//process_readability_message
 
 
 function process_opencalais_message(json, message) {
   var opencalais = json;
   var url = opencalais.url || '';
-  var date_published = opencalais.date_published;
+  var date_published = opencalais.date_published || null;
 
   if(!url)  {
     log.error({
@@ -179,7 +180,7 @@ function process_opencalais_message(json, message) {
 
   message.finish();
 
-}//process_opencalais_message() {
+}//process_opencalais_message
 
 
 function save_domain_metadata(domain, url, word_count, date_published, table, callback) {
@@ -189,38 +190,41 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
   }, "Persisting to datastore");
 
   if(!callback)   {
-      callback = function(error, result)  {
-          if(error)   {
-              log.error({err: error});
-          // } else {
-          //  console.log(result);
-          }//if-else
-      };
+    callback = function(error, result)  {
+      if(error)   {
+          log.error({err: error});
+      }//if-else
+    };
   }//if
 
   if(!domain) {
-      log.error("EMPTY domain name for url: '%s'", url);
+    log.error({
+      url: url
+    }, "EMPTY domain name for url");
   }//if
 
   var statement = util.format('INSERT INTO %s (domain, url, word_count, date_published, created_date) VALUES (?, ?, ?, ?, ?)', table);
 
+  var date_published_object;
+
   try {
-      date_published = new Date(date_published);
+    date_published_object = new Date(date_published).toISOString();
   } catch(error)  {
-      // date_published = new Date("1970-01-01 00:00:00 +0000");
-      log.error("Invalid date: '%s'" % date_published);
+    log.error({
+      date_published_string: date_published,
+    }, "Cannot convert date string to Date object.");
   }//try-catch
 
   var params = [
       domain,
       url,
       word_count, 
-      date_published,
+      date_published_object,
       datastore_api.types.timeuuid()
   ];
 
   client.execute(statement, params, callback);
-}//save_domain_metadata()
+}//save_domain_metadata
 
 
 function save_author_metadata(author, url, word_count, date_published, table, callback) {
@@ -230,38 +234,41 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
   }, "Persisting to datastore");
 
   if(!callback)   {
-      callback = function(error, result)  {
-          if(error)   {
-              log.error({err: error});
-          // } else {
-          //  console.log(result);
-          }//if-else
-      };
+    callback = function(error, result)  {
+      if(error)   {
+        log.error({err: error});
+      }//if-else
+    };
   }//if
 
   if(!author) {
-      log.error("EMPTY author name for url: '%s'", url);
+    log.error({
+      url: url
+    }, "EMPTY author name for url");
   }//if
 
   var statement = util.format('INSERT INTO %s (author, url, word_count, date_published, created_date) VALUES (?, ?, ?, ?, ?)', table);
 
+  var date_published_object;
+
   try {
-      date_published = new Date(date_published);
+    date_published_object = new Date(date_published).toISOString();
   } catch(error)  {
-      // date_published = new Date("1970-01-01 00:00:00 +0000");
-      log.error("Invalid date: '%s'" % date_published);
+    log.error({
+      date_published_string: date_published,
+    }, "Cannot convert date string to Date object.");
   }//try-catch
 
   var params = [
       author,
       url,
       word_count,
-      date_published,
+      date_published_object,
       datastore_api.types.timeuuid()
   ];
 
   client.execute(statement, params, callback);
-}//save_author_metadata()
+}//save_author_metadata
 
 
 function save_document(object, url, date_published, table, callback)    {
@@ -271,49 +278,53 @@ function save_document(object, url, date_published, table, callback)    {
   }, "Persisting to datastore");
 
   if(!callback)   {
-      callback = function(error, result)  {
-          if(error)   {
-              log.error({err: error});
-          // } else {
-          //  console.log(result);
-          }//if-else
-      };
+    callback = function(error, result)  {
+      if(error)   {
+        log.error({err: error});
+      }//if-else
+    };
   }//if
 
   if(!object) {
-      log.error("EMPTY object '%s' cannot be saved to table '%s'", url, table);
-      // throw new Error(util.format("EMPTY object '%s' cannot be saved to table '%s'", url, table));
-      return;
+    log.error({
+      url: url,
+      table: table,
+    }, "EMPTY object cannot be saved to table.");
+
+    return;
   }//if
 
   var statement = util.format('INSERT INTO %s (url, api_result, date_published, created_date) VALUES (?, ?, ?, ?)', table);
 
-  var buf;    
-  try {
-      buf = new Buffer(JSON.stringify(object), 'utf8');
-  } catch(error)  {
-      log.error(object);
-      // throw error;
-      return;
-  }//try-catch
+  var buf;
 
   try {
-      date_published = new Date(date_published);
+    buf = new Buffer(JSON.stringify(object), 'utf8');
   } catch(error)  {
-      // date_published = new Date("1970-01-01 00:00:00 +0000");
-      log.error("Invalid date: '%s'" % date_published);
+    log.error({
+      err: error,
+      json: object,
+    }, "Error converting JSON object to a Buffer object;");
+
+    return;
+  }//try-catch
+
+  var date_published_object;
+
+  try {
+    date_published_object = new Date(date_published).toISOString();
+  } catch(error)  {
+    log.error({
+      date_published_string: date_published,
+    }, "Cannot convert date string to Date object.");
   }//try-catch
 
   var params = [
       url,
       buf,
-      date_published,
+      date_published_object,
       datastore_api.types.timeuuid()
   ];
 
   client.execute(statement, params, callback);
-}//save_document()
-
-module.exports = {
-
-};//module.exports
+}//save_document
