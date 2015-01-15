@@ -172,6 +172,9 @@ function fetch_readability_content(url, callback)	{
   try {
   	readability_api.scrape(url, callback);
   } catch(err)  {
-    log.error({err: err});
+    log.error({
+      url: url,
+      err: err
+    }, "Error fetching URL content from Readability API");
   }//try-catch
 }//fetch_readability_content()
