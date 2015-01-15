@@ -40,9 +40,10 @@ queue.connect(function onQueueConnect(err) {
 });
 //==BEGIN here
 
+
 function start()    {
   listen_to_readability();
-}//start()
+}//start
 
 
 function listen_to_readability()  {
@@ -56,7 +57,7 @@ function listen_to_readability()  {
       process_readability_message(json, message);
     }//if-else
   });
-}//listen_to_readability()
+}//listen_to_readability
 
 
 function process_readability_message(json, message)	{
@@ -89,8 +90,7 @@ function process_readability_message(json, message)	{
     }//if-else
 	});
 
-}//process_readability_message()
-
+}//process_readability_message
 
 
 function get_opencalais(json)	{
@@ -104,13 +104,6 @@ function get_opencalais(json)	{
 
 	var query = "SELECT * FROM opencalais WHERE url=?";
   var params = [url];
-
-  try {
-    datastore_api.client.execute(query, params, datastore_fetch_callback);
-  } catch(err)  {
-    log.error({err: err});
-  }//try-catch
-
 
 	// CALLBACK
 	var datastore_fetch_callback = function onDatastoreFetch(err, response)	{
@@ -143,8 +136,7 @@ function get_opencalais(json)	{
 			fetch_opencalais_content(readability, api_fetch_callback);
 
 		}//if-else
-	};
-
+	};//datastore_fetch_callback
 
 	// CALLBACK
 	var api_fetch_callback = function onOpencalaisAPIFetch(err, opencalais)	{
@@ -157,6 +149,13 @@ function get_opencalais(json)	{
 
 		}//if-else
 	};//api_fetch_callback
+
+
+  try {
+    datastore_api.client.execute(query, params, datastore_fetch_callback);
+  } catch(err)  {
+    log.error({err: err});
+  }//try-catch
 
 }//get_opencalais
 
@@ -171,7 +170,7 @@ function process_opencalais_object(opencalais, url) {
   // publish Opencalais object and extracted entities object
   publish_opencalais_message(opencalais);
   publish_entities_message(entities);
-}//process_opencalais_object()
+}//process_opencalais_object
 
 
 function publish_opencalais_message(opencalais) {
@@ -250,4 +249,4 @@ function fetch_opencalais_content(payload, callback)	{
     } catch(error)  {
         log.error({err: error});
     }//try-catch
-}//fetch_opencalais_content()
+}//fetch_opencalais_content
