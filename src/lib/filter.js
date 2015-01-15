@@ -16,12 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 var appname = "filter";
 var log = require('_/util/logging.js')(appname);
 
-var fs = require('fs');
-var util = require('util');
-var path = require('path');
-var findit = require('findit');
-var url_utils = require('url');
-
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
@@ -51,20 +45,22 @@ function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
   var channel = "filter";
 
-  queue.read_message(topic, channel, function onReadMessage(err, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error("Error geting message from queue!");
     } else {
-      process_url_received_message(message);
+      process_url_received_message(json, message);
     }//if-else
   });
 }//listen_to_urls_received
 
 
-function process_url_received_message(msg)  {
-  var url = msg.url || '';
+function process_url_received_message(json, message)  {
+  var url = json.url || '';
 
   publish_url_approved(url);
+
+  message.finish();
 }//process_url_received_message
 
 

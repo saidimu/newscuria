@@ -1,5 +1,6 @@
-## Docker fig config file
+## Docker fig & crane config files
 fig.yml
+crane.yml
 
 # configuration files
 config

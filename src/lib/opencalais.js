@@ -20,7 +20,7 @@ var util = require('util');
 var datastore_api = require('_/util/datastore-api.js');
 var opencalais_api = require('_/util/opencalais-api.js');
 
-var queue = require('./util/queue.js');
+var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 
@@ -40,26 +40,27 @@ queue.connect(function onQueueConnect(err) {
 });
 //==BEGIN here
 
+
 function start()    {
   listen_to_readability();
-}//start()
+}//start
 
 
 function listen_to_readability()  {
   var topic = topics.READABILITY;
   var channel = "opencalais";
 
-  queue.read_message(topic, channel, function onReadMessage(err, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error("Error geting message from queue!");
     } else {
-      process_readability_message(message);
+      process_readability_message(json, message);
     }//if-else
   });
-}//listen_to_readability()
+}//listen_to_readability
 
 
-function process_readability_message(msg)	{
+function process_readability_message(json, message)	{
 	var RateLimiter = require('limiter').RateLimiter;
 
 	// 'second', 'minute', 'day', or a number of milliseconds
@@ -82,15 +83,19 @@ function process_readability_message(msg)	{
 
 		} else {
 
-      get_opencalais(msg);
+      get_opencalais(json);
+
+      message.finish();
+
     }//if-else
 	});
 
-}//process_readability_message()
+}//process_readability_message
 
 
+function get_opencalais(json)	{
+  var readability = json;
 
-function get_opencalais(readability)	{
   var url = readability.url || '';
 
   log.info({
@@ -99,13 +104,6 @@ function get_opencalais(readability)	{
 
 	var query = "SELECT * FROM opencalais WHERE url=?";
   var params = [url];
-
-  try {
-    datastore_api.client.execute(query, params, datastore_fetch_callback);
-  } catch(err)  {
-    log.error({err: err});
-  }//try-catch
-
 
 	// CALLBACK
 	var datastore_fetch_callback = function onDatastoreFetch(err, response)	{
@@ -138,8 +136,7 @@ function get_opencalais(readability)	{
 			fetch_opencalais_content(readability, api_fetch_callback);
 
 		}//if-else
-	};
-
+	};//datastore_fetch_callback
 
 	// CALLBACK
 	var api_fetch_callback = function onOpencalaisAPIFetch(err, opencalais)	{
@@ -152,6 +149,13 @@ function get_opencalais(readability)	{
 
 		}//if-else
 	};//api_fetch_callback
+
+
+  try {
+    datastore_api.client.execute(query, params, datastore_fetch_callback);
+  } catch(err)  {
+    log.error({err: err});
+  }//try-catch
 
 }//get_opencalais
 
@@ -166,7 +170,7 @@ function process_opencalais_object(opencalais, url) {
   // publish Opencalais object and extracted entities object
   publish_opencalais_message(opencalais);
   publish_entities_message(entities);
-}//process_opencalais_object()
+}//process_opencalais_object
 
 
 function publish_opencalais_message(opencalais) {
@@ -226,23 +230,29 @@ function process_api_response(opencalais)	{
 }//process_api_response
 
 
-function fetch_opencalais_content(payload, callback)	{
-	var url = payload.url;
-	var text = payload.text;
+function fetch_opencalais_content(readability, callback)	{
+	var url = readability.url;
+	var text = readability.text || readability.plaintext;
 
 	if(!url)	{
-		log.error("EMPTY url: '%s'", url);
+		log.error({
+      readability: readability,
+    }, "Cannot fetch Opencalais content becuase of EMPTY url in Readability object.");
+
 		return;
 	}//if
 
-	if(!text)	{
-		log.error("EMPTY text in payload: '%s'", payload);
-		return;
-	}//if
+  if(!text)	{
+    log.error({
+     readability: readability,
+    }, "Cannot fetch Opencalais content becuase of EMPTY text in Readability object.");
 
-    try {
-	    opencalais_api.fetch_nlp_content(text, callback);
-    } catch(error)  {
-        log.error({err: error});
-    }//try-catch
-}//fetch_opencalais_content()
+    return;
+  }//if
+
+  try {
+    opencalais_api.fetch_nlp_content(text, callback);
+  } catch(error)  {
+    log.error({err: error});
+  }//try-catch
+}//fetch_opencalais_content

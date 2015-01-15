@@ -48,6 +48,8 @@ function connect(callback) {
     log.info("nsqd Writer ready.");
 
     writer = nsqd_writer;
+    
+    callback(undefined);
   });//writer.on
 
   nsqd_writer.on('closed', function() {
@@ -79,9 +81,10 @@ function read_message(topic, channel, callback)	{
     // get JSON message payload
     try {
       var json = message.json();
-      callback(undefined, json);
+      callback(undefined, json, message);
 
     } catch(err)  {
+      message.body = '';  // hide verbose message body from logging
       log.error({
         topic: topic,
         channel: channel,
@@ -89,7 +92,7 @@ function read_message(topic, channel, callback)	{
         queue_msg: message,
       }, "Error geting message from queue!");
 
-      callback(err, message);
+      callback(err, undefined, message);
     }//try-catcg
   });
 
@@ -132,9 +135,9 @@ function read_message(topic, channel, callback)	{
 
 
 function publish_message(topic, message)	{
-  log.info({
+  log.debug({
     topic: topic,
-    payload: message,
+    // payload: message,
   }, "Publishing message.");
 
 	writer.publish(topic, message);
