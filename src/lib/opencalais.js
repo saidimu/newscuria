@@ -83,9 +83,7 @@ function process_readability_message(json, message)	{
 
 		} else {
 
-      get_opencalais(json);
-
-      message.finish();
+      get_opencalais(json, message);
 
     }//if-else
 	});
@@ -93,7 +91,7 @@ function process_readability_message(json, message)	{
 }//process_readability_message
 
 
-function get_opencalais(json)	{
+function get_opencalais(json, message)	{
   var readability = json;
 
   var url = readability.url || '';
@@ -153,8 +151,15 @@ function get_opencalais(json)	{
 
   try {
     datastore_api.client.execute(query, params, datastore_fetch_callback);
+
+    message.finish();
+
   } catch(err)  {
-    log.error({err: err});
+
+    log.error({
+      err: err
+    }, "Error fetching Opencalais from datastore.");
+
   }//try-catch
 
 }//get_opencalais
