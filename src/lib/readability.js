@@ -52,8 +52,12 @@ function listen_to_urls_approved()  {
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error({
+        topic: topic,
+        channel: channel,
+        json: json,
+        queue_msg: message,
         err: err
-      }, "Error geting message from queue!");
+      }, "Error getting message from queue!");
     } else {
       process_url_approved_message(json, message);
     }//if-else

@@ -107,8 +107,12 @@ function listen_to_entities()	{
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error({
+        topic: topic,
+        channel: channel,
+        json: json,
+        queue_msg: message,
         err: err
-      }, "Error geting message from queue!");
+      }, "Error getting message from queue!");
     } else {
       process_entities(json, message);
     }//if-else

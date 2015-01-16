@@ -53,8 +53,12 @@ function listen_to_readability()  {
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
       log.error({
+        topic: topic,
+        channel: channel,
+        json: json,
+        queue_msg: message,
         err: err
-      }, "Error geting message from queue!");
+      }, "Error getting message from queue!");
     } else {
       process_readability_message(json, message);
     }//if-else
@@ -85,7 +89,9 @@ function process_readability_message(json, message)	{
 
 		} else {
 
-      get_opencalais(json, message);
+      get_opencalais(json);
+
+      message.finish();
 
     }//if-else
 	});
@@ -93,7 +99,7 @@ function process_readability_message(json, message)	{
 }//process_readability_message
 
 
-function get_opencalais(json, message)	{
+function get_opencalais(json)	{
   var readability = json;
 
   var url = readability.url || '';
@@ -153,8 +159,6 @@ function get_opencalais(json, message)	{
 
   try {
     datastore_api.client.execute(query, params, datastore_fetch_callback);
-
-    message.finish();
 
   } catch(err)  {
 
