@@ -48,7 +48,7 @@ function start()    {
 
 function listen_to_readability()  {
   var topic = topics.READABILITY;
-  var channel = "opencalais";
+  var channel = "fetch-opencalais-content";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
