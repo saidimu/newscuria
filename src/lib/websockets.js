@@ -124,6 +124,10 @@ function process_entities(json, message)	{
 
 	emit(websocket_events.ENTITIES, entities);
 
+  log.debug({
+    entities: entities,
+  }, "Entities sent via websockets.");
+
 	message.finish();
 }//process_entities
 
