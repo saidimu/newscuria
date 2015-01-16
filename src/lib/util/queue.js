@@ -105,7 +105,7 @@ function read_message(topic, channel, callback)	{
       options: options
     }, "nsq Reader error.");
 
-    callback(err, undefined);
+    callback(err, undefined, undefined);
   });
 
   reader.on('nsqd_connected', function onNsqdConnected(host, port) {
