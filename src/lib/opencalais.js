@@ -48,11 +48,17 @@ function start()    {
 
 function listen_to_readability()  {
   var topic = topics.READABILITY;
-  var channel = "opencalais";
+  var channel = "fetch-opencalais-content";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
-      log.error("Error geting message from queue!");
+      log.error({
+        topic: topic,
+        channel: channel,
+        json: json,
+        queue_msg: message,
+        err: err
+      }, "Error getting message from queue!");
     } else {
       process_readability_message(json, message);
     }//if-else
@@ -153,8 +159,13 @@ function get_opencalais(json)	{
 
   try {
     datastore_api.client.execute(query, params, datastore_fetch_callback);
+
   } catch(err)  {
-    log.error({err: err});
+
+    log.error({
+      err: err
+    }, "Error fetching Opencalais from datastore.");
+
   }//try-catch
 
 }//get_opencalais

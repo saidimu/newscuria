@@ -84,10 +84,6 @@ function url_msg_processor(msg)	{
     websockets_msg: msg
   }, "RECEIVED from websocket.");
 
-  console.log({
-    websockets_msg: msg
-  }, "RECEIVED from websocket.");
-
 	if(msg.url)	{
 		queue.publish_message(topics.URLS_RECEIVED, {
       url: msg.url
@@ -106,11 +102,17 @@ function url_msg_processor(msg)	{
 
 function listen_to_entities()	{
   var topic = topics.ENTITIES;
-  var channel = "websockets";
+  var channel = "send-to-browser";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
-      log.error("Error geting message from queue!");
+      log.error({
+        topic: topic,
+        channel: channel,
+        json: json,
+        queue_msg: message,
+        err: err
+      }, "Error getting message from queue!");
     } else {
       process_entities(json, message);
     }//if-else
@@ -129,9 +131,9 @@ function process_entities(json, message)	{
 
 
 function emit(event, message) {
-  log.debug({
-    websocket_event: event,
-  }, "Emiting websockets event.");
+  // log.debug({
+  //   websocket_event: event,
+  // }, "Emiting websockets event.");
 
   websocket.emit(event, message);
 }//emit()

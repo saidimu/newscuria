@@ -81,18 +81,19 @@ function read_message(topic, channel, callback)	{
     // get JSON message payload
     try {
       var json = message.json();
+
       callback(undefined, json, message);
 
     } catch(err)  {
       message.body = '';  // hide verbose message body from logging
-      log.error({
-        topic: topic,
-        channel: channel,
-        err: err,
-        queue_msg: message,
-      }, "Error geting message from queue!");
+      // log.error({
+      //   topic: topic,
+      //   channel: channel,
+      //   err: err,
+      //   queue_msg: message,
+      // }, "Error getting message from queue!");
 
-      callback(err, undefined, message);
+      callback(err, {}, message);
     }//try-catcg
   });
 
@@ -104,7 +105,7 @@ function read_message(topic, channel, callback)	{
       options: options
     }, "nsq Reader error.");
 
-    callback(err, undefined);
+    callback(err, undefined, undefined);
   });
 
   reader.on('nsqd_connected', function onNsqdConnected(host, port) {

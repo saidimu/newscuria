@@ -43,11 +43,17 @@ function start()    {
 
 function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
-  var channel = "filter";
+  var channel = "filter-unwanted-urls";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
-      log.error("Error geting message from queue!");
+      log.error({
+        topic: topic,
+        channel: channel,
+        json: json,
+        queue_msg: message,
+        err: err
+      }, "Error getting message from queue!");
     } else {
       process_url_received_message(json, message);
     }//if-else
@@ -69,8 +75,3 @@ function publish_url_approved(url)  {
     url: url
   });
 }//publish_url_approved
-
-
-module.exports = {
-  
-};//module.exports
