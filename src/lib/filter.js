@@ -43,7 +43,7 @@ function start()    {
 
 function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
-  var channel = "filter";
+  var channel = "filter-unwanted-urls";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {

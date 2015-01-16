@@ -47,7 +47,7 @@ function start()    {
 
 function listen_to_urls_approved()  {
   var topic = topics.URLS_APPROVED;
-  var channel = "readability";
+  var channel = "fetch-readability-content";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {

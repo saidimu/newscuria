@@ -52,7 +52,7 @@ function start()    {
 
 function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
-  var channel = "datastore";
+  var channel = "save-to-datastore";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
@@ -66,7 +66,7 @@ function listen_to_urls_received()  {
 
 function listen_to_readability()  {
   var topic = topics.READABILITY;
-  var channel = "datastore";
+  var channel = "save-to-datastore";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
@@ -80,7 +80,7 @@ function listen_to_readability()  {
 
 function listen_to_opencalais()  {
   var topic = topics.OPENCALAIS;
-  var channel = "datastore";
+  var channel = "save-to-datastore";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {

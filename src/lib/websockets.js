@@ -102,7 +102,7 @@ function url_msg_processor(msg)	{
 
 function listen_to_entities()	{
   var topic = topics.ENTITIES;
-  var channel = "websockets";
+  var channel = "send-to-browser";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
