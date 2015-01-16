@@ -66,7 +66,8 @@ function handle_googlenews_webhooks() {
     process_googlenews_webhook(webhook);
 
     res.send(204);
-  }//server.post
+  });//server.post
+
 }//handle_googlenews_webhooks
 
 
