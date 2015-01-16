@@ -52,7 +52,9 @@ function listen_to_readability()  {
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
-      log.error("Error geting message from queue!");
+      log.error({
+        err: err
+      }, "Error geting message from queue!");
     } else {
       process_readability_message(json, message);
     }//if-else

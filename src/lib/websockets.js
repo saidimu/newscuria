@@ -106,7 +106,9 @@ function listen_to_entities()	{
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
-      log.error("Error geting message from queue!");
+      log.error({
+        err: err
+      }, "Error geting message from queue!");
     } else {
       process_entities(json, message);
     }//if-else
@@ -120,18 +122,14 @@ function process_entities(json, message)	{
 
 	emit(websocket_events.ENTITIES, entities);
 
-//  log.debug({
-//    entities: entities,
-//  }, "Entities sent via websockets.");
-
 	message.finish();
 }//process_entities
 
 
 function emit(event, message) {
-  log.debug({
-    websocket_event: event,
-  }, "Emiting websockets event.");
+  // log.debug({
+  //   websocket_event: event,
+  // }, "Emiting websockets event.");
 
   websocket.emit(event, message);
 }//emit()

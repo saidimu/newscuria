@@ -56,7 +56,9 @@ function listen_to_urls_received()  {
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
-      log.error("Error geting message from queue!");
+      log.error({
+        err: err
+      }, "Error geting message from queue!");
     } else {
       process_url_received_message(json, message);
     }//if-else
@@ -70,7 +72,9 @@ function listen_to_readability()  {
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
-      log.error("Error geting message from queue!");
+      log.error({
+        err: err
+      }, "Error geting message from queue!");
     } else {
       process_readability_message(json, message);
     }//if-else
@@ -84,7 +88,9 @@ function listen_to_opencalais()  {
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(err) {
-      log.error("Error geting message from queue!");
+      log.error({
+        err: err
+      }, "Error geting message from queue!");
     } else {
       process_opencalais_message(json, message);
     }//if-else
