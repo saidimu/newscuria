@@ -20,7 +20,7 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var restify = require('restify');
-var kimono = require('_/util/kimono.js');
+//var kimono = require('_/util/kimono.js');
 
 //==BEGIN here
 // connect to the message queue
@@ -119,7 +119,7 @@ function publish_url_message(url) {
 
 function start_rest_server()  {
   var server = restify.createServer({
-    name: app_name,
+    name: appname,
     log: log
   });
 
