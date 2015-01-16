@@ -84,10 +84,6 @@ function url_msg_processor(msg)	{
     websockets_msg: msg
   }, "RECEIVED from websocket.");
 
-  console.log({
-    websockets_msg: msg
-  }, "RECEIVED from websocket.");
-
 	if(msg.url)	{
 		queue.publish_message(topics.URLS_RECEIVED, {
       url: msg.url
@@ -124,9 +120,9 @@ function process_entities(json, message)	{
 
 	emit(websocket_events.ENTITIES, entities);
 
-  log.debug({
-    entities: entities,
-  }, "Entities sent via websockets.");
+//  log.debug({
+//    entities: entities,
+//  }, "Entities sent via websockets.");
 
 	message.finish();
 }//process_entities

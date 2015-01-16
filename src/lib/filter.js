@@ -69,8 +69,3 @@ function publish_url_approved(url)  {
     url: url
   });
 }//publish_url_approved
-
-
-module.exports = {
-  
-};//module.exports
