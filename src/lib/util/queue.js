@@ -90,7 +90,7 @@ function read_message(topic, channel, callback)	{
         channel: channel,
         err: err,
         queue_msg: message,
-      }, "Error geting message from queue!");
+      }, "Error getting message from queue!");
 
       callback(err, undefined, message);
     }//try-catcg

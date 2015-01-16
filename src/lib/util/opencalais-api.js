@@ -63,7 +63,9 @@ function extract_entities(plaintext, callback)	{
 	// submit text to API to extract entities
 	calais.fetch(function(api_response, err)	{
 		// fix bug with Calais library returning original doc in results
-		delete api_response.doc.info.document;
+    if (api_response) {
+      delete api_response.doc.info.document;      
+    }//if
 		
 		callback(err, api_response);
 	});
