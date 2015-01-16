@@ -101,7 +101,10 @@ function get_readability(url)	{
   // CALLBACK
   var datastore_fetch_callback = function onDatastoreFetch(err, response)  {
     if(err) {
-      log.error({err: err});
+      log.error({
+        url: url,
+        err: err
+      }, "Error fetching from the datastore.");
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -141,7 +144,10 @@ function get_readability(url)	{
   // CALLBACK
   var api_fetch_callback = function onReadabilityAPIFetch(err, readability) {
     if(err) {
-      log.error({ err: err });
+      log.error({
+        url: url,
+        err: err
+      }, "Error fetching from the Readability API.");
 
     } else {
 
@@ -159,6 +165,7 @@ function get_readability(url)	{
 
   } catch(err)  {
     log.error({
+      url: url,
       err: err
     }, "Error fetching URL from the datastore... fetching from remote Readability API");
 
