@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 'use strict';
 
-var appname = "websockets";
+var appname = "client_sockets";
 var log = require('_/util/logging.js')(appname);
 
 var fs = require('fs');
@@ -28,14 +28,15 @@ var io = require('socket.io')(app);
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
-var websocket_events = {
+var client_events = {
   URL: 'url',
   ACK: 'ack',
   STATUS: 'status',
   ENTITIES: 'entities'
-};//websocket_events
+};//client_events
 
-var websocket;
+var client_socket;
+var queue_reader;
 
 //==BEGIN here
 app.listen(8080, function onAppListen() {
@@ -48,7 +49,7 @@ app.listen(8080, function onAppListen() {
 });
 
 // connect to the message queue
-// then start listening for websocket messages
+// then start listening for client_socket messages
 queue.connect(function onQueueConnect(err) {
   if(err) {
     log.fatal({
@@ -66,13 +67,19 @@ queue.connect(function onQueueConnect(err) {
 
 function start() {
   io.on('connection', function onSocketConnect(socket) {
-    websocket = socket;
+    client_socket = socket;
 
-    emit(websocket_events.STATUS, {
+    emit(client_events.STATUS, {
       status: 'Connected to Socket.io server!'
     });
 
-    websocket.on(websocket_events.URL, url_msg_processor);
+    client_socket.on(client_events.URL, url_msg_processor);
+
+    // close open connections to the queue server
+    // FIXME: reuse these connections instead of closing them
+    client_socket.on('disconnect', function()  {
+      queue_reader.close();
+    });//client_socket.on('disconnect')
 
     listen_to_entities();
   });
@@ -81,20 +88,20 @@ function start() {
 
 function url_msg_processor(msg)	{
 	log.info({
-    websockets_msg: msg
-  }, "RECEIVED from websocket.");
+    client_sockets_msg: msg
+  }, "RECEIVED from client_socket.");
 
 	if(msg.url)	{
 		queue.publish_message(topics.URLS_RECEIVED, {
       url: msg.url
     });
 
-    emit(websocket_events.ACK, msg.url);
+    emit(client_events.ACK, msg.url);
 
 	} else {
 		log.error({
-      websockets_msg: msg
-    }, "No URL found in websockets payload.");
+      client_sockets_msg: msg
+    }, "No URL found in client_sockets payload.");
 
 	}//if-else
 }//url_msg_processor
@@ -104,7 +111,9 @@ function listen_to_entities()	{
   var topic = topics.ENTITIES;
   var channel = "send-to-browser";
 
-  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
+  queue.read_message(topic, channel, function onReadMessage(err, json, message, reader) {
+    queue_reader = reader;
+
     if(err) {
       log.error({
         topic: topic,
@@ -113,6 +122,20 @@ function listen_to_entities()	{
         queue_msg: message,
         err: err
       }, "Error getting message from queue!");
+
+      // FIXME: save these json-error messages for analysis
+      try {
+        message.finish();        
+      } catch(err)  {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          queue_msg: message,
+          err: err
+        }, "Error executing message.finish()");
+      }//try-catch
+      
     } else {
       process_entities(json, message);
     }//if-else
@@ -124,23 +147,19 @@ function listen_to_entities()	{
 function process_entities(json, message)	{
 	var entities = json;
 
-	emit(websocket_events.ENTITIES, entities);
+	emit(client_events.ENTITIES, entities);
 
 	message.finish();
 }//process_entities
 
 
 function emit(event, message) {
-  // log.debug({
-  //   websocket_event: event,
-  // }, "Emiting websockets event.");
-
-  websocket.emit(event, message);
+  client_socket.emit(event, message);
 }//emit()
 
 
 function http_handler (req, res) {
-	fs.readFile(__dirname + '/util/websockets.html', function (err, data) {
+	fs.readFile(__dirname + '/util/client_sockets.html', function (err, data) {
 		if (err) {
 		  res.writeHead(500);
 		  return res.end('Error loading realtime.html');

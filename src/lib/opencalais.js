@@ -59,6 +59,20 @@ function listen_to_readability()  {
         queue_msg: message,
         err: err
       }, "Error getting message from queue!");
+
+      // FIXME: save these json-error messages for analysis
+      try {
+        message.finish();        
+      } catch(err)  {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          queue_msg: message,
+          err: err
+        }, "Error executing message.finish()");
+      }//try-catch
+
     } else {
       process_readability_message(json, message);
     }//if-else

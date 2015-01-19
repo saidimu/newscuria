@@ -63,6 +63,20 @@ function listen_to_urls_received()  {
         queue_msg: message,
         err: err
       }, "Error getting message from queue!");
+
+      // FIXME: save these json-error messages for analysis
+      try {
+        message.finish();        
+      } catch(err)  {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          queue_msg: message,
+          err: err
+        }, "Error executing message.finish()");
+      }//try-catch
+
     } else {
       process_url_received_message(json, message);
     }//if-else
@@ -83,6 +97,20 @@ function listen_to_readability()  {
         queue_msg: message,
         err: err
       }, "Error getting message from queue!");
+
+      // FIXME: save these json-error messages for analysis
+      try {
+        message.finish();        
+      } catch(err)  {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          queue_msg: message,
+          err: err
+        }, "Error executing message.finish()");
+      }//try-catch
+      
     } else {
       process_readability_message(json, message);
     }//if-else
@@ -103,6 +131,20 @@ function listen_to_opencalais()  {
         queue_msg: message,
         err: err
       }, "Error getting message from queue!");
+
+      // FIXME: save these json-error messages for analysis
+      try {
+        message.finish();        
+      } catch(err)  {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          queue_msg: message,
+          err: err
+        }, "Error executing message.finish()");
+      }//try-catch
+      
     } else {
       process_opencalais_message(json, message);
     }//if-else
