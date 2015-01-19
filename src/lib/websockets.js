@@ -122,6 +122,20 @@ function listen_to_entities()	{
         queue_msg: message,
         err: err
       }, "Error getting message from queue!");
+
+      // FIXME: save these json-error messages for analysis
+      try {
+        message.finish();        
+      } catch(err)  {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          queue_msg: message,
+          err: err
+        }, "Error executing message.finish()");
+      }//try-catch
+      
     } else {
       process_entities(json, message);
     }//if-else
