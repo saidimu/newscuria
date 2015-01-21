@@ -134,7 +134,7 @@ function extract_entities(opencalais) {
 
   return {
     url: opencalais.url,
-    date_published: opencalais.date_published;
+    date_published: opencalais.date_published,
     people: people,
     places: places,
     things: things,
