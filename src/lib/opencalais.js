@@ -128,13 +128,19 @@ function get_opencalais(json)	{
 	// CALLBACK
 	var datastore_fetch_callback = function onDatastoreFetch(err, response)	{
 		if(err)	{
-			log.error({err: err});
+			log.error({ err: err });
 
 			fetch_opencalais_content(readability, api_fetch_callback);
 
-		} else if(response.rows.length > 0){
+		} else if(response.rows.length > 0){  // FIXME: What if > 1 rows?
 			var buf = response.rows[0].api_result;
-			var opencalais = JSON.parse(buf.toString('utf8'));
+			var opencalais;
+
+      try {
+        opencalais = JSON.parse(buf.toString('utf8'));        
+      } catch(err)  {
+        log.error({ err: err });
+      }//try-catch
 
 			if(opencalais)	{
 
@@ -189,12 +195,8 @@ function process_opencalais_object(opencalais, url) {
   // augment Opencalais object with same URL as Readability object
   opencalais.url = url;
 
-  // extract and organize chosen entities from Opencalais object
-  var entities = process_api_response(opencalais);
-
-  // publish Opencalais object and extracted entities object
+  // publish Opencalais object
   publish_opencalais_message(opencalais);
-  publish_entities_message(entities);
 }//process_opencalais_object
 
 
@@ -203,12 +205,7 @@ function publish_opencalais_message(opencalais) {
 }//publish_opencalais_message
 
 
-function publish_entities_message(entities) {
-  queue.publish_message(topics.ENTITIES, entities);
-}//publish_entities_message
-
-
-function process_api_response(opencalais)	{
+function extract_entities(opencalais)	{
 	var people = {};
 	var places = {};
 	var things = {};
@@ -252,7 +249,7 @@ function process_api_response(opencalais)	{
 		things: things,
 		tags: tags
 	};
-}//process_api_response
+}//extract_entities
 
 
 function fetch_opencalais_content(readability, callback)	{
@@ -276,8 +273,10 @@ function fetch_opencalais_content(readability, callback)	{
   }//if
 
   try {
-    opencalais_api.fetch_nlp_content(text, callback);
+    opencalais_api.get_content(text, callback);
   } catch(error)  {
-    log.error({err: error});
+    log.error({
+      err: error
+    }, "Error fetching content from Opencalais API.");
   }//try-catch
 }//fetch_opencalais_content
