@@ -78,6 +78,11 @@ function start() {
     // close open connections to the queue server
     // FIXME: reuse these connections instead of closing them
     client_socket.on('disconnect', function()  {
+      log.debug({
+        client_id: client_socket.id(),
+        req: client_socket.request(),
+      }, "Websocket client disconnected.");
+      
       queue_reader.close();
     });//client_socket.on('disconnect')
 
