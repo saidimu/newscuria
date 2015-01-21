@@ -36,6 +36,10 @@ var topics = {
 var writer = undefined;
 
 function connect(callback) {
+  if (!callback)  {
+    callback = console.log;
+  }//if
+
   var nsqd_writer = new nsq.Writer(nsqd_host, nsqd_port);
 
   nsqd_writer.on('error', function(err) {
@@ -93,7 +97,7 @@ function read_message(topic, channel, callback)	{
       //   queue_msg: message,
       // }, "Error getting message from queue!");
 
-      callback(err, {}, message, reader);
+      callback(err, undefined, message, reader);
     }//try-catcg
   });
 
