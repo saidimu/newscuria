@@ -195,23 +195,14 @@ function process_opencalais_object(opencalais, url) {
   // augment Opencalais object with same URL as Readability object
   opencalais.url = url;
 
-  // extract and organize chosen entities from Opencalais object
-  var entities = extract_entities(opencalais);
-
-  // publish Opencalais object and extracted entities object
+  // publish Opencalais object
   publish_opencalais_message(opencalais);
-  publish_entities_message(entities);
 }//process_opencalais_object
 
 
 function publish_opencalais_message(opencalais) {
   queue.publish_message(topics.OPENCALAIS, opencalais);
 }//publish_opencalais_message
-
-
-function publish_entities_message(entities) {
-  queue.publish_message(topics.ENTITIES, entities);
-}//publish_entities_message
 
 
 function extract_entities(opencalais)	{
