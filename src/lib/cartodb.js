@@ -110,29 +110,18 @@ function process_entities(json, message)  {
   cartodb_row.date_published = date_published;
 
   // PLACES
-  for(var place_hash in places) {
-    var place = places[place_hash];
-
-    if(place.resolutions) {
-      var resolution = place.resolutions[0] || {};  // FIXME: what about > 1 place resolutions?
-
-      // FIXME: stop processing if lat/lon is invalid
-      cartodb_row.lat = resolution.latitude;
-      cartodb_row.lon = resolution.longitude;
-      cartodb_row.country = resolution.containedbycountry;
-      cartodb_row.place = resolution.shortname || resolution.name;      
-    }//if
-  }//for
+  cartodb_row = extract_places(places, cartodb_row);
 
   // PEOPLE
-  for(var people_hash in people) {
-    var person = people[people_hash];
+  cartodb_row = extract_people(people, cartodb_row);
 
-    cartodb_row.person = person.commonname || person.name;
-    cartodb_row.nationality = person.nationality || "";
-  }//for
+  // TAGS
+  // THINGS
+  // AUTHORS
+  // PUBLICATIONS
+  // RELEVANCES
 
-  var cartodb_query = "INSERT INTO entities (lat, lon, country, place, person, nationality, date_published) VALUES ({lat}, {lon}, {country}, {place}, {person}, {nationality}, {date_published})";
+  var cartodb_query = "INSERT INTO entities (the_geom, lat, lon, country, place, person, nationality, date_published) VALUES (ST_SetSRID(ST_Point({lon}, {lat}),4326), {lat}, {lon}, {country}, {place}, {person}, {nationality}, {date_published})";
   var insert_data = {
     lat: cartodb_row.lat,
     lon: cartodb_row.lon,
@@ -162,3 +151,34 @@ function process_entities(json, message)  {
   });//client.query()
 
 }//process_entities
+
+
+function extract_places(places, cartodb_row)  {
+  for(var place_hash in places) {
+    var place = places[place_hash];
+
+    if(place.resolutions) {
+      var resolution = place.resolutions[0] || {};  // FIXME: what about > 1 place resolutions?
+
+      // FIXME: stop processing if lat/lon is invalid
+      cartodb_row.lat = resolution.latitude;
+      cartodb_row.lon = resolution.longitude;
+      cartodb_row.country = resolution.containedbycountry;
+      cartodb_row.place = resolution.shortname || resolution.name;      
+    }//if
+  }//for
+
+  return cartodb_row;
+}//extract_places
+
+
+function extract_people(people, cartodb_row)  {
+  for(var people_hash in people) {
+    var person = people[people_hash];
+
+    cartodb_row.person = person.commonname || person.name;
+    cartodb_row.nationality = person.nationality || "";
+  }//for
+
+  return cartodb_row;
+}//extract_people
