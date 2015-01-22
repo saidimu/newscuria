@@ -8,6 +8,7 @@
     "url": "https://api.newscuria.com/v0.1"
   },
   "dependencies": {
+    "cartodb": "^0.2.1",
     "readability-api": "^0.3.0",
     "restify": "^2.8.3",
     "sanitize-html": "^1.1.5",
