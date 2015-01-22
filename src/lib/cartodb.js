@@ -142,6 +142,7 @@ function process_entities(json, message)  {
       log.error({
         err: err,
         response: response,
+        query: CartoDB.tmpl(cartodb_query, insert_data),
       }, "Error updating CartoDB table.");
 
       message.requeue();
@@ -169,7 +170,7 @@ function extract_places(places, cartodb_row)  {
       if(resolution.latitude && resolution.longitude) {
         cartodb_row.lat = resolution.latitude;
         cartodb_row.lon = resolution.longitude;
-        cartodb_row.country = resolution.containedbycountry || "";
+        cartodb_row.country = resolution.containedbycountry || "N/A";
         cartodb_row.place = resolution.shortname || resolution.name;
       }//if
     }//if
