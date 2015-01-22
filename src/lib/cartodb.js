@@ -91,7 +91,7 @@ function process_entities(json, message)  {
 
   var cartodb_row = {};
   cartodb_row.url = url;
-  cartodb_row.date_published = 
+  cartodb_row.date_published = date_published;
 
   // PLACES
   for(var place_hash in places) {
