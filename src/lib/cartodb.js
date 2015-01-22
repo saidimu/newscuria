@@ -121,7 +121,7 @@ function process_entities(json, message)  {
   // PUBLICATIONS
   // RELEVANCES
 
-  var cartodb_query = "INSERT INTO entities (the_geom, lat, lon, url, country, place, person, nationality, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, '{url}', '{country}', '{place}', '{person}', '{nationality}', {date_published})";
+  var cartodb_query = "INSERT INTO entities (the_geom, lat, lon, url, country, place, person, nationality, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, '{url}', '{country}', '{place}', '{person}', '{nationality}', '{date_published}')";
   var insert_data = {
     lat: cartodb_row.lat,
     lon: cartodb_row.lon,
@@ -169,7 +169,7 @@ function extract_places(places, cartodb_row)  {
       if(resolution.latitude && resolution.longitude) {
         cartodb_row.lat = resolution.latitude;
         cartodb_row.lon = resolution.longitude;
-        cartodb_row.country = resolution.containedbycountry;
+        cartodb_row.country = resolution.containedbycountry || "";
         cartodb_row.place = resolution.shortname || resolution.name;
       }//if
     }//if
