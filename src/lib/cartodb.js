@@ -19,6 +19,9 @@ var log = require('_/util/logging.js')(appname);
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
+var request = require('request');
+var format = require('util').format;
+
 //==BEGIN here
 // connect to the message queue
 queue.connect(function onQueueConnect(err) {
@@ -78,6 +81,70 @@ function listen_to_entities() {
 
 function process_entities(json, message)  {
   var entities = json;
+
+  var url = entities.url;
+  var people = entities.people || {};
+  var places = entities.places || {};
+  var things = entities.things || {};
+  var tags = entities.tags || {};
+  var date_published = entities.date_published || new Date().toISOString();
+
+  var cartodb_row = {};
+  cartodb_row.url = url;
+  cartodb_row.date_published = 
+
+  // PLACES
+  for(var place_hash in places) {
+    var place = places[place_hash];
+
+    var resolution = place.resolutions[0];  // FIXME: what about > 1 place resolutions?
+
+    cartodb_row.lat = resolution.latitude;
+    cartodb_row.lon = resolution.longitude;
+    cartodb_row.country = resolution.containedbycountry;
+    cartodb_row.place = resolution.shortname || resolution.name;
+  }//for
+
+  // PEOPLE
+  for(var people_hash in people) {
+    var person = people[people_hash];
+
+    cartodb_row.person = person.commonname || person.name;
+    cartodb_row.nationality = person.nationality || "";
+  }//for
+
+  log.debug({
+    place: cartodb_row.name,
+    lat: cartodb_row.lat,
+    lon: cartodb_row.lon,
+    country: cartodb_row.country,
+    person: cartodb_row.person,
+    nationality: cartodb_row.nationality,
+  }, "Entity as a CartoDB row.");
+
+  var cartodb_sql_template = "http://saidimu.cartodb.com/api/v2/sql?q=INSERT INTO entities (lat, lon, country, place, person, nationality, date_published) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')&api_key=465496dd9c9630e3946238c8d724befca0d29471";
+  var cartodb_sql_endpoint = format(
+    cartodb_sql_template,
+    cartodb_row.lat,
+    cartodb_row.lon,
+    cartodb_row.country,
+    cartodb_row.place,
+    cartodb_row.person,
+    cartodb_row.nationality,
+    cartodb_row.date_published
+  );
+
+  request(cartodb_sql_endpoint, function onRequestResponse(err, response, body) {
+    if(err) {
+      log.error({
+        err: err
+      }, "Error updating CartoDB table via SQL API.");
+    } else {
+      log.debug({
+        body: body
+      }, "Successful insert of entity into CartoDB row.");
+    }//if-else
+  });//request.get
 
 //  message.finish();
 }//process_entities
