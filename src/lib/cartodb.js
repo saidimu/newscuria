@@ -146,5 +146,5 @@ function process_entities(json, message)  {
     }//if-else
   });//request.get
 
-//  message.finish();
+  message.finish();
 }//process_entities
