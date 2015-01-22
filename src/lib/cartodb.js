@@ -97,8 +97,10 @@ function process_entities(json, message)  {
   for(var place_hash in places) {
     var place = places[place_hash];
 
-    var resolution = place.resolutions[0];  // FIXME: what about > 1 place resolutions?
+    var resolution = place.resolutions[0] || {};  // FIXME: what about > 1 place resolutions?
 
+
+    // FIXME: stop processing if lat/lon is invalid
     cartodb_row.lat = resolution.latitude;
     cartodb_row.lon = resolution.longitude;
     cartodb_row.country = resolution.containedbycountry;
@@ -114,12 +116,14 @@ function process_entities(json, message)  {
   }//for
 
   log.debug({
-    place: cartodb_row.name,
-    lat: cartodb_row.lat,
-    lon: cartodb_row.lon,
-    country: cartodb_row.country,
-    person: cartodb_row.person,
-    nationality: cartodb_row.nationality,
+    cartodb: {
+      place: cartodb_row.name,
+      lat: cartodb_row.lat,
+      lon: cartodb_row.lon,
+      country: cartodb_row.country,
+      person: cartodb_row.person,
+      nationality: cartodb_row.nationality,
+    },
   }, "Entity as a CartoDB row.");
 
   var cartodb_sql_template = "http://saidimu.cartodb.com/api/v2/sql?q=INSERT INTO entities (lat, lon, country, place, person, nationality, date_published) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')&api_key=465496dd9c9630e3946238c8d724befca0d29471";
