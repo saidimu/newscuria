@@ -97,14 +97,15 @@ function process_entities(json, message)  {
   for(var place_hash in places) {
     var place = places[place_hash];
 
-    var resolution = place.resolutions[0] || {};  // FIXME: what about > 1 place resolutions?
+    if(place.resolutions) {
+      var resolution = place.resolutions[0] || {};  // FIXME: what about > 1 place resolutions?
 
-
-    // FIXME: stop processing if lat/lon is invalid
-    cartodb_row.lat = resolution.latitude;
-    cartodb_row.lon = resolution.longitude;
-    cartodb_row.country = resolution.containedbycountry;
-    cartodb_row.place = resolution.shortname || resolution.name;
+      // FIXME: stop processing if lat/lon is invalid
+      cartodb_row.lat = resolution.latitude;
+      cartodb_row.lon = resolution.longitude;
+      cartodb_row.country = resolution.containedbycountry;
+      cartodb_row.place = resolution.shortname || resolution.name;      
+    }//if
   }//for
 
   // PEOPLE
