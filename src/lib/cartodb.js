@@ -112,6 +112,12 @@ function process_entities(json, message)  {
   // PLACES
   cartodb_row = extract_places(places, cartodb_row);
 
+  // stop processing if either lat/lon is missing/undefined.
+  if(!cartodb_row.lat || !cartodb_row.lon)  {
+    message.finish();
+    return;
+  }//if
+
   // PEOPLE
   cartodb_row = extract_people(people, cartodb_row);
 
@@ -154,9 +160,7 @@ function process_entities(json, message)  {
       message.finish();
 
     }//if-else
-
   });//client.query()
-
 }//process_entities
 
 
