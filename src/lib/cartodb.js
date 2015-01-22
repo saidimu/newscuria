@@ -121,10 +121,11 @@ function process_entities(json, message)  {
   // PUBLICATIONS
   // RELEVANCES
 
-  var cartodb_query = "INSERT INTO entities (the_geom, lat, lon, country, place, person, nationality, date_published) VALUES (ST_SetSRID(ST_Point({lon}, {lat}),4326), {lat}, {lon}, {country}, {place}, {person}, {nationality}, {date_published})";
+  var cartodb_query = "INSERT INTO entities (the_geom, lat, lon, url, country, place, person, nationality, date_published) VALUES (ST_SetSRID(ST_Point({lon}, {lat}),4326), {lat}, {lon}, {url}, {country}, {place}, {person}, {nationality}, {date_published})";
   var insert_data = {
     lat: cartodb_row.lat,
     lon: cartodb_row.lon,
+    url: cartodb_row.url,
     country: cartodb_row.country,
     place: cartodb_row.place,
     person: cartodb_row.person,
@@ -141,13 +142,17 @@ function process_entities(json, message)  {
       log.error({
         err: err
       }, "Error updating CartoDB table.");
+
+      message.requeue();
+
     } else {
       // log.debug({
       //   body: body
       // }, "Successful insert of entity into CartoDB row.");
-
       message.finish();
+
     }//if-else
+
   });//client.query()
 
 }//process_entities
@@ -160,11 +165,12 @@ function extract_places(places, cartodb_row)  {
     if(place.resolutions) {
       var resolution = place.resolutions[0] || {};  // FIXME: what about > 1 place resolutions?
 
-      // FIXME: stop processing if lat/lon is invalid
-      cartodb_row.lat = resolution.latitude;
-      cartodb_row.lon = resolution.longitude;
-      cartodb_row.country = resolution.containedbycountry;
-      cartodb_row.place = resolution.shortname || resolution.name;      
+      if(resolution.latitude && resolution.longitude) {
+        cartodb_row.lat = resolution.latitude;
+        cartodb_row.lon = resolution.longitude;
+        cartodb_row.country = resolution.containedbycountry;
+        cartodb_row.place = resolution.shortname || resolution.name;
+      }//if
     }//if
   }//for
 
