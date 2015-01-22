@@ -16,8 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 var appname = "datastore";
 var log = require('_/util/logging.js')(appname);
 
-var _ = require('lodash');
-var fs = require('fs');
+// var _ = require('lodash');
+// var fs = require('fs');
 var util = require('util');
 
 var queue = require('_/util/queue.js');

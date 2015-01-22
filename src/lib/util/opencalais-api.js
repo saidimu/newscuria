@@ -40,7 +40,7 @@ var calais = new Calais(OPENCALAIS_API_KEY, {
 
 
 // a wrapper function for opencalais.com API call
-function extract_entities(plaintext, callback)	{
+function get_content(plaintext, callback)	{
 
 	if(!callback)	{
 		callback = function(api_response, err)	{
@@ -70,9 +70,9 @@ function extract_entities(plaintext, callback)	{
 		callback(err, api_response);
 	});
 
-}//extract_entities()
+}//get_content()
 
 
 module.exports = {
-	fetch_nlp_content: extract_entities,
+	get_content: get_content,
 };//module.exports

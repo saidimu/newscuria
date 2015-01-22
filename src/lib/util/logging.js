@@ -19,6 +19,15 @@ var hostname = require('os').hostname();
 
 var config = require('config').get("logging");
 
+// catch uncaught exceptions and print error message and stack before exiting cleanly
+// process restart is handled externally
+process.on('uncaughtException', function (err) {
+  var now = new Date().toUTCString();
+  console.error(now + ': uncaughtException:', err.message);
+  console.error(err.stack);
+  process.exit(1);
+});
+
 function get_logger(name) {
   if(!name) {
     throw new Error("Invalid logger name '%s'. Cannot create a logger", name);

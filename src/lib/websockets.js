@@ -78,6 +78,12 @@ function start() {
     // close open connections to the queue server
     // FIXME: reuse these connections instead of closing them
     client_socket.on('disconnect', function()  {
+      log.debug({
+        client_id: client_socket.id,
+        req: client_socket.request,
+        queue_reader: queue_reader,
+      }, "Websocket client disconnected. Starting disconnection from NSQ reader.");
+
       queue_reader.close();
     });//client_socket.on('disconnect')
 
@@ -87,16 +93,16 @@ function start() {
 
 
 function url_msg_processor(msg)	{
-	log.info({
-    client_sockets_msg: msg
-  }, "RECEIVED from client_socket.");
+  // log.info({
+  //   client_sockets_msg: msg
+  // }, "RECEIVED from client_socket.");
 
 	if(msg.url)	{
 		queue.publish_message(topics.URLS_RECEIVED, {
       url: msg.url
     });
 
-    emit(client_events.ACK, msg.url);
+    // emit(client_events.ACK, msg.url);
 
 	} else {
 		log.error({

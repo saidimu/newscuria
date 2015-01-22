@@ -131,7 +131,13 @@ function get_readability(url)	{
     } else if(response.rows.length > 0){
       // FIXME: TODO: what to do if > 1 rows?
       var buf = response.rows[0].api_result;
-      var readability = JSON.parse(buf.toString('utf8'));
+      var readability;
+
+      try {
+        readability = JSON.parse(buf.toString('utf8'));        
+      } catch(err)  {
+        log.error({ err: err });
+      }//try-catch
 
       // publish text if it isn't empty
       if((readability) && (readability.plaintext))  {
