@@ -25,6 +25,8 @@ var CartoDB = require('cartodb');
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
+var querystring = require('querystring');
+
 // var request = require('request');
 // var format = require('util').format;
 
@@ -132,10 +134,10 @@ function process_entities(json, message)  {
     lat: cartodb_row.lat,
     lon: cartodb_row.lon,
     url: cartodb_row.url,
-    country: cartodb_row.country,
-    place: cartodb_row.place,
-    person: cartodb_row.person,
-    nationality: cartodb_row.nationality,
+    country: querystring.stringify(cartodb_row.country),
+    place: querystring.stringify(cartodb_row.place),
+    person: querystring.stringify(cartodb_row.person),
+    nationality: querystring.stringify(cartodb_row.nationality),
     date_published: cartodb_row.date_published,
   };//insert_data
 
