@@ -13,7 +13,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 'use strict';
 
-var appname = "readability";
+var appname = process.env.APP_NAME;
 var log = require('_/util/logging.js')(appname);
 
 var util = require('util');
