@@ -1,3 +1,6 @@
+## NewRelic.com config file
+newrelic.js
+
 ## Docker fig & crane config files
 fig.yml
 crane.yml

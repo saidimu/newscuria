@@ -30,7 +30,8 @@
     "fast-csv": "^0.4.4",
     "raven": "^0.7.2",
     "js-yaml": "^3.2.5",
-    "config": "^1.10.0"
+    "config": "^1.10.0",
+    "newrelic": "^1.15.0"
   },
   "devDependencies": {},
   "scripts": {
