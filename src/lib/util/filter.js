@@ -17,7 +17,7 @@
 'use strict';
 
 
-function listen_to_urls_received(queue)  {
+function listen_to_urls_received(queue, topics)  {
   var topic = topics.URLS_RECEIVED;
   var channel = "filter-unwanted-urls";
 
@@ -45,26 +45,18 @@ function listen_to_urls_received(queue)  {
       }//try-catch
       
     } else {
-      process_url_received_message(json, message);
+      var url = json.url || '';
+
+      if(url) {
+        queue.publish_message(topics.URLS_APPROVED, {
+          url: url
+        });
+      }//if
+
+      message.finish();
     }//if-else
   });
 }//listen_to_urls_received
-
-
-function process_url_received_message(json, message)  {
-  var url = json.url || '';
-
-  publish_url_approved(url);
-
-  message.finish();
-}//process_url_received_message
-
-
-function publish_url_approved(url)  {
-  queue.publish_message(topics.URLS_APPROVED, {
-    url: url
-  });
-}//publish_url_approved
 
 
 module.exports = {

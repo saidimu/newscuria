@@ -45,5 +45,5 @@ queue.connect(function onQueueConnect(err) {
 
 
 function start()    {
-  filter.listen_to_urls_received(queue);
+  filter.listen_to_urls_received(queue, topics);
 }//start()
