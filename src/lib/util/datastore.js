@@ -1,51 +1,33 @@
 /**
-Copyright (C) 2015  Saidimu Apale
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
+ * Copyright (C) 2015  Saidimu Apale
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 'use strict';
 
-require('newrelic');
-
-var appname = process.env.APP_NAME;
-var log = require('_/util/logging.js')(appname);
-
-// var _ = require('lodash');
-// var fs = require('fs');
 var util = require('util');
-
-var queue = require('_/util/queue.js');
-var topics = queue.topics;
 
 var datastore_api = require('_/util/datastore-api.js');
 var client = datastore_api.client;
 
-//==BEGIN here
-// connect to the message queue
-queue.connect(function onQueueConnect(err) {
-  if(err) {
-    log.fatal({
-      err: err,
-    }, "Cannot connect to message queue!");
+var queue;
+var topics;
 
-  } else {
-    
-    start();
-
-  }//if-else
-});
-//==BEGIN here
-
-
-function start()    {
+function start(__queue, __topics)    {
+  queue = __queue;
+  topics = __topics;
+  
   listen_to_urls_received();
   listen_to_readability();
   listen_to_opencalais();
@@ -390,3 +372,8 @@ function save_document(object, url, date_published, table, callback)    {
 
   client.execute(statement, params, callback);
 }//save_document
+
+
+module.exports = {
+  start: start,
+};//module.exports
