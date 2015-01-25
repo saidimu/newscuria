@@ -16,6 +16,12 @@
  */
 'use strict';
 
+
+function start(queue, topics)    {
+  listen_to_urls_received(queue, topics);
+}//start()
+
+
 function listen_to_urls_received(queue, topics)  {
   var topic = topics.URLS_RECEIVED;
   var channel = "filter-unwanted-urls";
@@ -59,5 +65,5 @@ function listen_to_urls_received(queue, topics)  {
 
 
 module.exports = {
-  listen_to_urls_received: listen_to_urls_received,
+  start: start,
 };//module.exports

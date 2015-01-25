@@ -19,6 +19,12 @@
 var datastore_api = require('_/util/datastore-api.js');
 var opencalais_api = require('_/util/opencalais-api.js');
 
+
+function start(queue, topics)    {
+  listen_to_readability(queue, topics);
+}//start()
+
+
 function listen_to_readability(queue, topics)  {
   var topic = topics.READABILITY;
   var channel = "fetch-opencalais-content";
@@ -255,5 +261,5 @@ function fetch_opencalais_content(readability, callback)	{
 }//fetch_opencalais_content
 
 module.exports = {
-  listen_to_readability: listen_to_readability,
+  start: start,
 };//module.exports

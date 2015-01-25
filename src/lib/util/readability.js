@@ -20,6 +20,11 @@ var readability_api = require('_/util/readability-api.js');
 var datastore_api = require('_/util/datastore-api.js');
 
 
+function start(queue, topics)    {
+  listen_to_urls_approved(queue, topics);
+}//start()
+
+
 function listen_to_urls_approved(queue, topics)  {
   var topic = topics.URLS_APPROVED;
   var channel = "fetch-readability-content";
@@ -189,5 +194,5 @@ function fetch_readability_content(url, callback)	{
 
 
 module.exports = {
-  listen_to_urls_approved: listen_to_urls_approved,
+  start: start,
 };//module.exports
