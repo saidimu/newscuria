@@ -19,13 +19,18 @@
 var readability_api = require('_/util/readability-api.js');
 var datastore_api = require('_/util/datastore-api.js');
 
+var queue;
+var topics;
 
-function start(queue, topics)    {
-  listen_to_urls_approved(queue, topics);
+function start(__queue, __topics)    {
+  queue = __queue;
+  topics = __topics;
+  
+  listen_to_urls_approved();
 }//start()
 
 
-function listen_to_urls_approved(queue, topics)  {
+function listen_to_urls_approved()  {
   var topic = topics.URLS_APPROVED;
   var channel = "fetch-readability-content";
 
@@ -53,13 +58,13 @@ function listen_to_urls_approved(queue, topics)  {
       }//try-catch
       
     } else {
-      process_url_approved_message(json, message, queue, topics);
+      process_url_approved_message(json, message);
     }//if-else
   });
 }//listen_to_urls_approved
 
 
-function process_url_approved_message(json, message, queue, topics)	{
+function process_url_approved_message(json, message)	{
 	var RateLimiter = require('limiter').RateLimiter;
 
 	// 'second', 'minute', 'day', or a number of milliseconds
@@ -84,7 +89,7 @@ function process_url_approved_message(json, message, queue, topics)	{
 
       var url = json.url || '';
 
-      get_readability(url, queue, topics);
+      get_readability(url);
 
       message.finish();
 
@@ -94,7 +99,7 @@ function process_url_approved_message(json, message, queue, topics)	{
 }//process_url_approved_message()
 
 
-function get_readability(url, queue, topics)	{
+function get_readability(url)	{
 	var query_stmt = "SELECT * FROM nuzli.readability WHERE url=?";
   var params = [url];
 

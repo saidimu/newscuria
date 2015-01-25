@@ -19,13 +19,18 @@
 var datastore_api = require('_/util/datastore-api.js');
 var opencalais_api = require('_/util/opencalais-api.js');
 
+var queue;
+var topics;
 
-function start(queue, topics)    {
-  listen_to_readability(queue, topics);
+function start(__queue, __topics)    {
+  queue = __queue;
+  topics = __topics;
+  
+  listen_to_readability();
 }//start()
 
 
-function listen_to_readability(queue, topics)  {
+function listen_to_readability()  {
   var topic = topics.READABILITY;
   var channel = "fetch-opencalais-content";
 
@@ -53,13 +58,13 @@ function listen_to_readability(queue, topics)  {
       }//try-catch
 
     } else {
-      process_readability_message(json, message, queue, topics);
+      process_readability_message(json, message);
     }//if-else
   });
 }//listen_to_readability
 
 
-function process_readability_message(json, message, queue, topics)	{
+function process_readability_message(json, message)	{
 	var RateLimiter = require('limiter').RateLimiter;
 
 	// 'second', 'minute', 'day', or a number of milliseconds
@@ -82,7 +87,7 @@ function process_readability_message(json, message, queue, topics)	{
 
 		} else {
 
-      get_opencalais(json, queue, topics);
+      get_opencalais(json);
 
       message.finish();
 
@@ -92,7 +97,7 @@ function process_readability_message(json, message, queue, topics)	{
 }//process_readability_message
 
 
-function get_opencalais(json, queue, topics)	{
+function get_opencalais(json)	{
   var readability = json;
 
   var url = readability.url || '';
@@ -123,7 +128,7 @@ function get_opencalais(json, queue, topics)	{
 
 			if(opencalais)	{
 
-        process_opencalais_object(opencalais, url, queue, topics);
+        process_opencalais_object(opencalais, url);
 
 			} else {
         log.info({
@@ -150,7 +155,7 @@ function get_opencalais(json, queue, topics)	{
 
 		} else {
 
-      process_opencalais_object(opencalais, url, queue, topics);
+      process_opencalais_object(opencalais, url);
 
 		}//if-else
 	};//api_fetch_callback
@@ -170,16 +175,16 @@ function get_opencalais(json, queue, topics)	{
 }//get_opencalais
 
 
-function process_opencalais_object(opencalais, url, queue, topics) {
+function process_opencalais_object(opencalais, url) {
   // augment Opencalais object with same URL as Readability object
   opencalais.url = url;
 
   // publish Opencalais object
-  publish_opencalais_message(opencalais, queue, topics);
+  publish_opencalais_message(opencalais);
 }//process_opencalais_object
 
 
-function publish_opencalais_message(opencalais, queue, topics) {
+function publish_opencalais_message(opencalais) {
   queue.publish_message(topics.OPENCALAIS, opencalais);
 }//publish_opencalais_message
 

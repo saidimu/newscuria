@@ -16,13 +16,18 @@
  */
 'use strict';
 
+var queue;
+var topics;
 
-function start(queue, topics)    {
-  listen_to_urls_received(queue, topics);
+function start(__queue, __topics)    {
+  queue = __queue;
+  topics = __topics;
+  
+  listen_to_urls_received();
 }//start()
 
 
-function listen_to_urls_received(queue, topics)  {
+function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
   var channel = "filter-unwanted-urls";
 
