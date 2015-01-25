@@ -1,53 +1,26 @@
 /**
-Copyright (C) 2015  Saidimu Apale
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
+ * Copyright (C) 2015  Saidimu Apale
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 'use strict';
 
-require('newrelic');
-
-var appname = process.env.APP_NAME;
-var log = require('_/util/logging.js')(appname);
-
-var util = require('util');
 var readability_api = require('_/util/readability-api.js');
-
-var queue = require('_/util/queue.js');
-var topics = queue.topics;
-
 var datastore_api = require('_/util/datastore-api.js');
 
-//==BEGIN here
-// connect to the message queue
-queue.connect(function onQueueConnect(err) {
-  if(err) {
-    log.fatal({
-      err: err,
-    }, "Cannot connect to message queue!");
 
-  } else {
-    
-    start();
-
-  }//if-else
-});
-//==BEGIN here
-
-function start()    {
-  listen_to_urls_approved();
-}//start()
-
-
-function listen_to_urls_approved()  {
+function listen_to_urls_approved(queue, topics)  {
   var topic = topics.URLS_APPROVED;
   var channel = "fetch-readability-content";
 
@@ -75,13 +48,13 @@ function listen_to_urls_approved()  {
       }//try-catch
       
     } else {
-      process_url_approved_message(json, message);
+      process_url_approved_message(json, message, queue, topics);
     }//if-else
   });
 }//listen_to_urls_approved
 
 
-function process_url_approved_message(json, message)	{
+function process_url_approved_message(json, message, queue, topics)	{
 	var RateLimiter = require('limiter').RateLimiter;
 
 	// 'second', 'minute', 'day', or a number of milliseconds
@@ -106,7 +79,7 @@ function process_url_approved_message(json, message)	{
 
       var url = json.url || '';
 
-      get_readability(url);
+      get_readability(url, queue, topics);
 
       message.finish();
 
@@ -116,7 +89,7 @@ function process_url_approved_message(json, message)	{
 }//process_url_approved_message()
 
 
-function get_readability(url)	{
+function get_readability(url, queue, topics)	{
 	var query_stmt = "SELECT * FROM nuzli.readability WHERE url=?";
   var params = [url];
 
@@ -213,3 +186,8 @@ function fetch_readability_content(url, callback)	{
     }, "Error fetching URL content from Readability API");
   }//try-catch
 }//fetch_readability_content()
+
+
+module.exports = {
+  listen_to_urls_approved: listen_to_urls_approved,
+};//module.exports

@@ -25,6 +25,7 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var filter = require('_/util/filter.js');
+var readability = require('_/util/readability.js');
 
 
 //==BEGIN here
@@ -46,4 +47,5 @@ queue.connect(function onQueueConnect(err) {
 
 function start()    {
   filter.listen_to_urls_received(queue, topics);
+  readability.listen_to_urls_approved(queue, topics);
 }//start()

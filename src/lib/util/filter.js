@@ -16,7 +16,6 @@
  */
 'use strict';
 
-
 function listen_to_urls_received(queue, topics)  {
   var topic = topics.URLS_RECEIVED;
   var channel = "filter-unwanted-urls";
