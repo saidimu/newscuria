@@ -16,6 +16,9 @@
  */
 'use strict';
 
+var appname = "opencalais";
+var log = require('_/util/logging.js')(appname);
+
 var datastore_api = require('_/util/datastore-api.js');
 var opencalais_api = require('_/util/opencalais-api.js');
 

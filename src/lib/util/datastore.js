@@ -16,6 +16,9 @@
  */
 'use strict';
 
+var appname = "datastore";
+var log = require('_/util/logging.js')(appname);
+
 var util = require('util');
 
 var datastore_api = require('_/util/datastore-api.js');

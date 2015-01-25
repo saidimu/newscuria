@@ -16,6 +16,9 @@
  */
 'use strict';
 
+var appname = "entities";
+var log = require('_/util/logging.js')(appname);
+
 var queue;
 var topics;
 

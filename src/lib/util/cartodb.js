@@ -16,6 +16,9 @@
  */
 'use strict';
 
+var appname = "cartodb";
+var log = require('_/util/logging.js')(appname);
+
 var config = require('config').get("cartodb");
 var CARTODB_API_KEY = config.get('api_key');
 var CARTODB_USER = config.get('user');
