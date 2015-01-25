@@ -134,10 +134,10 @@ function process_entities(json, message)  {
     lat: cartodb_row.lat,
     lon: cartodb_row.lon,
     url: cartodb_row.url,
-    country: querystring.stringify(cartodb_row.country),
-    place: querystring.stringify(cartodb_row.place),
-    person: querystring.stringify(cartodb_row.person),
-    nationality: querystring.stringify(cartodb_row.nationality),
+    country: querystring.escape(cartodb_row.country),
+    place: querystring.escape(cartodb_row.place),
+    person: querystring.escape(cartodb_row.person),
+    nationality: querystring.escape(cartodb_row.nationality),
     date_published: cartodb_row.date_published,
   };//insert_data
 
@@ -176,8 +176,8 @@ function extract_places(places, cartodb_row)  {
       if(resolution.latitude && resolution.longitude) {
         cartodb_row.lat = resolution.latitude;
         cartodb_row.lon = resolution.longitude;
-        cartodb_row.country = resolution.containedbycountry || "N/A";
         cartodb_row.place = resolution.shortname || resolution.name;
+        cartodb_row.country = resolution.containedbycountry || cartodb_row.place;
       }//if
     }//if
   }//for
