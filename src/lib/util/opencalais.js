@@ -1,54 +1,25 @@
 /**
-Copyright (C) 2015  Saidimu Apale
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
+ * Copyright (C) 2015  Saidimu Apale
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 'use strict';
 
-require('newrelic');
-
-var appname = process.env.APP_NAME;
-var log = require('_/util/logging.js')(appname);
-
-var util = require('util');
 var datastore_api = require('_/util/datastore-api.js');
 var opencalais_api = require('_/util/opencalais-api.js');
 
-var queue = require('_/util/queue.js');
-var topics = queue.topics;
-
-
-//==BEGIN here
-// connect to the message queue
-queue.connect(function onQueueConnect(err) {
-  if(err) {
-    log.fatal({
-      err: err,
-    }, "Cannot connect to message queue!");
-
-  } else {
-    
-    start();
-
-  }//if-else
-});
-//==BEGIN here
-
-
-function start()    {
-  listen_to_readability();
-}//start
-
-
-function listen_to_readability()  {
+function listen_to_readability(queue, topics)  {
   var topic = topics.READABILITY;
   var channel = "fetch-opencalais-content";
 
@@ -76,13 +47,13 @@ function listen_to_readability()  {
       }//try-catch
 
     } else {
-      process_readability_message(json, message);
+      process_readability_message(json, message, queue, topics);
     }//if-else
   });
 }//listen_to_readability
 
 
-function process_readability_message(json, message)	{
+function process_readability_message(json, message, queue, topics)	{
 	var RateLimiter = require('limiter').RateLimiter;
 
 	// 'second', 'minute', 'day', or a number of milliseconds
@@ -105,7 +76,7 @@ function process_readability_message(json, message)	{
 
 		} else {
 
-      get_opencalais(json);
+      get_opencalais(json, queue, topics);
 
       message.finish();
 
@@ -115,7 +86,7 @@ function process_readability_message(json, message)	{
 }//process_readability_message
 
 
-function get_opencalais(json)	{
+function get_opencalais(json, queue, topics)	{
   var readability = json;
 
   var url = readability.url || '';
@@ -146,7 +117,7 @@ function get_opencalais(json)	{
 
 			if(opencalais)	{
 
-        process_opencalais_object(opencalais, url);
+        process_opencalais_object(opencalais, url, queue, topics);
 
 			} else {
         log.info({
@@ -173,7 +144,7 @@ function get_opencalais(json)	{
 
 		} else {
 
-      process_opencalais_object(opencalais, url);
+      process_opencalais_object(opencalais, url, queue, topics);
 
 		}//if-else
 	};//api_fetch_callback
@@ -193,16 +164,16 @@ function get_opencalais(json)	{
 }//get_opencalais
 
 
-function process_opencalais_object(opencalais, url) {
+function process_opencalais_object(opencalais, url, queue, topics) {
   // augment Opencalais object with same URL as Readability object
   opencalais.url = url;
 
   // publish Opencalais object
-  publish_opencalais_message(opencalais);
+  publish_opencalais_message(opencalais, queue, topics);
 }//process_opencalais_object
 
 
-function publish_opencalais_message(opencalais) {
+function publish_opencalais_message(opencalais, queue, topics) {
   queue.publish_message(topics.OPENCALAIS, opencalais);
 }//publish_opencalais_message
 
@@ -282,3 +253,7 @@ function fetch_opencalais_content(readability, callback)	{
     }, "Error fetching content from Opencalais API.");
   }//try-catch
 }//fetch_opencalais_content
+
+module.exports = {
+  listen_to_readability: listen_to_readability,
+};//module.exports

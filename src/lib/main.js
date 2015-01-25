@@ -26,6 +26,7 @@ var topics = queue.topics;
 
 var filter = require('_/util/filter.js');
 var readability = require('_/util/readability.js');
+var opencalais = require('_/util/opencalais.js');
 
 
 //==BEGIN here
@@ -48,4 +49,5 @@ queue.connect(function onQueueConnect(err) {
 function start()    {
   filter.listen_to_urls_received(queue, topics);
   readability.listen_to_urls_approved(queue, topics);
+  opencalais.listen_to_readability(queue, topics);
 }//start()
