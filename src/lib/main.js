@@ -28,6 +28,7 @@ var filter = require('_/util/filter.js');
 var readability = require('_/util/readability.js');
 var opencalais = require('_/util/opencalais.js');
 var datastore = require('_/util/datastore.js');
+var entities = require('_/util/entities.js');
 
 
 //==BEGIN here
@@ -52,4 +53,5 @@ function start()    {
   readability.start(queue, topics);
   opencalais.start(queue, topics);
   datastore.start(queue, topics);
+  entities.start(queue, topics);
 }//start()
