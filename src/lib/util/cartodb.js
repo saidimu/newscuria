@@ -114,16 +114,16 @@ function process_entities(json, message)  {
   // PUBLICATIONS
   // RELEVANCES
 
-  var cartodb_query = "INSERT INTO entities (the_geom, lat, lon, url, country, place, person, nationality, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, \"{url}\", \"{country}\", \"{place}\", \"{person}\", \"{nationality}\", \"{date_published}\")";
+  var cartodb_query = "INSERT INTO entities (the_geom, lat, lon, url, country, place, person, nationality, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, {url}, {country}, {place}, {person}, {nationality}, {date_published})";
   var insert_data = {
     lat: cartodb_row.lat,
     lon: cartodb_row.lon,
-    url: cartodb_row.url,
-    country: cartodb_row.country,
-    place: cartodb_row.place,
-    person: cartodb_row.person,
-    nationality: cartodb_row.nationality,
-    date_published: cartodb_row.date_published,
+    url: JSON.stringify(cartodb_row.url),
+    country: JSON.stringify(cartodb_row.country),
+    place: JSON.stringify(cartodb_row.place),
+    person: JSON.stringify(cartodb_row.person),
+    nationality: JSON.stringify(cartodb_row.nationality),
+    date_published: JSON.stringify(cartodb_row.date_published),
   };//insert_data
 
   log.debug({
