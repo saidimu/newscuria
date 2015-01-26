@@ -25,8 +25,6 @@ var CARTODB_USER = config.get('user');
 
 var CartoDB = require('cartodb');
 
-var querystring = require('querystring');
-
 var client;
 
 var queue;
@@ -121,10 +119,10 @@ function process_entities(json, message)  {
     lat: cartodb_row.lat,
     lon: cartodb_row.lon,
     url: cartodb_row.url,
-    country: querystring.escape(cartodb_row.country),
-    place: querystring.escape(cartodb_row.place),
-    person: querystring.escape(cartodb_row.person),
-    nationality: querystring.escape(cartodb_row.nationality),
+    country: JSON.stringify(cartodb_row.country),
+    place: JSON.stringify(cartodb_row.place),
+    person: JSON.stringify(cartodb_row.person),
+    nationality: JSON.stringify(cartodb_row.nationality),
     date_published: cartodb_row.date_published,
   };//insert_data
 
