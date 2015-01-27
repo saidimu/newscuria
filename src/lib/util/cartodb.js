@@ -103,6 +103,7 @@ function process_entities(json, message)  {
   var people_rows = extract_people(people);
 
   // TAGS
+  // TOPICS
   // THINGS
   // AUTHORS
   // PUBLICATIONS
@@ -156,14 +157,42 @@ function extract_places(places)  {
       for(resolution in place.resolutions)  {
 
         if(resolution.latitude && resolution.longitude) {
-          rows.push({
-            lat: resolution.latitude,
-            lon: resolution.longitude,
-            place: resolution.shortname || resolution.name,
-            state: resolution.containedbystate || "";
-            country: resolution.containedbycountry || cartodb_row.place,
-            relevance: place.relevance,
-          });
+
+          // make sure to return other data even if no instances found
+          // else return a copy of other data for every instance found
+          if(place.instances === [])  {
+
+            rows.push({
+              lat: resolution.latitude,
+              lon: resolution.longitude,
+              place: resolution.shortname || resolution.name,
+              state: resolution.containedbystate || "";
+              country: resolution.containedbycountry || resolution.shortname || resolution.name,
+              relevance: place.relevance,
+            });
+
+          } else {
+
+            for(var instance in place.instances)  {
+              rows.push({
+                lat: resolution.latitude,
+                lon: resolution.longitude,
+                place: resolution.shortname || resolution.name,
+                state: resolution.containedbystate || "";
+                country: resolution.containedbycountry || resolution.shortname || resolution.name,
+                relevance: place.relevance,
+                suffix: place.instances[instance].suffix,
+                prefix: place.instances[instance].prefix,
+                detection: place.instances[instance].detection,
+                length: place.instances[instance].length,
+                offset: place.instances[instance].offset,
+                exact: place.instances[instance].exact,
+              });
+              
+            }//for
+
+          }//if-else
+
         }//if
 
       }//for
