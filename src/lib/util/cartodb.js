@@ -97,16 +97,10 @@ function process_entities(json, message)  {
   cartodb_row.date_published = date_published;
 
   // PLACES
-  cartodb_row = extract_places(places, cartodb_row);
-
-  // stop processing if either lat/lon is missing/undefined.
-  if(!cartodb_row.lat || !cartodb_row.lon)  {
-    message.finish();
-    return;
-  }//if
+  var place_rows = extract_places(places);
 
   // PEOPLE
-  cartodb_row = extract_people(people, cartodb_row);
+  var people_rows = extract_people(people);
 
   // TAGS
   // THINGS
@@ -151,35 +145,73 @@ function process_entities(json, message)  {
 }//process_entities
 
 
-function extract_places(places, cartodb_row)  {
+function extract_places(places)  {
+  var rows = [];
+
   for(var place_hash in places) {
     var place = places[place_hash];
 
     if(place.resolutions) {
-      var resolution = place.resolutions[0] || {};  // FIXME: what about > 1 place resolutions?
 
-      if(resolution.latitude && resolution.longitude) {
-        cartodb_row.lat = resolution.latitude;
-        cartodb_row.lon = resolution.longitude;
-        cartodb_row.place = resolution.shortname || resolution.name;
-        cartodb_row.country = resolution.containedbycountry || cartodb_row.place;
-      }//if
+      for(resolution in place.resolutions)  {
+
+        if(resolution.latitude && resolution.longitude) {
+          rows.push({
+            lat: resolution.latitude,
+            lon: resolution.longitude,
+            place: resolution.shortname || resolution.name,
+            state: resolution.containedbystate || "";
+            country: resolution.containedbycountry || cartodb_row.place,
+            relevance: place.relevance,
+          });
+        }//if
+
+      }//for
     }//if
   }//for
 
-  return cartodb_row;
+  return rows;
 }//extract_places
 
 
-function extract_people(people, cartodb_row)  {
+function extract_people(people)  {
+  var rows = [];
+
   for(var people_hash in people) {
     var person = people[people_hash];
 
-    cartodb_row.person = person.commonname || person.name;
-    cartodb_row.nationality = person.nationality || "";
+    // make sure to return other data even if no instances found
+    // else return a copy of other data for every instance found
+    if(person.instances === [])  {
+      rows.push({
+        person: person.commonname || person.name,
+        nationality: person.nationality || "",
+        persontype: person.persontype || "";
+        relevance: person.relevance,
+      });
+
+    } else {
+
+      for(var instance in person.instances)  {
+        rows.push({
+          person: person.commonname || person.name,
+          nationality: person.nationality || "",
+          persontype: person.persontype || "";
+          relevance: person.relevance,
+          suffix: person.instances[instance].suffix,
+          prefix: person.instances[instance].prefix,
+          detection: person.instances[instance].detection,
+          length: person.instances[instance].length,
+          offset: person.instances[instance].offset,
+          exact: person.instances[instance].exact,
+        });
+      }//for
+
+    }//if-else
+
   }//for
 
-  return cartodb_row;
+  return rows;
 }//extract_people
 
 
