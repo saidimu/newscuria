@@ -89,6 +89,7 @@ function extract_entities(opencalais) {
   var places = {};
   var things = {};
   var tags = {};
+  var topics = {};
 
   for(var key in opencalais)  {
     var value = opencalais[key];
@@ -115,6 +116,9 @@ function extract_entities(opencalais) {
     } else if(_typeGroup === "socialTag") {
       tags[key] = value;
 
+    } else if(_typeGroup === "topics") {
+      topics[key] = value;
+
     } else {
       things[key] = value;
 
@@ -127,7 +131,8 @@ function extract_entities(opencalais) {
     people: people,
     places: places,
     things: things,
-    tags: tags
+    tags: tags,
+    topics: topics,
   };
 }//extract_entities
 

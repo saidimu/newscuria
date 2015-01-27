@@ -89,97 +89,196 @@ function process_entities(json, message)  {
   var people = entities.people || {};
   var places = entities.places || {};
   var things = entities.things || {};
+  var topics = entities.topics || {};
   var tags = entities.tags || {};
   var date_published = entities.date_published || new Date().toISOString();
 
-  var cartodb_row = {};
-  cartodb_row.url = url;
-  cartodb_row.date_published = date_published;
-
   // PLACES
-  cartodb_row = extract_places(places, cartodb_row);
-
-  // stop processing if either lat/lon is missing/undefined.
-  if(!cartodb_row.lat || !cartodb_row.lon)  {
-    message.finish();
-    return;
-  }//if
+  var places = extract_places(places, url, date_published);
 
   // PEOPLE
-  cartodb_row = extract_people(people, cartodb_row);
+  var people = extract_people(people);
 
   // TAGS
+  // TOPICS
   // THINGS
   // AUTHORS
   // PUBLICATIONS
   // RELEVANCES
 
-  var cartodb_query = "INSERT INTO entities (the_geom, lat, lon, url, country, place, person, nationality, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, '{url}', '{country}', '{place}', '{person}', '{nationality}', '{date_published}')";
-  var insert_data = {
-    lat: cartodb_row.lat,
-    lon: cartodb_row.lon,
-    url: cartodb_row.url,
-    country: cartodb_row.country,
-    place: cartodb_row.place,
-    person: cartodb_row.person,
-    nationality: cartodb_row.nationality,
-    date_published: cartodb_row.date_published,
-  };//insert_data
+  add_place_rows(places, function(err) {
 
-  log.debug({
-    cartodb: insert_data,
-  }, "Entity as a CartoDB row.");
-
-  client.query(cartodb_query, insert_data, function(err, response)  {
     if(err) {
-      log.error({
-        err: err,
-        response: response,
-        query: CartoDB.tmpl(cartodb_query, insert_data),
-      }, "Error updating CartoDB table.");
-
       message.requeue();
-
     } else {
-      // log.debug({
-      //   body: body
-      // }, "Successful insert of entity into CartoDB row.");
-      message.finish();
+
+      add_people(people, function(err)  {
+        if(err) {
+          message.requeue();
+        } else {
+          message.finish();
+        }//if-else
+      });
 
     }//if-else
-  });//client.query()
+  });
+
 }//process_entities
 
 
-function extract_places(places, cartodb_row)  {
+function add_places(rows, url, date_published, callback) {
+  var query = 'INSERT INTO places (the_geom, lat, lon, url, place, state, country, relevance, suffix, prefix, detection, length, offset, exact, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, "{url}", "{place}", "{state}", "{country}", {relevance}, "{suffix}", "{prefix}", "{detection}", {length}, {offset}, "{exact}", "{date_published}")';
+
+  for(var row in rows)  {
+    log.debug({
+      cartodb: row,
+    }, "'place' CartoDB row.");
+
+    client.query(query, row, function(err, response)  {
+      if(err) {
+        log.error({
+          err: err,
+          response: response,
+          query: CartoDB.tmpl(query, row),
+        }, "Error updating CartoDB table.");
+
+        callback(err);
+
+      } else {
+
+        callback();
+
+      }//if-else
+    });//client.query()
+  }//for
+
+}//add_places
+
+
+function add_people(rows, url, date_published, callback) {
+  var query = 'INSERT INTO people (url, person, nationality, persontype, relevance, suffix, prefix, detection, length, offset, exact, date_published) VALUES ("{url}", "{person}", "{nationality}", "{persontype}", {relevance}, "{suffix}", "{prefix}", "{detection}", {length}, {offset}, "{exact}", "{date_published}")';
+
+  for(var row in rows)  {
+    log.debug({
+      cartodb: row,
+    }, "'people' CartoDB row.");
+
+    client.query(query, row, function(err, response)  {
+      if(err) {
+        log.error({
+          err: err,
+          response: response,
+          query: CartoDB.tmpl(query, row),
+        }, "Error updating CartoDB table.");
+
+        callback(err);
+
+      } else {
+        
+        callback();
+
+      }//if-else
+    });//client.query()
+  }//for
+
+}//add_people
+
+
+function extract_places(places)  {
+  var rows = [];
+
   for(var place_hash in places) {
     var place = places[place_hash];
 
     if(place.resolutions) {
-      var resolution = place.resolutions[0] || {};  // FIXME: what about > 1 place resolutions?
 
-      if(resolution.latitude && resolution.longitude) {
-        cartodb_row.lat = resolution.latitude;
-        cartodb_row.lon = resolution.longitude;
-        cartodb_row.place = resolution.shortname || resolution.name;
-        cartodb_row.country = resolution.containedbycountry || cartodb_row.place;
-      }//if
+      for(resolution in place.resolutions)  {
+
+        if(resolution.latitude && resolution.longitude) {
+
+          // make sure to return other data even if no instances found
+          // else return a copy of other data for every instance found
+          if(place.instances === [])  {
+
+            rows.push({
+              lat: resolution.latitude,
+              lon: resolution.longitude,
+              place: resolution.shortname || resolution.name,
+              state: resolution.containedbystate || "";
+              country: resolution.containedbycountry || resolution.shortname || resolution.name,
+              relevance: place.relevance,
+            });
+
+          } else {
+
+            for(var instance in place.instances)  {
+              rows.push({
+                lat: resolution.latitude,
+                lon: resolution.longitude,
+                place: resolution.shortname || resolution.name,
+                state: resolution.containedbystate || "";
+                country: resolution.containedbycountry || resolution.shortname || resolution.name,
+                relevance: place.relevance,
+                suffix: place.instances[instance].suffix,
+                prefix: place.instances[instance].prefix,
+                detection: place.instances[instance].detection,
+                length: place.instances[instance].length,
+                offset: place.instances[instance].offset,
+                exact: place.instances[instance].exact,
+              });
+              
+            }//for
+
+          }//if-else
+
+        }//if
+
+      }//for
     }//if
   }//for
 
-  return cartodb_row;
+  return rows;
 }//extract_places
 
 
-function extract_people(people, cartodb_row)  {
+function extract_people(people)  {
+  var rows = [];
+
   for(var people_hash in people) {
     var person = people[people_hash];
 
-    cartodb_row.person = person.commonname || person.name;
-    cartodb_row.nationality = person.nationality || "";
+    // make sure to return other data even if no instances found
+    // else return a copy of other data for every instance found
+    if(person.instances === [])  {
+      rows.push({
+        person: person.commonname || person.name,
+        nationality: person.nationality || "",
+        persontype: person.persontype || "";
+        relevance: person.relevance,
+      });
+
+    } else {
+
+      for(var instance in person.instances)  {
+        rows.push({
+          person: person.commonname || person.name,
+          nationality: person.nationality || "",
+          persontype: person.persontype || "";
+          relevance: person.relevance,
+          suffix: person.instances[instance].suffix,
+          prefix: person.instances[instance].prefix,
+          detection: person.instances[instance].detection,
+          length: person.instances[instance].length,
+          offset: person.instances[instance].offset,
+          exact: person.instances[instance].exact,
+        });
+      }//for
+
+    }//if-else
+
   }//for
 
-  return cartodb_row;
+  return rows;
 }//extract_people
 
 
