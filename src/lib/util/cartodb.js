@@ -127,7 +127,7 @@ function process_entities(json, message)  {
 
 
 function add_places(rows, url, date_published, callback) {
-  var query = 'INSERT INTO places (the_geom, lat, lon, url, place, state, country, relevance, suffix, prefix, detection, length, offset, exact, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, "{url}", "{place}", "{state}", "{country}", {relevance}, "{suffix}", "{prefix}", "{detection}", {length}, {offset}, "{exact}", "{date_published}")';
+  var query = 'INSERT INTO places (the_geom, lat, lon, url, place, state, country, relevance, suffix, prefix, detection, length, _offset, exact, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, "{url}", "{place}", "{state}", "{country}", {relevance}, "{suffix}", "{prefix}", "{detection}", {length}, {offset}, "{exact}", "{date_published}")';
 
   for(var row in rows)  {
     log.debug({
@@ -156,7 +156,7 @@ function add_places(rows, url, date_published, callback) {
 
 
 function add_people(rows, url, date_published, callback) {
-  var query = 'INSERT INTO people (url, person, nationality, persontype, relevance, suffix, prefix, detection, length, offset, exact, date_published) VALUES ("{url}", "{person}", "{nationality}", "{persontype}", {relevance}, "{suffix}", "{prefix}", "{detection}", {length}, {offset}, "{exact}", "{date_published}")';
+  var query = 'INSERT INTO people (url, person, nationality, persontype, relevance, suffix, prefix, detection, length, _offset, exact, date_published) VALUES ("{url}", "{person}", "{nationality}", "{persontype}", {relevance}, "{suffix}", "{prefix}", "{detection}", {length}, {offset}, "{exact}", "{date_published}")';
 
   for(var row in rows)  {
     log.debug({
