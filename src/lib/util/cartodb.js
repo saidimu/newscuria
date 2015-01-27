@@ -263,7 +263,7 @@ function extract_people(people)  {
         rows.push({
           person: person.commonname || person.name,
           nationality: person.nationality || "",
-          persontype: person.persontype || "";
+          persontype: person.persontype || "",
           relevance: person.relevance,
           suffix: person.instances[instance].suffix,
           prefix: person.instances[instance].prefix,
