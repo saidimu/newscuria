@@ -192,7 +192,7 @@ function extract_places(places)  {
 
     if(place.resolutions) {
 
-      for(resolution in place.resolutions)  {
+      for(var resolution in place.resolutions)  {
 
         if(resolution.latitude && resolution.longitude) {
 
