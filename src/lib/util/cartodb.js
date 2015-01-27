@@ -89,18 +89,15 @@ function process_entities(json, message)  {
   var people = entities.people || {};
   var places = entities.places || {};
   var things = entities.things || {};
+  var topics = entities.topics || {};
   var tags = entities.tags || {};
   var date_published = entities.date_published || new Date().toISOString();
 
-  var cartodb_row = {};
-  cartodb_row.url = url;
-  cartodb_row.date_published = date_published;
-
   // PLACES
-  var place_rows = extract_places(places);
+  var places = extract_places(places, url, date_published);
 
   // PEOPLE
-  var people_rows = extract_people(people);
+  var people = extract_people(people);
 
   // TAGS
   // TOPICS
@@ -109,41 +106,82 @@ function process_entities(json, message)  {
   // PUBLICATIONS
   // RELEVANCES
 
-  var cartodb_query = "INSERT INTO entities (the_geom, lat, lon, url, country, place, person, nationality, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, '{url}', '{country}', '{place}', '{person}', '{nationality}', '{date_published}')";
-  var insert_data = {
-    lat: cartodb_row.lat,
-    lon: cartodb_row.lon,
-    url: cartodb_row.url,
-    country: cartodb_row.country,
-    place: cartodb_row.place,
-    person: cartodb_row.person,
-    nationality: cartodb_row.nationality,
-    date_published: cartodb_row.date_published,
-  };//insert_data
+  add_place_rows(places, function(err) {
 
-  log.debug({
-    cartodb: insert_data,
-  }, "Entity as a CartoDB row.");
-
-  client.query(cartodb_query, insert_data, function(err, response)  {
     if(err) {
-      log.error({
-        err: err,
-        response: response,
-        query: CartoDB.tmpl(cartodb_query, insert_data),
-      }, "Error updating CartoDB table.");
-
       message.requeue();
-
     } else {
-      // log.debug({
-      //   body: body
-      // }, "Successful insert of entity into CartoDB row.");
-      message.finish();
+
+      add_people(people, function(err)  {
+        if(err) {
+          message.requeue();
+        } else {
+          message.finish();
+        }//if-else
+      });
 
     }//if-else
-  });//client.query()
+  });
+
 }//process_entities
+
+
+function add_places(rows, url, date_published, callback) {
+  var query = 'INSERT INTO places (the_geom, lat, lon, url, place, state, country, relevance, suffix, prefix, detection, length, offset, exact, date_published) VALUES (CDB_LatLng({lat}, {lon}), {lat}, {lon}, "{url}", "{place}", "{state}", "{country}", {relevance}, "{suffix}", "{prefix}", "{detection}", {length}, {offset}, "{exact}", "{date_published}")';
+
+  for(var row in rows)  {
+    log.debug({
+      cartodb: row,
+    }, "'place' CartoDB row.");
+
+    client.query(query, row, function(err, response)  {
+      if(err) {
+        log.error({
+          err: err,
+          response: response,
+          query: CartoDB.tmpl(query, row),
+        }, "Error updating CartoDB table.");
+
+        callback(err);
+
+      } else {
+
+        callback();
+
+      }//if-else
+    });//client.query()
+  }//for
+
+}//add_places
+
+
+function add_people(rows, url, date_published, callback) {
+  var query = 'INSERT INTO people (url, person, nationality, persontype, relevance, suffix, prefix, detection, length, offset, exact, date_published) VALUES ("{url}", "{person}", "{nationality}", "{persontype}", {relevance}, "{suffix}", "{prefix}", "{detection}", {length}, {offset}, "{exact}", "{date_published}")';
+
+  for(var row in rows)  {
+    log.debug({
+      cartodb: row,
+    }, "'people' CartoDB row.");
+
+    client.query(query, row, function(err, response)  {
+      if(err) {
+        log.error({
+          err: err,
+          response: response,
+          query: CartoDB.tmpl(query, row),
+        }, "Error updating CartoDB table.");
+
+        callback(err);
+
+      } else {
+        
+        callback();
+
+      }//if-else
+    });//client.query()
+  }//for
+
+}//add_people
 
 
 function extract_places(places)  {
