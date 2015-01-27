@@ -204,7 +204,7 @@ function extract_places(places)  {
               lat: resolution.latitude,
               lon: resolution.longitude,
               place: resolution.shortname || resolution.name,
-              state: resolution.containedbystate || "";
+              state: resolution.containedbystate || "",
               country: resolution.containedbycountry || resolution.shortname || resolution.name,
               relevance: place.relevance,
             });
@@ -216,7 +216,7 @@ function extract_places(places)  {
                 lat: resolution.latitude,
                 lon: resolution.longitude,
                 place: resolution.shortname || resolution.name,
-                state: resolution.containedbystate || "";
+                state: resolution.containedbystate || "",
                 country: resolution.containedbycountry || resolution.shortname || resolution.name,
                 relevance: place.relevance,
                 suffix: place.instances[instance].suffix,
