@@ -106,13 +106,13 @@ function process_entities(json, message)  {
   // PUBLICATIONS
   // RELEVANCES
 
-  add_places(places, function(err) {
+  add_places(places, url, date_published, function(err) {
 
     if(err) {
       message.requeue();
     } else {
 
-      add_people(people, function(err)  {
+      add_people(people, url, date_published, function(err)  {
         if(err) {
           message.requeue();
         } else {
