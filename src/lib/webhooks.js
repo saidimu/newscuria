@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-'use strict';
-
 require('newrelic');
+
+'use strict';
 
 var appname = process.env.APP_NAME;
 var log = require('_/util/logging.js')(appname);
