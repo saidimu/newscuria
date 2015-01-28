@@ -94,7 +94,7 @@ function process_entities(json, message)  {
   var date_published = entities.date_published || new Date().toISOString();
 
   // PLACES
-  var places = extract_places(places, url, date_published);
+  var places = extract_places(places);
 
   // PEOPLE
   var people = extract_people(people);
@@ -109,14 +109,26 @@ function process_entities(json, message)  {
   add_places(places, url, date_published, function(err) {
 
     if(err) {
+      log.error({
+        err: err,
+      }, "'add_places' error.");
+
       message.requeue();
+
     } else {
 
       add_people(people, url, date_published, function(err)  {
         if(err) {
+          log.error({
+            err: err,
+          }, "'add_people' error.");
+
           message.requeue();
+
         } else {
+
           message.finish();
+          
         }//if-else
       });
 
