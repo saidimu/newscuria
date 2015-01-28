@@ -106,7 +106,7 @@ function process_entities(json, message)  {
   // PUBLICATIONS
   // RELEVANCES
 
-  add_place_rows(places, function(err) {
+  add_places(places, function(err) {
 
     if(err) {
       message.requeue();
