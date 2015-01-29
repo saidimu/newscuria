@@ -22,10 +22,12 @@ var log = require('_/util/logging.js')(appname);
 var queue;
 var topics;
 
+var opencalais_config = require('config');
+
 function start(__queue, __topics)    {
   queue = __queue;
   topics = __topics;
-  
+
   listen_to_opencalais();
 }//start()
 
@@ -46,7 +48,7 @@ function listen_to_opencalais()  {
 
       // FIXME: save these json-error messages for analysis
       try {
-        message.finish();        
+        message.finish();
       } catch(err)  {
         log.error({
           topic: topic,
@@ -56,7 +58,7 @@ function listen_to_opencalais()  {
           err: err
         }, "Error executing message.finish()");
       }//try-catch
-      
+
     } else {
       process_opencalais_message(json, message);
     }//if-else
@@ -76,65 +78,66 @@ function process_opencalais_message(json, message) {
     return;
   }//if
 
-  // extract and organize chosen entities from Opencalais object
-  var entities = extract_entities(opencalais);
-  publish_entities_message(entities);
+  // extract and organize chosen 'NLP objects' from Opencalais object
+  extract_nlp_objects(opencalais);
 
   message.finish();
 }//process_opencalais_message
 
 
-function extract_entities(opencalais) {
-  var people = {};
-  var places = {};
-  var things = {};
-  var tags = {};
-  var topics = {};
-
-  for(var key in opencalais)  {
-    var value = opencalais[key];
-
-    var _type = value._type;
-    var _typeGroup = value._typeGroup;
-    var _typeReference = value._typeReference;
-
-    if(_typeGroup === "entities") {
-      if(_type === "Person")  {
-        people[key] = value;
-
-      } else if(_type === "ProvinceOrState")  {
-        places[key] = value;
-
-      } else if(_type === "City") {
-        places[key] = value;
-
-      } else if(_type === "Country")  {
-        places[key] = value;
-
-      }//if-else
-
-    } else if(_typeGroup === "socialTag") {
-      tags[key] = value;
-
-    } else if(_typeGroup === "topics") {
-      topics[key] = value;
-
-    } else {
-      things[key] = value;
-
-    }//if-else
-  }//for
+function extract_nlp_objects(opencalais) {
+  var entities = opencalais_config.get('entities') || {};
+  var relations = opencalais_config.get('relations') || {};
+  var topics = opencalais_config.get('topics') || {};
+  var social_tags = opencalais_config.get('socialTag') || {};
+  var language = opencalais_config.get('language') || {};
 
   return {
     url: opencalais.url,
     date_published: opencalais.date_published,
-    people: people,
-    places: places,
-    things: things,
-    tags: tags,
     topics: topics,
   };
-}//extract_entities
+}//extract_nlp_objects
+
+
+function extract_relations(nlp_object) {
+  var _type = nlp_object._type;
+  var _typeGroup = nlp_object._typeGroup;
+  var _typeReference = nlp_object._typeReference;
+
+}//extract_relations
+
+
+function extract_entities(nlp_object) {
+  var _type = nlp_object._type;
+  var _typeGroup = nlp_object._typeGroup;
+  var _typeReference = nlp_object._typeReference;
+
+}//extract_entities()
+
+
+function extract_topics(nlp_object) {
+  var _type = nlp_object._type;
+  var _typeGroup = nlp_object._typeGroup;
+  var _typeReference = nlp_object._typeReference;
+
+}//extract_topics()
+
+
+function extract_social_tags(nlp_object) {
+  var _type = nlp_object._type;
+  var _typeGroup = nlp_object._typeGroup;
+  var _typeReference = nlp_object._typeReference;
+
+}//extract_social_tags()
+
+
+function extract_language(nlp_object) {
+  var _type = nlp_object._type;
+  var _typeGroup = nlp_object._typeGroup;
+  var _typeReference = nlp_object._typeReference;
+
+}//extract_language()
 
 
 function publish_entities_message(entities) {
