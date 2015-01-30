@@ -1,0 +1,140 @@
+PEOPLE:
+  - Person
+  - PersonCareer
+  - Quotation
+  - Position
+  - PersonAttributes
+  - PersonCareer
+  - PersonCommunication
+  - PersonEducation
+  - PersonEmailAddress
+  - PersonLocation
+  - PersonParty
+  - PersonTravel
+
+PLACES:
+  - ProvinceOrState
+  - Facility
+  - City
+  - Continent
+  - Country
+  - NaturalFeature
+  - Region
+  - CompanyLocation
+
+THINGS:
+  - Movie
+  - TVShow
+  - Currency
+  - EmailAddress
+  - FaxNumber
+  - MedicalCondition
+  - MedicalTreatment
+  - MusicAlbum
+  - MusicGroup
+  - OperatingSystem
+  - PhoneNumber
+  - ProgrammingLanguage
+  - SportsGame
+  - SportsLeague
+  - Technology
+  - TVShow
+  - URL
+  - CandidatePosition
+  - CompanyProduct
+  - CompanyTechnology
+  - CompanyTicker
+  - CompanyUsingProduct
+
+COMPANIES:
+  - Company
+  - MarketIndex
+  - IndustryTerm
+  - Organization
+  - Product
+  - PublishedMedium
+  - RadioProgram
+  - RadioStation
+  - TVStation
+  - CompanyEmployeesNumber
+  - CompanyReorganization
+  - CompanyRestatement
+
+EVENTS:
+  - Anniversary
+  - EntertainmentAwardEvent
+  - Holiday
+  - PoliticalEvent
+  - SportsEvent
+  - Acquisition
+  - Alliance
+  - ArmedAttack
+  - ArmsPurchaseSale
+  - Arrest
+  - Bankruptcy
+  - AnalystEarningsEstimate
+  - AnalystRecommendation
+  - BonusSharesIssuance
+  - BusinessRelation
+  - Buybacks
+  - CompanyAccountingChange
+  - CompanyEarningsAnnouncement
+  - CompanyEarningsGuidance
+  - CompanyExpansion
+  - CompanyForceMajeure
+  - CompanyFounded
+  - CompanyInvestment
+  - CompanyLaborIssues
+  - CompanyLayoffs
+  - CompanyLegalIssues
+  - CompanyListingChange
+  - CompanyMeeting
+  - CompanyNameChange
+  - ConferenceCall
+  - Conviction
+  - CreditRating
+  - DebtFinancing
+  - DelayedFiling
+  - DiplomaticRelations
+  - Dividend
+  - EmploymentChange
+  - EmploymentRelation
+  - EnvironmentalIssue
+  - EquityFinancing
+  - Extinction
+  - FDAPhase
+  - IndicesChanges
+  - Indictment
+  - IPO
+  - JointVenture
+  - ManMadeDisaster
+  - Merger
+  - MilitaryAction
+  - MovieRelease
+  - MusicAlbumRelease
+  - NaturalDisaster
+  - PatentFiling
+  - PatentIssuance
+  - PoliticalEndorsement
+  - PollsResult
+  - ProductIssues
+  - ProductRecall
+  - ProductRelease
+  - SecondaryIssuance
+  - StockSplit
+  - Trial
+  - VotingResult
+
+RELATIONS:
+  - GenericRelations
+  - BusinessRelation
+  - CompanyAffiliates
+  - CompanyCompetitor
+  - CompanyCustomer
+  - FamilyRelation
+  - PoliticalRelationship
+  - PersonRelation
+
+TOPICS:
+SOCIALTAGS:
+LANGUAGE:
