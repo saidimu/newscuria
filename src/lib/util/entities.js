@@ -93,16 +93,16 @@ function extract_nlp_objects(opencalais) {
   var EVENTS = opencalais_config.get('EVENTS');
   var THINGS = opencalais_config.get('THINGS');
   var RELATIONS = opencalais_config.get('RELATIONS');
-  var TOPICS = opencalais_config.get('TOPICS');
-  var TAGS = opencalais_config.get('SOCIALTAGS');
-  var LANGUAGE = opencalais_config.get('LANGUAGE');
+  var TOPICS = opencalais_config.get('TOPICS') || [];
+  var TAGS = opencalais_config.get('SOCIALTAGS') || [];
+  var LANGUAGE = opencalais_config.get('LANGUAGE') || [];
 
   for(var hash in opencalais) {
     if(opencalais.hasOwnProperty(hash))  {
       var nlp_object = opencalais[hash];
       var nlp_type = nlp_object._type;
 
-      switch(nlp_type)  {
+      switch(true)  {
         case PEOPLE.indexOf(nlp_type) === 0:
           extract_people(nlp_object);
           break;
@@ -151,82 +151,101 @@ function extract_nlp_objects(opencalais) {
 
 
 function extract_people(nlp_object) {
-  var _type = nlp_object._type;
-  var _typeGroup = nlp_object._typeGroup;
-  var _typeReference = nlp_object._typeReference;
+  // remove unwanted properties
+  nlp_object._type = undefined;
+  nlp_object._typeGroup = undefined;
+  nlp_object._typeReference = undefined;
 
+  publish_message(topics.ENTITIES_PEOPLE, nlp_object);
 }//extract_people
 
 
 function extract_places(nlp_object) {
-  var _type = nlp_object._type;
-  var _typeGroup = nlp_object._typeGroup;
-  var _typeReference = nlp_object._typeReference;
+  // remove unwanted properties
+  nlp_object._type = undefined;
+  nlp_object._typeGroup = undefined;
+  nlp_object._typeReference = undefined;
 
+  publish_message(topics.ENTITIES_PLACES, nlp_object);
 }//extract_places
 
 
 function extract_companies(nlp_object) {
-  var _type = nlp_object._type;
-  var _typeGroup = nlp_object._typeGroup;
-  var _typeReference = nlp_object._typeReference;
+  // remove unwanted properties
+  nlp_object._type = undefined;
+  nlp_object._typeGroup = undefined;
+  nlp_object._typeReference = undefined;
 
+  publish_message(topics.ENTITIES_COMPANIES, nlp_object);
 }//extract_companies
 
 
 function extract_things(nlp_object) {
-  var _type = nlp_object._type;
-  var _typeGroup = nlp_object._typeGroup;
-  var _typeReference = nlp_object._typeReference;
+  // remove unwanted properties
+  nlp_object._type = undefined;
+  nlp_object._typeGroup = undefined;
+  nlp_object._typeReference = undefined;
 
+  publish_message(topics.ENTITIES_THINGS, nlp_object);
 }//extract_things
 
 
 function extract_events(nlp_object) {
-  var _type = nlp_object._type;
-  var _typeGroup = nlp_object._typeGroup;
-  var _typeReference = nlp_object._typeReference;
+  // remove unwanted properties
+  nlp_object._type = undefined;
+  nlp_object._typeGroup = undefined;
+  nlp_object._typeReference = undefined;
 
+  publish_message(topics.ENTITIES_EVENTS, nlp_object);
 }//extract_events
 
 
 function extract_relations(nlp_object) {
-  var _type = nlp_object._type;
-  var _typeGroup = nlp_object._typeGroup;
-  var _typeReference = nlp_object._typeReference;
+  // remove unwanted properties
+  nlp_object._type = undefined;
+  nlp_object._typeGroup = undefined;
+  nlp_object._typeReference = undefined;
 
+  publish_message(topics.ENTITIES_RELATIONS, nlp_object);
 }//extract_relations
 
 
 function extract_topics(nlp_object) {
-  var _type = nlp_object._type;
-  var _typeGroup = nlp_object._typeGroup;
-  var _typeReference = nlp_object._typeReference;
+  // remove unwanted properties
+  nlp_object._type = undefined;
+  nlp_object._typeGroup = undefined;
+  nlp_object._typeReference = undefined;
 
+  publish_message(topics.ENTITIES_TOPICS, nlp_object);
 }//extract_topics()
 
 
 function extract_tags(nlp_object) {
-  var _type = nlp_object._type;
-  var _typeGroup = nlp_object._typeGroup;
-  var _typeReference = nlp_object._typeReference;
+  // remove unwanted properties
+  nlp_object._type = undefined;
+  nlp_object._typeGroup = undefined;
+  nlp_object._typeReference = undefined;
 
+  publish_message(topics.ENTITIES_TAGS, nlp_object);
 }//extract_tags()
 
 
 function extract_language(nlp_object) {
-  var _type = nlp_object._type;
-  var _typeGroup = nlp_object._typeGroup;
-  var _typeReference = nlp_object._typeReference;
+  // remove unwanted properties
+  nlp_object._type = undefined;
+  nlp_object._typeGroup = undefined;
+  nlp_object._typeReference = undefined;
 
+  // TODO: what to do with language stats?
 }//extract_language()
 
 
-function publish_entities_message(entities) {
-  queue.publish_message(topics.ENTITIES, entities);
-}//publish_entities_message
+function publish_message(topic, nlp_object) {
+  queue.publish_message(topics, nlp_object);
+}//publish_message
 
 
 module.exports = {
   start: start,
+  extract_nlp_objects: extract_nlp_objects,
 };//module.exports
