@@ -25,12 +25,20 @@ var nsqd_port = config.writer.get('port');
 var lookupdHTTPAddresses = config.reader.get('lookupdHTTPAddresses');
 
 var topics = {
-	URLS_RECEIVED: "newscuria.urls_received",
-	URLS_APPROVED: "newscuria.urls_approved",
-	URLS_DENIED: "newscuria.urls_denied",
-	OPENCALAIS: "newscuria.opencalais",
-	READABILITY: "newscuria.readability",
+  URLS_RECEIVED: "newscuria.urls_received",
+  URLS_APPROVED: "newscuria.urls_approved",
+  URLS_DENIED: "newscuria.urls_denied",
+  OPENCALAIS: "newscuria.opencalais",
+  READABILITY: "newscuria.readability",
   ENTITIES: "newscuria.entities",
+  ENTITIES_PEOPLE: "newscuria.entities.people#ephemeral",
+  ENTITIES_PLACES: "newscuria.entities.places#ephemeral",
+  ENTITIES_COMPANIES: "newscuria.entities.companies#ephemeral",
+  ENTITIES_THINGS: "newscuria.entities.things#ephemeral",
+  ENTITIES_EVENTS: "newscuria.entities.events#ephemeral",
+  ENTITIES_RELATIONS: "newscuria.entities.relations#ephemeral",
+  ENTITIES_TOPICS: "newscuria.entities.topics#ephemeral",
+  ENTITIES_TAGS: "newscuria.entities.tags#ephemeral",
 };//topics
 
 var writer = undefined;
@@ -44,7 +52,7 @@ function connect(callback) {
 
   nsqd_writer.on('error', function(err) {
     log.error({err: err}, "nsqd Writer error.");
-    
+
     callback(err);
   });//writer.on
 
@@ -52,7 +60,7 @@ function connect(callback) {
     log.info("nsqd Writer ready.");
 
     writer = nsqd_writer;
-    
+
     callback(undefined);
   });//writer.on
 
