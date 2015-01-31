@@ -31,15 +31,17 @@ var queue;
 var topics;
 
 function start(__queue, __topics)    {
+  return;
+  
   queue = __queue;
   topics = __topics;
-  
+
   client = new CartoDB({
     user: CARTODB_USER,
     api_key: CARTODB_API_KEY
   });//client
 
-  client.on('connect', function() {  
+  client.on('connect', function() {
     listen_to_entities();
   });
 
@@ -63,7 +65,7 @@ function listen_to_entities() {
 
       // FIXME: save these json-error messages for analysis
       try {
-        message.finish();        
+        message.finish();
       } catch(err)  {
         log.error({
           topic: topic,
@@ -73,7 +75,7 @@ function listen_to_entities() {
           err: err
         }, "Error executing message.finish()");
       }//try-catch
-      
+
     } else {
       process_entities(json, message);
     }//if-else
@@ -128,7 +130,7 @@ function process_entities(json, message)  {
         } else {
 
           message.finish();
-          
+
         }//if-else
       });
 
@@ -186,7 +188,7 @@ function add_people(rows, url, date_published, callback) {
         callback(err);
 
       } else {
-        
+
         callback();
 
       }//if-else
@@ -238,7 +240,7 @@ function extract_places(places)  {
                 offset: place.instances[instance].offset,
                 exact: place.instances[instance].exact,
               });
-              
+
             }//for
 
           }//if-else
