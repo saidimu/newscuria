@@ -79,13 +79,11 @@ function process_opencalais_message(json, message) {
   }//if
 
   // extract and organize chosen 'NLP objects' from Opencalais object
-  extract_nlp_objects(opencalais);
-
-  message.finish();
+  extract_nlp_objects(opencalais, message);
 }//process_opencalais_message
 
 
-function extract_nlp_objects(opencalais) {
+function extract_nlp_objects(opencalais, message) {
 
   var PEOPLE = opencalais_config.get('PEOPLE');
   var PLACES = opencalais_config.get('PLACES');
@@ -146,6 +144,8 @@ function extract_nlp_objects(opencalais) {
       }//switch
     }//if
   }//for
+
+  message.finish();
 
 }//extract_nlp_objects
 
