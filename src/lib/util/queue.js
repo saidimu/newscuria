@@ -31,14 +31,14 @@ var topics = {
   OPENCALAIS: "newscuria.opencalais",
   READABILITY: "newscuria.readability",
   ENTITIES: "newscuria.entities",
-  ENTITIES_PEOPLE: "newscuria.entities.people#ephemeral",
-  ENTITIES_PLACES: "newscuria.entities.places#ephemeral",
-  ENTITIES_COMPANIES: "newscuria.entities.companies#ephemeral",
-  ENTITIES_THINGS: "newscuria.entities.things#ephemeral",
-  ENTITIES_EVENTS: "newscuria.entities.events#ephemeral",
-  ENTITIES_RELATIONS: "newscuria.entities.relations#ephemeral",
-  ENTITIES_TOPICS: "newscuria.entities.topics#ephemeral",
-  ENTITIES_TAGS: "newscuria.entities.tags#ephemeral",
+  ENTITIES_PEOPLE: "newscuria.entities.people",
+  ENTITIES_PLACES: "newscuria.entities.places",
+  ENTITIES_COMPANIES: "newscuria.entities.companies",
+  ENTITIES_THINGS: "newscuria.entities.things",
+  ENTITIES_EVENTS: "newscuria.entities.events",
+  ENTITIES_RELATIONS: "newscuria.entities.relations",
+  ENTITIES_TOPICS: "newscuria.entities.topics",
+  ENTITIES_TAGS: "newscuria.entities.tags",
 };//topics
 
 var writer = undefined;
