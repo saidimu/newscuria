@@ -18,6 +18,9 @@
 
 'use strict';
 
+// FIXME: workaround 'config' bug regarding multiple confg files
+process.env.NODE_ENV = "entities";
+
 var appname = process.env.APP_NAME;
 var log = require('_/util/logging.js')(appname);
 
@@ -41,7 +44,7 @@ queue.connect(function onQueueConnect(err) {
     }, "Cannot connect to message queue!");
 
   } else {
-    
+
     start();
 
   }//if-else
