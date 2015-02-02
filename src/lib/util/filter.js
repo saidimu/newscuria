@@ -25,7 +25,7 @@ var topics;
 function start(__queue, __topics)    {
   queue = __queue;
   topics = __topics;
-  
+
   listen_to_urls_received();
 }//start()
 
@@ -46,7 +46,7 @@ function listen_to_urls_received()  {
 
       // FIXME: save these json-error messages for analysis
       try {
-        message.finish();        
+        message.finish();
       } catch(err)  {
         log.error({
           topic: topic,
@@ -56,15 +56,24 @@ function listen_to_urls_received()  {
           err: err
         }, "Error executing message.finish()");
       }//try-catch
-      
+
     } else {
       var url = json.url || '';
 
-      if(url) {
+      // FIXME: Save url-less messages for later analysis
+      if(url !== '') {
         queue.publish_message(topics.URLS_APPROVED, {
           url: url
         });
-      }//if
+      } else {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          queue_msg: message,
+          err: err
+        }, "json message has no URL.");
+      }//if-else
 
       message.finish();
     }//if-else
