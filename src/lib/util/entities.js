@@ -99,41 +99,42 @@ function extract_nlp_objects(opencalais, message) {
     if(opencalais.hasOwnProperty(hash))  {
       var nlp_object = opencalais[hash];
       var nlp_type = nlp_object._type;
+      var nlp_typeGroup = nlp_object._typeGroup;
 
       switch(true)  {
-        case PEOPLE.indexOf(nlp_type) === 0:
+        case PEOPLE.indexOf(nlp_type) >= 0:
           extract_people(nlp_object);
           break;
 
-        case PLACES.indexOf(nlp_type) === 0:
+        case PLACES.indexOf(nlp_type) >= 0:
           extract_places(nlp_object);
           break;
 
-        case COMPANIES.indexOf(nlp_type) === 0:
+        case COMPANIES.indexOf(nlp_type) >= 0:
           extract_companies(nlp_object);
           break;
 
-        case THINGS.indexOf(nlp_type) === 0:
+        case THINGS.indexOf(nlp_type) >= 0:
           extract_things(nlp_object);
           break;
 
-        case EVENTS.indexOf(nlp_type) === 0:
+        case EVENTS.indexOf(nlp_type) >= 0:
           extract_events(nlp_object);
           break;
 
-        case RELATIONS.indexOf(nlp_type) === 0:
+        case RELATIONS.indexOf(nlp_type) >= 0:
           extract_relations(nlp_object);
           break;
 
-        case TOPICS.indexOf(nlp_type) === 0:
+        case nlp_typeGroup === 'topics':
           extract_topics(nlp_object);
           break;
 
-        case TAGS.indexOf(nlp_type) === 0:
+        case nlp_typeGroup === 'socialTag':
           extract_tags(nlp_object);
           break;
 
-        case LANGUAGE.indexOf(nlp_type) === 0:
+        case nlp_typeGroup === 'language':
           extract_language(nlp_object);
           break;
 
