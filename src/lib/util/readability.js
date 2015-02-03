@@ -28,7 +28,7 @@ var topics;
 function start(__queue, __topics)    {
   queue = __queue;
   topics = __topics;
-  
+
   listen_to_urls_approved();
 }//start()
 
@@ -49,7 +49,7 @@ function listen_to_urls_approved()  {
 
       // FIXME: save these json-error messages for analysis
       try {
-        message.finish();        
+        message.finish();
       } catch(err)  {
         log.error({
           topic: topic,
@@ -59,7 +59,7 @@ function listen_to_urls_approved()  {
           err: err
         }, "Error executing message.finish()");
       }//try-catch
-      
+
     } else {
       process_url_approved_message(json, message);
     }//if-else
@@ -68,37 +68,11 @@ function listen_to_urls_approved()  {
 
 
 function process_url_approved_message(json, message)	{
-	var RateLimiter = require('limiter').RateLimiter;
+  var url = json.url || '';
 
-	// 'second', 'minute', 'day', or a number of milliseconds
-	var limiter = new RateLimiter(30, 'minute'); // approx. 50K requests/day
-
-	// Throttle requests: https://github.com/jhurliman/node-rate-limiter
-	// The default behaviour is to wait for the duration of the rate limiting
-	// that’s currently in effect before the callback is fired
-	limiter.removeTokens(1, function onLimiter(err, remainingRequests) {
-		// - err will only be set if we request more than the maximum number of
-		// requests we set in the constructor
-		// - remainingRequests tells us how many additional requests could be sent
-		// right this moment
-
-		if (err)	{
-
-			log.info({
-        remainingRequests: remainingRequests
-      }, "Throttling APPROVED URLs message processing.");
-
-		} else {
-
-      var url = json.url || '';
-
-      get_readability(url);
-
-      message.finish();
-
-    }//if-else
-	});
-
+  // FIXME: fix and re-implement rate-limiting.
+  get_readability(url);
+  message.finish();
 }//process_url_approved_message()
 
 
@@ -122,7 +96,7 @@ function get_readability(url)	{
       var readability;
 
       try {
-        readability = JSON.parse(buf.toString('utf8'));        
+        readability = JSON.parse(buf.toString('utf8'));
       } catch(err)  {
         log.error({ err: err });
       }//try-catch
@@ -140,7 +114,7 @@ function get_readability(url)	{
         log.info({
           readability: readability
         }, "EMPTY Readability object... re-fetching from remote Readability API");
-        
+
         fetch_readability_content(url, api_fetch_callback);
       }//if-else
 
