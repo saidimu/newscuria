@@ -79,6 +79,24 @@ events.kimono = {
   WEBHOOK: 'kimono_webhook',
 };//events.kimono
 
+// READABILITY events
+events.readability = {
+  FETCHED_URL: 'readability_fetched_url',
+  JSON_PARSE_ERROR: 'readability_json_parse_error',
+  EMPTY_PLAINTEXT: 'readability_empty_plaintext',
+  EMPTY_OBJECT: 'readability_empty_object',
+  URL_NOT_IN_DB: 'readability_not_in_datastore',
+  FETCHED_API: 'readability_api_fetch',
+  API_ERROR: 'readability_api_error',
+};//events.readability
+
+// DATASTORE events
+events.datastore = {
+  FETCHED_URL: 'datastore_fetched_url',
+  GENERIC_ERROR: 'datastore_generic_error',
+};//events.datastore
+
+
 function track(event, data) {
   var callback = function(err) {
     if (err) {

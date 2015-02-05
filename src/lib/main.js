@@ -47,7 +47,12 @@ function start()    {
     queue: queue,
     mixpanel: mixpanel,
   });
-  readability.start(queue, topics);
+
+  readability.start({
+    queue: queue,
+    mixpanel: mixpanel,
+  });
+
   opencalais.start(queue, topics);
   datastore.start(queue, topics);
   entities.start(queue, topics);
