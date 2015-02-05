@@ -90,6 +90,17 @@ events.readability = {
   API_ERROR: 'readability_api_error',
 };//events.readability
 
+// OPENCALAIS events
+events.opencalais = {
+  JSON_PARSE_ERROR: 'opencalais_json_parse_error',
+  EMPTY_OBJECT: 'opencalais_empty_object',
+  URL_NOT_IN_READABILITY: 'opencalais_url_not_in_readability_object',
+  TEXT_NOT_IN_READABILITY: 'opencalais_text_not_in_readability_object',
+  URL_NOT_IN_DB: 'opencalais_not_in_datastore',
+  FETCHED_API: 'opencalais_api_fetch',
+  API_ERROR: 'opencalais_api_error',
+};//events.opencalais
+
 // DATASTORE events
 events.datastore = {
   FETCHED_URL: 'datastore_fetched_url',

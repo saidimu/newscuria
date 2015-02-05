@@ -53,7 +53,11 @@ function start()    {
     mixpanel: mixpanel,
   });
 
-  opencalais.start(queue, topics);
+  opencalais.start({
+    queue: queue,
+    mixpanel: mixpanel,
+  });
+  
   datastore.start(queue, topics);
   entities.start(queue, topics);
   cartodb.start(queue, topics);

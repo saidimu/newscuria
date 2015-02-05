@@ -42,7 +42,7 @@ function listen_to_urls_approved()  {
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
       process_url_approved_message(json, message);
-    }//if-else
+    }//if
   });
 }//listen_to_urls_approved
 
@@ -68,7 +68,9 @@ function get_readability(url)	{
       //   url: url,
       //   err: err
       // }, "Error fetching from the datastore.");
-      mixpanel.track(events.datastore.GENERIC_ERROR);
+      mixpanel.track(events.datastore.GENERIC_ERROR, {
+        table: 'readability',
+      });
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -137,7 +139,9 @@ function get_readability(url)	{
   };//api_fetch_callback
 
   try {
-    mixpanel.track(events.datastore.FETCHED_URL);
+    mixpanel.track(events.datastore.FETCHED_URL, {
+      table: 'readability',
+    });
 
     datastore_api.client.execute(query_stmt, params, datastore_fetch_callback);
 
@@ -146,7 +150,9 @@ function get_readability(url)	{
     //   url: url,
     //   err: err
     // }, "Error fetching URL from the datastore... fetching from remote Readability API");
-    mixpanel.track(events.datastore.GENERIC_ERROR);
+    mixpanel.track(events.datastore.GENERIC_ERROR, {
+      table: 'readability',
+    });
 
     fetch_readability_content(url, api_fetch_callback);
   }//try-catch
