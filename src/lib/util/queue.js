@@ -110,15 +110,40 @@ function read_message(topic, channel, callback)	{
 
     } catch(err)  {
       message.body = '';  // hide verbose message body from logging
-      // log.error({
-      //   topic: topic,
-      //   channel: channel,
-      //   err: err,
-      //   queue_msg: message,
-      // }, "Error getting message from queue!");
 
-      callback(err, undefined, message, reader);
-    }//try-catcg
+      log.error({
+        topic: topic,
+        channel: channel,
+        err: err,
+        queue_msg: message,
+      }, "Error getting message from queue!");
+
+      mixpanel.track(events.queue.reader.READ_ERROR, {
+        topic: topic,
+        channel: channel,
+        json: json,
+      });//mixpanel.track
+
+      // FIXME: save these json-error messages for analysis
+      try {
+        message.finish();
+      } catch(err)  {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          queue_msg: message,
+          err: err
+        }, "Error executing message.finish()");
+
+        mixpanel.track(events.queue.message.FINISH_ERROR, {
+          topic: topic,
+          channel: channel,
+          json: json,
+        });//mixpanel.track        
+      }//try-catch
+
+    }//try-catch
   });
 
   reader.on('error', function onError(err) {

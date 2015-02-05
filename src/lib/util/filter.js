@@ -19,12 +19,14 @@
 var appname = "filter";
 var log = require('_/util/logging.js')(appname);
 
-var queue;
-var topics;
+var queue, topics, mixpanel, events;
 
-function start(__queue, __topics)    {
-  queue = __queue;
-  topics = __topics;
+function start(options)    {
+  queue = options.queue;
+  mixpanel = options.mixpanel;
+
+  topics = queue.topics;
+  events = mixpanel.events;
 
   listen_to_urls_received();
 }//start()
@@ -35,37 +37,18 @@ function listen_to_urls_received()  {
   var channel = "filter-unwanted-urls";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
-    if(err) {
-      log.error({
-        topic: topic,
-        channel: channel,
-        json: json,
-        queue_msg: message,
-        err: err
-      }, "Error getting message from queue!");
-
-      // FIXME: save these json-error messages for analysis
-      try {
-        message.finish();
-      } catch(err)  {
-        log.error({
-          topic: topic,
-          channel: channel,
-          json: json,
-          queue_msg: message,
-          err: err
-        }, "Error executing message.finish()");
-      }//try-catch
-
-    } else {
+    if(!err) {
       var url = json.url || '';
 
       // FIXME: Save url-less messages for later analysis
       if(url !== '') {
+
         queue.publish_message(topics.URLS_APPROVED, {
           url: url
         });
+
       } else {
+
         log.error({
           topic: topic,
           channel: channel,
@@ -73,6 +56,13 @@ function listen_to_urls_received()  {
           queue_msg: message,
           err: err
         }, "json message has no URL.");
+
+        mixpanel.track(events.url.ERROR, {
+          source: appname,
+          message: "URL not found in queue message JSON.",
+          data: json,
+        });
+
       }//if-else
 
       message.finish();

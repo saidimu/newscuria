@@ -104,7 +104,8 @@ function process_googlenews_webhook(webhook)  {
       }, "No URL found in GoogleNews webhook results payload.");
 
       mixpanel.track(events.url.ERROR, {
-        source: "kimono_webhooks",
+        source: appname,
+        message: "URL not found in GoogleNews result.",
         data: article,
       });
 

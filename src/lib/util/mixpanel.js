@@ -42,10 +42,14 @@ events.queue.writer = {
   CLOSED: 'queue_writer_closed',
 };//events.queue
 
+// QUEUE reader events
+events.queue.reader = {
+  READ_ERROR: 'queue_reader_error',
+};//events.queue.reader
+
 // QUEUE message events
 events.queue.message = {
   PUBLISHED: 'queue_message_published',
-  READ_ERROR: 'queue_message_read_error',
   FINISH_ERROR: 'queue_message_finish_error',
 };//events.queue.message
 

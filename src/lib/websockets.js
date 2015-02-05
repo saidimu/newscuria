@@ -103,13 +103,14 @@ function url_msg_processor(msg)	{
 	} else {
 
     mixpanel.track(events.url.ERROR, {
-      source: "websockets",
+      source: appname,
+      message: "URL not found in websockets payload.",
       data: msg,
     });
 
 		log.error({
       client_sockets_msg: msg
-    }, "No URL found in client_sockets payload.");
+    }, "URL not found in client_sockets payload.");
 
 	}//if-else
 }//url_msg_processor
@@ -122,47 +123,8 @@ function listen_to_entities()	{
   queue.read_message(topic, channel, function onReadMessage(err, json, message, reader) {
     queue_reader = reader;
 
-    if(err) {
-      mixpanel.track(events.queue.message.READ_ERROR, {
-        topic: topic,
-        channel: channel,
-        json: json,
-      });//mixpanel.track
-
-      log.error({
-        topic: topic,
-        channel: channel,
-        json: json,
-        queue_msg: message,
-        err: err
-      }, "Error getting message from queue!");
-
-      // FIXME: save these json-error messages for analysis
-      try {
-
-        message.finish();
-
-      } catch(err)  {
-
-        mixpanel.track(events.queue.message.FINISH_ERROR, {
-          topic: topic,
-          channel: channel,
-          json: json,
-        });//mixpanel.track
-
-        log.error({
-          topic: topic,
-          channel: channel,
-          json: json,
-          queue_msg: message,
-          err: err
-        }, "Error executing message.finish()");
-      }//try-catch
-
-    } else {
-
+    if(!err) {
       process_entities(json, message);
-
     }//if-else
   });
 
