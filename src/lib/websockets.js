@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-require('newrelic');
-
 'use strict';
 
 var appname = process.env.APP_NAME;
@@ -29,6 +27,9 @@ var io = require('socket.io')(app);
 
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
+
+var mixpanel = require('_util/util/mixpanel.js');
+var events = mixpanel.events;
 
 var client_events = {
   URL: 'url',
@@ -48,6 +49,8 @@ app.listen(8080, function onAppListen() {
     address: address.address,
     port: address.port
   }, "Listening...");
+
+  mixpanel.track(events.websockets.server.LISTENING);
 });
 
 // connect to the message queue
@@ -58,8 +61,12 @@ queue.connect(function onQueueConnect(err) {
       err: err,
     }, "Cannot connect to message queue!");
 
+    mixpanel.track(events.queue.CONNECTION_FAILED);
+
   } else {
-    
+
+    mixpanel.track(events.queue.CONNECTION_OK);
+
     start();
 
   }//if-else
@@ -69,17 +76,24 @@ queue.connect(function onQueueConnect(err) {
 
 function start() {
   io.on('connection', function onSocketConnect(socket) {
+    mixpanel.track(events.websockets.client.CONNECTED);
+
     client_socket = socket;
 
     emit(client_events.STATUS, {
       status: 'Connected to Socket.io server!'
     });
 
-    client_socket.on(client_events.URL, url_msg_processor);
+    client_socket.on(client_events.URL, function(msg) {
+      mixpanel.track(events.websockets.client.MESSAGE, msg);
+      url_msg_processor(msg);
+    });//client_socket.on
 
     // close open connections to the queue server
     // FIXME: reuse these connections instead of closing them
     client_socket.on('disconnect', function()  {
+      mixpanel.track(events.websockets.client.DISCONNECTED);
+
       log.debug({
         client_id: client_socket.id,
         req: client_socket.request,
@@ -95,18 +109,23 @@ function start() {
 
 
 function url_msg_processor(msg)	{
-  // log.info({
-  //   client_sockets_msg: msg
-  // }, "RECEIVED from client_socket.");
-
 	if(msg.url)	{
-		queue.publish_message(topics.URLS_RECEIVED, {
+    var topic = topics.URLS_RECEIVED;
+
+		queue.publish_message(topic, {
       url: msg.url
     });
 
-    // emit(client_events.ACK, msg.url);
+    mixpanel.track(events.queue.message.PUBLISHED, {
+      topic: topic,
+    });
 
 	} else {
+
+    mixpanel.track(events.url.ERROR, {
+      websockets_data: msg,
+    });
+
 		log.error({
       client_sockets_msg: msg
     }, "No URL found in client_sockets payload.");
@@ -123,6 +142,12 @@ function listen_to_entities()	{
     queue_reader = reader;
 
     if(err) {
+      mixpanel.track(events.queue.message.READ_ERROR, {
+        topic: topic,
+        channel: channel,
+        json: json,
+      });//mixpanel.track
+
       log.error({
         topic: topic,
         channel: channel,
@@ -133,8 +158,17 @@ function listen_to_entities()	{
 
       // FIXME: save these json-error messages for analysis
       try {
-        message.finish();        
+
+        message.finish();
+
       } catch(err)  {
+
+        mixpanel.track(events.queue.message.FINISH_ERROR, {
+          topic: topic,
+          channel: channel,
+          json: json,
+        });//mixpanel.track
+
         log.error({
           topic: topic,
           channel: channel,
@@ -143,9 +177,11 @@ function listen_to_entities()	{
           err: err
         }, "Error executing message.finish()");
       }//try-catch
-      
+
     } else {
+
       process_entities(json, message);
+
     }//if-else
   });
 
@@ -162,6 +198,8 @@ function process_entities(json, message)	{
 
 
 function emit(event, message) {
+  mixpanel.track(events.websockets.server.EMITTED_TO_CLIENT);
+
   client_socket.emit(event, message);
 }//emit()
 
