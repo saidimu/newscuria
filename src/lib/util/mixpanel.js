@@ -33,12 +33,16 @@ var mixpanel = Mixpanel.init(MIXPANEL_TOKEN);
 var events = {};
 
 // QUEUE events
-events.queue = {
-  CONNECTION_OK: 'queue_connection_ok',
-  CONNECTION_FAILED: 'queue_connection_failed',
-  DISCONNECTED: 'queue_disconnected',
+events.queue = {};
+
+// QUEUE writer events
+events.queue.writer = {
+  READY: 'queue_writer_ready',
+  ERROR: 'queue_writer_error',
+  CLOSED: 'queue_writer_closed',
 };//events.queue
 
+// QUEUE message events
 events.queue.message = {
   PUBLISHED: 'queue_message_published',
   READ_ERROR: 'queue_message_read_error',
@@ -65,6 +69,11 @@ events.websockets.client = {
 events.url = {
   ERROR: 'url_processing_error'
 };//events.url
+
+// KIMONO webhook events
+events.kimono = {
+  WEBHOOK: 'kimono_webhook',
+};//events.kimono
 
 function track(event, data) {
   var callback = function(err) {

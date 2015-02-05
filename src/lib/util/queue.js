@@ -16,6 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 var appname = "queue";
 var log = require('_/util/logging.js')(appname);
 
+var mixpanel = require('_util/util/mixpanel.js');
+var events = mixpanel.events;
+
 var nsq = require('nsqjs');
 var util = require('util');
 
@@ -41,7 +44,7 @@ var topics = {
   ENTITIES_TAGS: "newscuria.entities.tags",
 };//topics
 
-var writer = undefined;
+var writer;
 
 function connect(callback) {
   if (!callback)  {
@@ -51,21 +54,30 @@ function connect(callback) {
   var nsqd_writer = new nsq.Writer(nsqd_host, nsqd_port);
 
   nsqd_writer.on('error', function(err) {
-    log.error({err: err}, "nsqd Writer error.");
+    if(err) {
+      mixpanel.track(events.queue.writer.ERROR);
 
-    callback(err);
+      log.fatal({
+        err: err,
+      }, "nsqd Writer error.");
+    }//if
   });//writer.on
+
 
   nsqd_writer.on('ready', function() {
     log.info("nsqd Writer ready.");
 
     writer = nsqd_writer;
 
-    callback(undefined);
+    mixpanel.track(events.queue.writer.READY);
+
+    callback();
   });//writer.on
 
   nsqd_writer.on('closed', function() {
     log.info("nsqd Writer closed.");
+
+    mixpanel.track(events.queue.writer.CLOSED);
   });//writer.on
 
   nsqd_writer.connect();
@@ -148,12 +160,15 @@ function read_message(topic, channel, callback)	{
 
 
 function publish_message(topic, message)	{
-  log.debug({
-    topic: topic,
-    // payload: message,
-  }, "Publishing message.");
+  // log.debug({
+  //   topic: topic,
+  // }, "Publishing message.");
 
 	writer.publish(topic, message);
+
+  mixpanel.track(events.queue.message.PUBLISHED, {
+    topic: topic,
+  });
 }//publish_message
 
 

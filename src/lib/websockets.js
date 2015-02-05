@@ -55,22 +55,7 @@ app.listen(8080, function onAppListen() {
 
 // connect to the message queue
 // then start listening for client_socket messages
-queue.connect(function onQueueConnect(err) {
-  if(err) {
-    log.fatal({
-      err: err,
-    }, "Cannot connect to message queue!");
-
-    mixpanel.track(events.queue.CONNECTION_FAILED);
-
-  } else {
-
-    mixpanel.track(events.queue.CONNECTION_OK);
-
-    start();
-
-  }//if-else
-});
+queue.connect(start);
 //==BEGIN here
 
 
@@ -110,20 +95,16 @@ function start() {
 
 function url_msg_processor(msg)	{
 	if(msg.url)	{
-    var topic = topics.URLS_RECEIVED;
 
-		queue.publish_message(topic, {
+		queue.publish_message(topics.URLS_RECEIVED, {
       url: msg.url
-    });
-
-    mixpanel.track(events.queue.message.PUBLISHED, {
-      topic: topic,
     });
 
 	} else {
 
     mixpanel.track(events.url.ERROR, {
-      websockets_data: msg,
+      source: "websockets",
+      data: msg,
     });
 
 		log.error({
