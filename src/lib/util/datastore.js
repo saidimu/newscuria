@@ -111,8 +111,8 @@ function process_readability_message(json, message) {
   var url = readability.url;
 //  var date_published = readability.date_published || "1970-01-01 00:00:00 +0000";
   var date_published = readability.date_published || null;
-  var author = readability.author || "";
-  var domain = readability.domain || "";
+  var author = readability.author || '';
+  var domain = readability.domain || '';
   var word_count = readability.word_count || 0;
 
   if(date_published === null) {

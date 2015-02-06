@@ -62,7 +62,11 @@ function start()    {
     queue: queue,
     mixpanel: mixpanel,
   });
+
+  entities.start({
+    queue: queue,
+    mixpanel: mixpanel,
+  });
   
-  entities.start(queue, topics);
   cartodb.start(queue, topics);
 }//start()

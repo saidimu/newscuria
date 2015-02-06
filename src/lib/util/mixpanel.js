@@ -118,6 +118,22 @@ events.datastore = {
   GENERIC_ERROR         : 'datastore_generic_error',
 };//events.datastore
 
+// ENTITIES events
+events.entities = {
+  PEOPLE: 'entities_people',
+  PLACES: 'entities_places',
+  COMPANIES: 'entities_companies',
+  THINGS: 'entities_things',
+  EVENTS: 'entities_events',
+  RELATIONS: 'entities_relations',
+  TOPICS: 'entities_topics',
+  TAGS: 'entities_tags',
+  LANGUAGE: 'entities_lang_',
+  UNDEFINED_NLP_OBJECT: 'entities_undefined_nlp_object',
+  EMPTY_DATE_PUBLISHED : 'entities_empty_date_published',
+  URL_NOT_IN_OPENCALAIS: 'entities_url_not_in_opencalais_object',
+};//events.entities
+
 
 function track(event, data) {
   var callback = function(err) {
