@@ -25,7 +25,7 @@ var log = require('_/util/logging.js')(appname);
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
-var mixpanel = require('_util/util/mixpanel.js');
+var mixpanel = require('_util/mixpanel.js');
 var event_type = mixpanel.event_type;
 
 var filter = require('_/util/filter.js');
