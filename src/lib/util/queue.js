@@ -17,7 +17,7 @@ var appname = "queue";
 var log = require('_/util/logging.js')(appname);
 
 var mixpanel = require('_/util/mixpanel.js');
-var events = mixpanel.events;
+var event_type = mixpanel.event_type;
 
 var nsq = require('nsqjs');
 var util = require('util');
@@ -55,7 +55,7 @@ function connect(callback) {
 
   nsqd_writer.on('error', function(err) {
     if(err) {
-      mixpanel.track(events.queue.writer.ERROR);
+      mixpanel.track(event_type.queue.writer.ERROR);
 
       log.fatal({
         err: err,
@@ -69,7 +69,7 @@ function connect(callback) {
 
     writer = nsqd_writer;
 
-    mixpanel.track(events.queue.writer.READY);
+    mixpanel.track(event_type.queue.writer.READY);
 
     callback();
   });//writer.on
@@ -77,7 +77,7 @@ function connect(callback) {
   nsqd_writer.on('closed', function() {
     log.info("nsqd Writer closed.");
 
-    mixpanel.track(events.queue.writer.CLOSED);
+    mixpanel.track(event_type.queue.writer.CLOSED);
   });//writer.on
 
   nsqd_writer.connect();
@@ -88,7 +88,7 @@ function read_message(topic, channel, callback)	{
 	if(channel === undefined)	{
 		log.fatal("Must provide a channel name to listen on.");
 
-    mixpanel.track(events.queue.reader.INVALID_CHANNEL_NAME);
+    mixpanel.track(event_type.queue.reader.INVALID_CHANNEL_NAME);
 
 		throw new Error("Must provide a channel name to listen on.");
 	}//if
@@ -109,7 +109,7 @@ function read_message(topic, channel, callback)	{
     try {
       var json = message.json();
 
-      mixpanel.track(events.queue.reader.MESSAGE, {
+      mixpanel.track(event_type.queue.reader.MESSAGE, {
         topic: topic,
         channel: channel,
       });
@@ -126,7 +126,7 @@ function read_message(topic, channel, callback)	{
       //   queue_msg: message,
       // }, "Error getting message from queue!");
 
-      mixpanel.track(events.queue.reader.MESSAGE_ERROR, {
+      mixpanel.track(event_type.queue.reader.MESSAGE_ERROR, {
         topic: topic,
         channel: channel,
         json: json,
@@ -146,7 +146,7 @@ function read_message(topic, channel, callback)	{
           err: err
         }, "Error executing message.finish()");
 
-        mixpanel.track(events.queue.message.FINISH_ERROR, {
+        mixpanel.track(event_type.queue.message.FINISH_ERROR, {
           topic: topic,
           channel: channel,
           json: json,
@@ -165,7 +165,7 @@ function read_message(topic, channel, callback)	{
       options: options
     }, "nsq Reader error.");
 
-    mixpanel.track(events.queue.reader.ERROR, {
+    mixpanel.track(event_type.queue.reader.ERROR, {
       topic: topic,
       channel: channel,
     });//mixpanel.track
@@ -184,7 +184,7 @@ function read_message(topic, channel, callback)	{
     }, "Reader connected to nsqd.");
 
 
-    mixpanel.track(events.queue.reader.NSQD_CONNECTED, {
+    mixpanel.track(event_type.queue.reader.NSQD_CONNECTED, {
       topic: topic,
       channel: channel,
     });//mixpanel.track
@@ -201,7 +201,7 @@ function read_message(topic, channel, callback)	{
       options: options
     }, "Reader disconnected from nsqd.");
 
-    mixpanel.track(events.queue.reader.NSQD_CLOSED, {
+    mixpanel.track(event_type.queue.reader.NSQD_CLOSED, {
       topic: topic,
       channel: channel,
     });//mixpanel.track
@@ -219,7 +219,7 @@ function publish_message(topic, message)	{
 
 	writer.publish(topic, message);
 
-  mixpanel.track(events.queue.message.PUBLISHED, {
+  mixpanel.track(event_type.queue.message.PUBLISHED, {
     topic: topic,
   });
 }//publish_message
