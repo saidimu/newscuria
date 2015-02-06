@@ -72,16 +72,13 @@ event_type.websockets.client = {
   CONNECTED    : 'websockets_connection_from_client',
   DISCONNECTED : 'websockets_disconnection_from_client',
   MESSAGE      : 'websockets_client_message',
+  URL_ERROR    : 'websockets_url_processing_error'
 };//event_type.websockets.client
 
-// URL processing events
-event_type.url = {
-  ERROR : 'url_processing_error'
-};//event_type.url
-
-// KIMONO webhook events
-event_type.kimono = {
-  WEBHOOK : 'kimono_webhook',
+// webhook events
+event_type.webhook = {
+  URL_ERROR   : 'webhook_url_processing_error'
+  GOOGLE_NEWS : 'webhook_googlenews',
 };//event_type.kimono
 
 // READABILITY events

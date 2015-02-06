@@ -23,7 +23,7 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var mixpanel = require('_util/util/mixpanel.js');
-var events = mixpanel.events;
+var event_type = mixpanel.event_type;
 
 var restify = require('restify');
 
@@ -57,7 +57,7 @@ function handle_googlenews_webhooks() {
 
     req.log.info(webhook_header);
 
-    mixpanel.track(events.kimono.WEBHOOK, webhook_header);
+    mixpanel.track(event_type.webhook.GOOGLE_NEWS);
 
     process_googlenews_webhook(webhook);
 
@@ -103,10 +103,8 @@ function process_googlenews_webhook(webhook)  {
         results_content: article
       }, "No URL found in GoogleNews webhook results payload.");
 
-      mixpanel.track(events.url.ERROR, {
-        source: appname,
-        message: "URL not found in GoogleNews result.",
-        data: article,
+      mixpanel.track(event_type.webhook.URL_ERROR, {
+        source: 'Google_News',
       });
 
     }//if-else

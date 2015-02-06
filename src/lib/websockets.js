@@ -29,7 +29,7 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var mixpanel = require('_util/util/mixpanel.js');
-var events = mixpanel.events;
+var event_type = mixpanel.event_type;
 
 var client_events = {
   URL: 'url',
@@ -50,7 +50,7 @@ app.listen(8080, function onAppListen() {
     port: address.port
   }, "Listening...");
 
-  mixpanel.track(events.websockets.server.LISTENING);
+  mixpanel.track(event_type.websockets.server.LISTENING);
 });
 
 // connect to the message queue
@@ -61,7 +61,7 @@ queue.connect(start);
 
 function start() {
   io.on('connection', function onSocketConnect(socket) {
-    mixpanel.track(events.websockets.client.CONNECTED);
+    mixpanel.track(event_type.websockets.client.CONNECTED);
 
     client_socket = socket;
 
@@ -70,14 +70,14 @@ function start() {
     });
 
     client_socket.on(client_events.URL, function(msg) {
-      mixpanel.track(events.websockets.client.MESSAGE, msg);
+      mixpanel.track(event_type.websockets.client.MESSAGE);
       url_msg_processor(msg);
     });//client_socket.on
 
     // close open connections to the queue server
     // FIXME: reuse these connections instead of closing them
     client_socket.on('disconnect', function()  {
-      mixpanel.track(events.websockets.client.DISCONNECTED);
+      mixpanel.track(event_type.websockets.client.DISCONNECTED);
 
       log.debug({
         client_id: client_socket.id,
@@ -102,11 +102,7 @@ function url_msg_processor(msg)	{
 
 	} else {
 
-    mixpanel.track(events.url.ERROR, {
-      source: appname,
-      message: "URL not found in websockets payload.",
-      data: msg,
-    });
+    mixpanel.track(event_type.websockets.client.URL_ERROR);
 
 		log.error({
       client_sockets_msg: msg
@@ -141,7 +137,7 @@ function process_entities(json, message)	{
 
 
 function emit(event, message) {
-  mixpanel.track(events.websockets.server.EMITTED_TO_CLIENT);
+  mixpanel.track(event_type.websockets.server.EMITTED_TO_CLIENT);
 
   client_socket.emit(event, message);
 }//emit()
