@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 var appname = "queue";
 var log = require('_/util/logging.js')(appname);
 
-var mixpanel = require('_util/util/mixpanel.js');
+var mixpanel = require('_util/mixpanel.js');
 var events = mixpanel.events;
 
 var nsq = require('nsqjs');
