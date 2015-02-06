@@ -24,13 +24,15 @@ var util = require('util');
 var datastore_api = require('_/util/datastore-api.js');
 var client = datastore_api.client;
 
-var queue;
-var topics;
+var queue, topics, mixpanel, events;
 
-function start(__queue, __topics)    {
-  queue = __queue;
-  topics = __topics;
-  
+function start(options)    {
+  queue = options.queue;
+  mixpanel = options.mixpanel;
+
+  topics = queue.topics;
+  events = mixpanel.events;
+
   listen_to_urls_received();
   listen_to_readability();
   listen_to_opencalais();
@@ -42,31 +44,9 @@ function listen_to_urls_received()  {
   var channel = "save-to-datastore";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
-    if(err) {
-      log.error({
-        topic: topic,
-        channel: channel,
-        json: json,
-        queue_msg: message,
-        err: err
-      }, "Error getting message from queue!");
-
-      // FIXME: save these json-error messages for analysis
-      try {
-        message.finish();        
-      } catch(err)  {
-        log.error({
-          topic: topic,
-          channel: channel,
-          json: json,
-          queue_msg: message,
-          err: err
-        }, "Error executing message.finish()");
-      }//try-catch
-
-    } else {
+    if(!err) {
       process_url_received_message(json, message);
-    }//if-else
+    }//if
   });
 }//listen_to_urls_received
 
@@ -76,31 +56,9 @@ function listen_to_readability()  {
   var channel = "save-to-datastore";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
-    if(err) {
-      log.error({
-        topic: topic,
-        channel: channel,
-        json: json,
-        queue_msg: message,
-        err: err
-      }, "Error getting message from queue!");
-
-      // FIXME: save these json-error messages for analysis
-      try {
-        message.finish();        
-      } catch(err)  {
-        log.error({
-          topic: topic,
-          channel: channel,
-          json: json,
-          queue_msg: message,
-          err: err
-        }, "Error executing message.finish()");
-      }//try-catch
-      
-    } else {
+    if(!err) {
       process_readability_message(json, message);
-    }//if-else
+    }//if
   });
 }//listen_to_readability
 
@@ -110,31 +68,9 @@ function listen_to_opencalais()  {
   var channel = "save-to-datastore";
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
-    if(err) {
-      log.error({
-        topic: topic,
-        channel: channel,
-        json: json,
-        queue_msg: message,
-        err: err
-      }, "Error getting message from queue!");
-
-      // FIXME: save these json-error messages for analysis
-      try {
-        message.finish();        
-      } catch(err)  {
-        log.error({
-          topic: topic,
-          channel: channel,
-          json: json,
-          queue_msg: message,
-          err: err
-        }, "Error executing message.finish()");
-      }//try-catch
-      
-    } else {
+    if(!err) {
       process_opencalais_message(json, message);
-    }//if-else
+    }//if
   });
 }//listen_to_opencalais
 
@@ -146,15 +82,20 @@ function process_url_received_message(json, message) {
   var received_date = new Date().toISOString();
   var params = [url, received_date];
 
-  log.info({
-    url: url,
-    table: 'nuzli.received_urls',
-  }, "Persisting to datastore");
+  // log.info({
+  //   url: url,
+  //   table: 'nuzli.received_urls',
+  // }, "Persisting to datastore");
 
-  client.execute(insert_stmt, params, function(error, response) {
-    if(error) {
+  client.execute(insert_stmt, params, function onDatastoreClientExecute(err, response) {
+    if(err) {
       log.error({
-        err: error
+        err: err,
+        insert_stmt: insert_stmt,
+      });
+
+      mixpanel.track(events.datastore.INSERT_ERROR, {
+        table: 'nuzli.received_urls'
       });
     }//if
   });
@@ -173,6 +114,18 @@ function process_readability_message(json, message) {
   var author = readability.author || "";
   var domain = readability.domain || "";
   var word_count = readability.word_count || 0;
+
+  if(date_published === null) {
+    mixpanel.track(events.readability.EMPTY_DATE_PUBLISHED);
+  }//if
+
+  if(author === '') {
+    mixpanel.track(events.readability.EMPTY_AUTHOR);
+  }//if
+
+  if(domain === '') {
+    mixpanel.track(events.readability.EMPTY_DOMAIN);
+  }//if
 
   // save Readability object to datastore
   save_document(
@@ -210,10 +163,19 @@ function process_opencalais_message(json, message) {
   var url = opencalais.url || '';
   var date_published = opencalais.date_published || null;
 
+  if(date_published === null) {
+    mixpanel.track(events.opencalais.EMPTY_DATE_PUBLISHED);
+  }//if
+
+  if(url === '') {
+    mixpanel.track(events.opencalais.EMPTY_URL);
+  }//if
+
   if(!url)  {
     log.error({
       url: url
     }, "EMPTY url! Cannot persist Opencalais object to datastore.");
+
     return;
   }//if
 
@@ -231,42 +193,44 @@ function process_opencalais_message(json, message) {
 
 
 function save_domain_metadata(domain, url, word_count, date_published, table, callback) {
-  log.info({
-    url: url,
-    table: table,
-  }, "Persisting to datastore");
+  // log.info({
+  //   url: url,
+  //   table: table,
+  // }, "Persisting to datastore");
 
   if(!callback)   {
-    callback = function(error, result)  {
-      if(error)   {
-          log.error({err: error});
-      }//if-else
-    };
+    callback = function(err, result)  {
+      if(err)   {
+        log.error({
+          url: url,
+          err: err
+        }, 'Error persisting domain metadata to datastore');
+
+        mixpanel.track(events.datastore.INSERT_ERROR, {
+          table: table,
+        });
+      }//if
+    };//callback
   }//if
 
   if(!domain) {
-    log.error({
-      url: url
-    }, "EMPTY domain name for url");
+    // FIXME: publish these to a topic for further analysis
+    // log.error({
+    //   url: url
+    // }, "EMPTY domain name for url");
+
+    mixpanel.track(events.datastore.EMPTY_DOMAIN);
   }//if
 
   var statement = util.format('INSERT INTO %s (domain, url, word_count, date_published, created_date) VALUES (?, ?, ?, ?, ?)', table);
 
-  var date_published_object;
-
-  try {
-    date_published_object = new Date(date_published).toISOString();
-  } catch(error)  {
-    log.error({
-      date_published_string: date_published,
-    }, "Cannot convert date string to Date object.");
-  }//try-catch
+  var date_published_iso = date_string_to_iso_object(date_published, url);
 
   var params = [
       domain,
       url,
-      word_count, 
-      date_published_object,
+      word_count,
+      date_published_iso,
       datastore_api.types.timeuuid()
   ];
 
@@ -275,42 +239,44 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
 
 
 function save_author_metadata(author, url, word_count, date_published, table, callback) {
-  log.info({
-    url: url,
-    table: table,
-  }, "Persisting to datastore");
+  // log.info({
+  //   url: url,
+  //   table: table,
+  // }, "Persisting to datastore");
 
   if(!callback)   {
-    callback = function(error, result)  {
-      if(error)   {
-        log.error({err: error});
-      }//if-else
-    };
+    callback = function(err, result)  {
+      if(err)   {
+        log.error({
+          url: url,
+          err: err
+        }, 'Error persisting author metadata to datastore');
+
+        mixpanel.track(events.datastore.INSERT_ERROR, {
+          table: table,
+        });
+      }//if
+    };//callback
   }//if
 
   if(!author) {
-    log.error({
-      url: url
-    }, "EMPTY author name for url");
+    // FIXME: publish these to a topic for further analysis
+    // log.error({
+    //   url: url
+    // }, "EMPTY author name for url");
+
+    mixpanel.track(events.datastore.EMPTY_AUTHOR);
   }//if
 
   var statement = util.format('INSERT INTO %s (author, url, word_count, date_published, created_date) VALUES (?, ?, ?, ?, ?)', table);
 
-  var date_published_object;
-
-  try {
-    date_published_object = new Date(date_published).toISOString();
-  } catch(error)  {
-    log.error({
-      date_published_string: date_published,
-    }, "Cannot convert date string to Date object.");
-  }//try-catch
+  var date_published_iso = date_string_to_iso_object(date_published, url);
 
   var params = [
       author,
       url,
       word_count,
-      date_published_object,
+      date_published_iso,
       datastore_api.types.timeuuid()
   ];
 
@@ -319,17 +285,24 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
 
 
 function save_document(object, url, date_published, table, callback)    {
-  log.info({
-    url: url,
-    table: table,
-  }, "Persisting to datastore");
+  // log.info({
+  //   url: url,
+  //   table: table,
+  // }, "Persisting to datastore");
 
   if(!callback)   {
-    callback = function(error, result)  {
-      if(error)   {
-        log.error({err: error});
-      }//if-else
-    };
+    callback = function(err, result)  {
+      if(err)   {
+        log.error({
+          url: url,
+          err: err
+        }, 'Error persisting document to datastore');
+
+        mixpanel.track(events.datastore.INSERT_ERROR, {
+          table: table,
+        });
+      }//if
+    };//callback
   }//if
 
   if(!object) {
@@ -337,6 +310,10 @@ function save_document(object, url, date_published, table, callback)    {
       url: url,
       table: table,
     }, "EMPTY object cannot be saved to table.");
+
+    mixpanel.track(events.datastore.EMPTY_OBJECT, {
+      table: table,
+    });
 
     return;
   }//if
@@ -353,28 +330,45 @@ function save_document(object, url, date_published, table, callback)    {
       json: object,
     }, "Error converting JSON object to a Buffer object;");
 
+    mixpanel.track(events.datastore.JSON_PARSE_ERROR);
+
     return;
   }//try-catch
 
-  var date_published_object;
-
-  try {
-    date_published_object = new Date(date_published).toISOString();
-  } catch(error)  {
-    log.error({
-      date_published_string: date_published,
-    }, "Cannot convert date string to Date object.");
-  }//try-catch
+  var date_published_iso = date_string_to_iso_object(date_published, url);
 
   var params = [
       url,
       buf,
-      date_published_object,
+      date_published_iso,
       datastore_api.types.timeuuid()
   ];
 
   client.execute(statement, params, callback);
 }//save_document
+
+
+function date_string_to_iso_object(date_string, url)  {
+  var iso_object;
+
+  try {
+
+    iso_object = new Date(date_string).toISOString();
+
+  } catch(err)  {
+    log.error({
+      url: url,
+      err: err,
+      date_string: date_string,
+    }, "Cannot convert date string to Date object.");
+
+    mixpanel.track(events.datastore.DATE_CONVERSION_ERROR);
+
+    iso_object = new Date('1970-01-01 00:00:00 +0000').toISOString();
+  }//try-catch
+
+  return iso_object;
+}//date_string_to_iso_object
 
 
 module.exports = {

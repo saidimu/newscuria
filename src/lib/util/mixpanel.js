@@ -37,20 +37,20 @@ events.queue = {};
 
 // QUEUE writer events
 events.queue.writer = {
-  READY: 'queue_writer_ready',
-  ERROR: 'queue_writer_error',
-  CLOSED: 'queue_writer_closed',
+  READY  : 'queue_writer_ready',
+  ERROR  : 'queue_writer_error',
+  CLOSED : 'queue_writer_closed',
 };//events.queue
 
 // QUEUE reader events
 events.queue.reader = {
-  READ_ERROR: 'queue_reader_error',
+  READ_ERROR : 'queue_reader_error',
 };//events.queue.reader
 
 // QUEUE message events
 events.queue.message = {
-  PUBLISHED: 'queue_message_published',
-  FINISH_ERROR: 'queue_message_finish_error',
+  PUBLISHED    : 'queue_message_published',
+  FINISH_ERROR : 'queue_message_finish_error',
 };//events.queue.message
 
 // WEBSOCKET events
@@ -58,53 +58,64 @@ events.websockets = {};
 
 // WEBSOCKET server events
 events.websockets.server = {
-  LISTENING: 'websockets_server_listening',
-  EMITTED_TO_CLIENT: 'websockets_server_emitted_to_client'
+  LISTENING         : 'websockets_server_listening',
+  EMITTED_TO_CLIENT : 'websockets_server_emitted_to_client'
 };//events.websockets.server
 
 // WEBSOCKET client events
 events.websockets.client = {
-  CONNECTED: 'websockets_connection_from_client',
-  DISCONNECTED: 'websockets_disconnection_from_client',
-  MESSAGE: 'websockets_client_message',
+  CONNECTED    : 'websockets_connection_from_client',
+  DISCONNECTED : 'websockets_disconnection_from_client',
+  MESSAGE      : 'websockets_client_message',
 };//events.websockets.client
 
 // URL processing events
 events.url = {
-  ERROR: 'url_processing_error'
+  ERROR : 'url_processing_error'
 };//events.url
 
 // KIMONO webhook events
 events.kimono = {
-  WEBHOOK: 'kimono_webhook',
+  WEBHOOK : 'kimono_webhook',
 };//events.kimono
 
 // READABILITY events
 events.readability = {
-  FETCHED_URL: 'readability_fetched_url',
-  JSON_PARSE_ERROR: 'readability_json_parse_error',
-  EMPTY_PLAINTEXT: 'readability_empty_plaintext',
-  EMPTY_OBJECT: 'readability_empty_object',
-  URL_NOT_IN_DB: 'readability_not_in_datastore',
-  FETCHED_API: 'readability_api_fetch',
-  API_ERROR: 'readability_api_error',
+  FETCHED_URL          : 'readability_fetched_url',
+  JSON_PARSE_ERROR     : 'readability_json_parse_error',
+  EMPTY_PLAINTEXT      : 'readability_empty_plaintext',
+  EMPTY_OBJECT         : 'readability_empty_object',
+  URL_NOT_IN_DB        : 'readability_not_in_datastore',
+  FETCHED_API          : 'readability_api_fetch',
+  API_ERROR            : 'readability_api_error',
+  EMPTY_DATE_PUBLISHED : 'readability_empty_date_published',
+  EMPTY_AUTHOR         : 'readability_empty_author',
+  EMPTY_DOMAIN         : 'readability_empty_domain',
 };//events.readability
 
 // OPENCALAIS events
 events.opencalais = {
-  JSON_PARSE_ERROR: 'opencalais_json_parse_error',
-  EMPTY_OBJECT: 'opencalais_empty_object',
-  URL_NOT_IN_READABILITY: 'opencalais_url_not_in_readability_object',
-  TEXT_NOT_IN_READABILITY: 'opencalais_text_not_in_readability_object',
-  URL_NOT_IN_DB: 'opencalais_not_in_datastore',
-  FETCHED_API: 'opencalais_api_fetch',
-  API_ERROR: 'opencalais_api_error',
+  JSON_PARSE_ERROR        : 'opencalais_json_parse_error',
+  EMPTY_OBJECT            : 'opencalais_empty_object',
+  URL_NOT_IN_READABILITY  : 'opencalais_url_not_in_readability_object',
+  TEXT_NOT_IN_READABILITY : 'opencalais_text_not_in_readability_object',
+  URL_NOT_IN_DB           : 'opencalais_not_in_datastore',
+  FETCHED_API             : 'opencalais_api_fetch',
+  API_ERROR               : 'opencalais_api_error',
+  EMPTY_DATE_PUBLISHED    : 'opencalais_empty_date_published',
+  EMPTY_URL               : 'opencalais _empty_url',
 };//events.opencalais
 
 // DATASTORE events
 events.datastore = {
-  FETCHED_URL: 'datastore_fetched_url',
-  GENERIC_ERROR: 'datastore_generic_error',
+  FETCHED_URL           : 'datastore_fetched_url',
+  INSERT_ERROR          : 'datastore_insert_error',
+  EMPTY_DOMAIN          : 'datastore_empty_domain',
+  EMPTY_AUTHOR          : 'datastore_empty_author',
+  EMPTY_OBJECT          : 'datastore_empty_object',
+  DATE_CONVERSION_ERROR : 'datastore_date_conversion_error',
+  JSON_PARSE_ERROR      : 'datastore_json_parse_error',
+  GENERIC_ERROR         : 'datastore_generic_error',
 };//events.datastore
 
 

@@ -57,8 +57,12 @@ function start()    {
     queue: queue,
     mixpanel: mixpanel,
   });
+
+  datastore.start({
+    queue: queue,
+    mixpanel: mixpanel,
+  });
   
-  datastore.start(queue, topics);
   entities.start(queue, topics);
   cartodb.start(queue, topics);
 }//start()
