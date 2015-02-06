@@ -44,7 +44,12 @@ events.queue.writer = {
 
 // QUEUE reader events
 events.queue.reader = {
-  READ_ERROR : 'queue_reader_error',
+  ERROR                : 'queue_reader_error',
+  MESSAGE              : 'queue_reader_message',
+  NSQD_CLOSED          : 'queue_reader_nsqd_closed',
+  NSQD_CONNECTED       : 'queue_reader_nsqd_connected',
+  MESSAGE_ERROR        : 'queue_reader_message_error',
+  INVALID_CHANNEL_NAME : 'queue_reader_invalid_channel_name'
 };//events.queue.reader
 
 // QUEUE message events

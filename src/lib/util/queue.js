@@ -87,6 +87,9 @@ function connect(callback) {
 function read_message(topic, channel, callback)	{
 	if(channel === undefined)	{
 		log.fatal("Must provide a channel name to listen on.");
+
+    mixpanel.track(events.queue.reader.INVALID_CHANNEL_NAME);
+
 		throw new Error("Must provide a channel name to listen on.");
 	}//if
 
@@ -106,19 +109,24 @@ function read_message(topic, channel, callback)	{
     try {
       var json = message.json();
 
+      mixpanel.track(events.queue.reader.MESSAGE, {
+        topic: topic,
+        channel: channel,
+      });
+
       callback(undefined, json, message, reader);
 
     } catch(err)  {
       message.body = '';  // hide verbose message body from logging
 
-      log.error({
-        topic: topic,
-        channel: channel,
-        err: err,
-        queue_msg: message,
-      }, "Error getting message from queue!");
+      // log.error({
+      //   topic: topic,
+      //   channel: channel,
+      //   err: err,
+      //   queue_msg: message,
+      // }, "Error getting message from queue!");
 
-      mixpanel.track(events.queue.reader.READ_ERROR, {
+      mixpanel.track(events.queue.reader.MESSAGE_ERROR, {
         topic: topic,
         channel: channel,
         json: json,
@@ -126,7 +134,9 @@ function read_message(topic, channel, callback)	{
 
       // FIXME: save these json-error messages for analysis
       try {
+
         message.finish();
+
       } catch(err)  {
         log.error({
           topic: topic,
@@ -144,7 +154,8 @@ function read_message(topic, channel, callback)	{
       }//try-catch
 
     }//try-catch
-  });
+  });//reader,on
+
 
   reader.on('error', function onError(err) {
     log.error({
@@ -154,8 +165,14 @@ function read_message(topic, channel, callback)	{
       options: options
     }, "nsq Reader error.");
 
+    mixpanel.track(events.queue.reader.ERROR, {
+      topic: topic,
+      channel: channel,
+    });//mixpanel.track
+
     callback(err, undefined, undefined, reader);
-  });
+  });//reader.on
+
 
   reader.on('nsqd_connected', function onNsqdConnected(host, port) {
     log.info({
@@ -166,9 +183,14 @@ function read_message(topic, channel, callback)	{
       options: options
     }, "Reader connected to nsqd.");
 
-    // callback(undefined, reader);
-    // return reader;
-  });
+
+    mixpanel.track(events.queue.reader.NSQD_CONNECTED, {
+      topic: topic,
+      channel: channel,
+    });//mixpanel.track
+
+  });//reader.on
+
 
   reader.on('nsqd_closed', function onNsqdClosed(host, port) {
     log.info({
@@ -178,7 +200,13 @@ function read_message(topic, channel, callback)	{
       nsqd_port: port,
       options: options
     }, "Reader disconnected from nsqd.");
-  });
+
+    mixpanel.track(events.queue.reader.NSQD_CLOSED, {
+      topic: topic,
+      channel: channel,
+    });//mixpanel.track
+  });//reader.on
+
 
 	reader.connect();
 }//read_message()
