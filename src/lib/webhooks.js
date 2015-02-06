@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-require('newrelic');
-
 'use strict';
 
 var appname = process.env.APP_NAME;
@@ -24,23 +22,14 @@ var log = require('_/util/logging.js')(appname);
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
+var mixpanel = require('_util/util/mixpanel.js');
+var events = mixpanel.events;
+
 var restify = require('restify');
-//var kimono = require('_/util/kimono.js');
 
 //==BEGIN here
 // connect to the message queue
-queue.connect(function onQueueConnect(err) {
-  if(err) {
-    log.fatal({
-      err: err,
-    }, "Cannot connect to message queue!");
-
-  } else {
-    
-    start();
-
-  }//if-else
-});
+queue.connect(start);
 //==BEGIN here
 
 var server;
@@ -52,7 +41,7 @@ function start()    {
 
 
 function handle_googlenews_webhooks() {
-  server.post('/googlenews', function webhook(req, res, next) {
+  server.post('/googlenews', function onGoogleNews(req, res, next) {
     var webhook = req.body;
 
     var webhook_header = {
@@ -67,6 +56,8 @@ function handle_googlenews_webhooks() {
     };
 
     req.log.info(webhook_header);
+
+    mixpanel.track(events.kimono.WEBHOOK, webhook_header);
 
     process_googlenews_webhook(webhook);
 
@@ -84,12 +75,12 @@ function process_googlenews_webhook(webhook)  {
   var related = results.related || [];
 
   content.forEach(function(article)  {
+    // TODO: also process Google News article headlines
     var headline = article.headline || {};
     var url = headline.href || undefined;
 
     if(url) {
       publish_url_message(url);
-
     } else {
       log.error({
         results_content: article
@@ -103,12 +94,21 @@ function process_googlenews_webhook(webhook)  {
     var url = article.headline || undefined;
 
     if(url) {
+
       publish_url_message(url);
 
     } else {
+
       log.error({
         results_content: article
       }, "No URL found in GoogleNews webhook results payload.");
+
+      mixpanel.track(events.url.ERROR, {
+        source: appname,
+        message: "URL not found in GoogleNews result.",
+        data: article,
+      });
+
     }//if-else
   });//related.forEach
 

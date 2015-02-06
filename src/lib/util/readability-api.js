@@ -58,7 +58,7 @@ function scrape_url(url, callback)	{
 	        	api_response.plaintext = plaintext;
 	        	callback(undefined, api_response);
 	        }//if-else
-	        
+
 	    }//if-else
 	});
 

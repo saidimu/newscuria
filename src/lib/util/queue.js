@@ -16,6 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 var appname = "queue";
 var log = require('_/util/logging.js')(appname);
 
+var mixpanel = require('_util/util/mixpanel.js');
+var events = mixpanel.events;
+
 var nsq = require('nsqjs');
 var util = require('util');
 
@@ -25,23 +28,23 @@ var nsqd_port = config.writer.get('port');
 var lookupdHTTPAddresses = config.reader.get('lookupdHTTPAddresses');
 
 var topics = {
-  URLS_RECEIVED: "newscuria.urls_received",
-  URLS_APPROVED: "newscuria.urls_approved",
-  URLS_DENIED: "newscuria.urls_denied",
-  OPENCALAIS: "newscuria.opencalais",
-  READABILITY: "newscuria.readability",
-  ENTITIES: "newscuria.entities",
-  ENTITIES_PEOPLE: "newscuria.entities.people",
-  ENTITIES_PLACES: "newscuria.entities.places",
-  ENTITIES_COMPANIES: "newscuria.entities.companies",
-  ENTITIES_THINGS: "newscuria.entities.things",
-  ENTITIES_EVENTS: "newscuria.entities.events",
-  ENTITIES_RELATIONS: "newscuria.entities.relations",
-  ENTITIES_TOPICS: "newscuria.entities.topics",
-  ENTITIES_TAGS: "newscuria.entities.tags",
+  URLS_RECEIVED      : "newscuria.urls_received",
+  URLS_APPROVED      : "newscuria.urls_approved",
+  URLS_DENIED        : "newscuria.urls_denied",
+  OPENCALAIS         : "newscuria.opencalais",
+  READABILITY        : "newscuria.readability",
+  ENTITIES           : "newscuria.entities",
+  ENTITIES_PEOPLE    : "newscuria.entities.people",
+  ENTITIES_PLACES    : "newscuria.entities.places",
+  ENTITIES_COMPANIES : "newscuria.entities.companies",
+  ENTITIES_THINGS    : "newscuria.entities.things",
+  ENTITIES_EVENTS    : "newscuria.entities.events",
+  ENTITIES_RELATIONS : "newscuria.entities.relations",
+  ENTITIES_TOPICS    : "newscuria.entities.topics",
+  ENTITIES_TAGS      : "newscuria.entities.tags",
 };//topics
 
-var writer = undefined;
+var writer;
 
 function connect(callback) {
   if (!callback)  {
@@ -51,21 +54,30 @@ function connect(callback) {
   var nsqd_writer = new nsq.Writer(nsqd_host, nsqd_port);
 
   nsqd_writer.on('error', function(err) {
-    log.error({err: err}, "nsqd Writer error.");
+    if(err) {
+      mixpanel.track(events.queue.writer.ERROR);
 
-    callback(err);
+      log.fatal({
+        err: err,
+      }, "nsqd Writer error.");
+    }//if
   });//writer.on
+
 
   nsqd_writer.on('ready', function() {
     log.info("nsqd Writer ready.");
 
     writer = nsqd_writer;
 
-    callback(undefined);
+    mixpanel.track(events.queue.writer.READY);
+
+    callback();
   });//writer.on
 
   nsqd_writer.on('closed', function() {
     log.info("nsqd Writer closed.");
+
+    mixpanel.track(events.queue.writer.CLOSED);
   });//writer.on
 
   nsqd_writer.connect();
@@ -75,6 +87,9 @@ function connect(callback) {
 function read_message(topic, channel, callback)	{
 	if(channel === undefined)	{
 		log.fatal("Must provide a channel name to listen on.");
+
+    mixpanel.track(events.queue.reader.INVALID_CHANNEL_NAME);
+
 		throw new Error("Must provide a channel name to listen on.");
 	}//if
 
@@ -94,10 +109,16 @@ function read_message(topic, channel, callback)	{
     try {
       var json = message.json();
 
+      mixpanel.track(events.queue.reader.MESSAGE, {
+        topic: topic,
+        channel: channel,
+      });
+
       callback(undefined, json, message, reader);
 
     } catch(err)  {
       message.body = '';  // hide verbose message body from logging
+
       // log.error({
       //   topic: topic,
       //   channel: channel,
@@ -105,9 +126,36 @@ function read_message(topic, channel, callback)	{
       //   queue_msg: message,
       // }, "Error getting message from queue!");
 
-      callback(err, undefined, message, reader);
-    }//try-catcg
-  });
+      mixpanel.track(events.queue.reader.MESSAGE_ERROR, {
+        topic: topic,
+        channel: channel,
+        json: json,
+      });//mixpanel.track
+
+      // FIXME: save these json-error messages for analysis
+      try {
+
+        message.finish();
+
+      } catch(err)  {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          queue_msg: message,
+          err: err
+        }, "Error executing message.finish()");
+
+        mixpanel.track(events.queue.message.FINISH_ERROR, {
+          topic: topic,
+          channel: channel,
+          json: json,
+        });//mixpanel.track
+      }//try-catch
+
+    }//try-catch
+  });//reader,on
+
 
   reader.on('error', function onError(err) {
     log.error({
@@ -117,8 +165,14 @@ function read_message(topic, channel, callback)	{
       options: options
     }, "nsq Reader error.");
 
+    mixpanel.track(events.queue.reader.ERROR, {
+      topic: topic,
+      channel: channel,
+    });//mixpanel.track
+
     callback(err, undefined, undefined, reader);
-  });
+  });//reader.on
+
 
   reader.on('nsqd_connected', function onNsqdConnected(host, port) {
     log.info({
@@ -129,9 +183,14 @@ function read_message(topic, channel, callback)	{
       options: options
     }, "Reader connected to nsqd.");
 
-    // callback(undefined, reader);
-    // return reader;
-  });
+
+    mixpanel.track(events.queue.reader.NSQD_CONNECTED, {
+      topic: topic,
+      channel: channel,
+    });//mixpanel.track
+
+  });//reader.on
+
 
   reader.on('nsqd_closed', function onNsqdClosed(host, port) {
     log.info({
@@ -141,19 +200,28 @@ function read_message(topic, channel, callback)	{
       nsqd_port: port,
       options: options
     }, "Reader disconnected from nsqd.");
-  });
+
+    mixpanel.track(events.queue.reader.NSQD_CLOSED, {
+      topic: topic,
+      channel: channel,
+    });//mixpanel.track
+  });//reader.on
+
 
 	reader.connect();
 }//read_message()
 
 
 function publish_message(topic, message)	{
-  log.debug({
-    topic: topic,
-    // payload: message,
-  }, "Publishing message.");
+  // log.debug({
+  //   topic: topic,
+  // }, "Publishing message.");
 
 	writer.publish(topic, message);
+
+  mixpanel.track(events.queue.message.PUBLISHED, {
+    topic: topic,
+  });
 }//publish_message
 
 
