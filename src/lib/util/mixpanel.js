@@ -30,62 +30,62 @@ var Mixpanel = require('mixpanel');
 var mixpanel = Mixpanel.init(MIXPANEL_TOKEN);
 
 // application's mixpanel events
-var events = {};
+var event_type = {};
 
 // QUEUE events
-events.queue = {};
+event_type.queue = {};
 
 // QUEUE writer events
-events.queue.writer = {
+event_type.queue.writer = {
   READY  : 'queue_writer_ready',
   ERROR  : 'queue_writer_error',
   CLOSED : 'queue_writer_closed',
-};//events.queue
+};//event_type.queue
 
 // QUEUE reader events
-events.queue.reader = {
+event_type.queue.reader = {
   ERROR                : 'queue_reader_error',
   MESSAGE              : 'queue_reader_message',
   NSQD_CLOSED          : 'queue_reader_nsqd_closed',
   NSQD_CONNECTED       : 'queue_reader_nsqd_connected',
   MESSAGE_ERROR        : 'queue_reader_message_error',
   INVALID_CHANNEL_NAME : 'queue_reader_invalid_channel_name'
-};//events.queue.reader
+};//event_type.queue.reader
 
 // QUEUE message events
-events.queue.message = {
+event_type.queue.message = {
   PUBLISHED    : 'queue_message_published',
   FINISH_ERROR : 'queue_message_finish_error',
-};//events.queue.message
+};//event_type.queue.message
 
 // WEBSOCKET events
-events.websockets = {};
+event_type.websockets = {};
 
 // WEBSOCKET server events
-events.websockets.server = {
+event_type.websockets.server = {
   LISTENING         : 'websockets_server_listening',
   EMITTED_TO_CLIENT : 'websockets_server_emitted_to_client'
-};//events.websockets.server
+};//event_type.websockets.server
 
 // WEBSOCKET client events
-events.websockets.client = {
+event_type.websockets.client = {
   CONNECTED    : 'websockets_connection_from_client',
   DISCONNECTED : 'websockets_disconnection_from_client',
   MESSAGE      : 'websockets_client_message',
-};//events.websockets.client
+};//event_type.websockets.client
 
 // URL processing events
-events.url = {
+event_type.url = {
   ERROR : 'url_processing_error'
-};//events.url
+};//event_type.url
 
 // KIMONO webhook events
-events.kimono = {
+event_type.kimono = {
   WEBHOOK : 'kimono_webhook',
-};//events.kimono
+};//event_type.kimono
 
 // READABILITY events
-events.readability = {
+event_type.readability = {
   FETCHED_URL          : 'readability_fetched_url',
   JSON_PARSE_ERROR     : 'readability_json_parse_error',
   EMPTY_PLAINTEXT      : 'readability_empty_plaintext',
@@ -96,10 +96,10 @@ events.readability = {
   EMPTY_DATE_PUBLISHED : 'readability_empty_date_published',
   EMPTY_AUTHOR         : 'readability_empty_author',
   EMPTY_DOMAIN         : 'readability_empty_domain',
-};//events.readability
+};//event_type.readability
 
 // OPENCALAIS events
-events.opencalais = {
+event_type.opencalais = {
   JSON_PARSE_ERROR        : 'opencalais_json_parse_error',
   EMPTY_OBJECT            : 'opencalais_empty_object',
   URL_NOT_IN_READABILITY  : 'opencalais_url_not_in_readability_object',
@@ -109,10 +109,10 @@ events.opencalais = {
   API_ERROR               : 'opencalais_api_error',
   EMPTY_DATE_PUBLISHED    : 'opencalais_empty_date_published',
   EMPTY_URL               : 'opencalais _empty_url',
-};//events.opencalais
+};//event_type.opencalais
 
 // DATASTORE events
-events.datastore = {
+event_type.datastore = {
   FETCHED_URL           : 'datastore_fetched_url',
   INSERT_ERROR          : 'datastore_insert_error',
   EMPTY_DOMAIN          : 'datastore_empty_domain',
@@ -121,10 +121,10 @@ events.datastore = {
   DATE_CONVERSION_ERROR : 'datastore_date_conversion_error',
   JSON_PARSE_ERROR      : 'datastore_json_parse_error',
   GENERIC_ERROR         : 'datastore_generic_error',
-};//events.datastore
+};//event_type.datastore
 
 // ENTITIES events
-events.entities = {
+event_type.entities = {
   PEOPLE                : 'entities_people',
   PLACES                : 'entities_places',
   COMPANIES             : 'entities_companies',
@@ -137,7 +137,7 @@ events.entities = {
   UNDEFINED_NLP_OBJECT  : 'entities_undefined_nlp_object',
   EMPTY_DATE_PUBLISHED  : 'entities_empty_date_published',
   URL_NOT_IN_OPENCALAIS : 'entities_url_not_in_opencalais_object',
-};//events.entities
+};//event_type.entities
 
 
 function track(event, data) {
@@ -159,6 +159,6 @@ function track(event, data) {
 }//track
 
 module.exports = {
-  events: events,
+  event_type: event_type,
   track: track,
 };
