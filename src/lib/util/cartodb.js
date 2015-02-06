@@ -27,14 +27,16 @@ var CartoDB = require('cartodb');
 
 var client;
 
-var queue;
-var topics;
+var queue, topics, mixpanel, events;
 
-function start(__queue, __topics)    {
+function start(options)    {
   return;
   
-  queue = __queue;
-  topics = __topics;
+  queue = options.queue;
+  mixpanel = options.mixpanel;
+
+  topics = queue.topics;
+  events = mixpanel.events;
 
   client = new CartoDB({
     user: CARTODB_USER,

@@ -28,20 +28,20 @@ var nsqd_port = config.writer.get('port');
 var lookupdHTTPAddresses = config.reader.get('lookupdHTTPAddresses');
 
 var topics = {
-  URLS_RECEIVED: "newscuria.urls_received",
-  URLS_APPROVED: "newscuria.urls_approved",
-  URLS_DENIED: "newscuria.urls_denied",
-  OPENCALAIS: "newscuria.opencalais",
-  READABILITY: "newscuria.readability",
-  ENTITIES: "newscuria.entities",
-  ENTITIES_PEOPLE: "newscuria.entities.people",
-  ENTITIES_PLACES: "newscuria.entities.places",
-  ENTITIES_COMPANIES: "newscuria.entities.companies",
-  ENTITIES_THINGS: "newscuria.entities.things",
-  ENTITIES_EVENTS: "newscuria.entities.events",
-  ENTITIES_RELATIONS: "newscuria.entities.relations",
-  ENTITIES_TOPICS: "newscuria.entities.topics",
-  ENTITIES_TAGS: "newscuria.entities.tags",
+  URLS_RECEIVED      : "newscuria.urls_received",
+  URLS_APPROVED      : "newscuria.urls_approved",
+  URLS_DENIED        : "newscuria.urls_denied",
+  OPENCALAIS         : "newscuria.opencalais",
+  READABILITY        : "newscuria.readability",
+  ENTITIES           : "newscuria.entities",
+  ENTITIES_PEOPLE    : "newscuria.entities.people",
+  ENTITIES_PLACES    : "newscuria.entities.places",
+  ENTITIES_COMPANIES : "newscuria.entities.companies",
+  ENTITIES_THINGS    : "newscuria.entities.things",
+  ENTITIES_EVENTS    : "newscuria.entities.events",
+  ENTITIES_RELATIONS : "newscuria.entities.relations",
+  ENTITIES_TOPICS    : "newscuria.entities.topics",
+  ENTITIES_TAGS      : "newscuria.entities.tags",
 };//topics
 
 var writer;
@@ -140,7 +140,7 @@ function read_message(topic, channel, callback)	{
           topic: topic,
           channel: channel,
           json: json,
-        });//mixpanel.track        
+        });//mixpanel.track
       }//try-catch
 
     }//try-catch

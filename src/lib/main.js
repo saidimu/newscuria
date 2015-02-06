@@ -67,6 +67,9 @@ function start()    {
     queue: queue,
     mixpanel: mixpanel,
   });
-  
-  cartodb.start(queue, topics);
+
+  cartodb.start({
+    queue: queue,
+    mixpanel: mixpanel,
+  });
 }//start()
