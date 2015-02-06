@@ -77,7 +77,7 @@ event_type.websockets.client = {
 
 // webhook events
 event_type.webhook = {
-  URL_ERROR   : 'webhook_url_processing_error'
+  URL_ERROR   : 'webhook_url_processing_error',
   GOOGLE_NEWS : 'webhook_googlenews',
 };//event_type.kimono
 
