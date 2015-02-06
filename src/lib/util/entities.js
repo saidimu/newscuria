@@ -21,14 +21,14 @@ var log = require('_/util/logging.js')(appname);
 
 var opencalais_config = require('config');
 
-var queue, topics, mixpanel, events;
+var queue, topics, mixpanel, event_type;
 
 function start(options)    {
   queue = options.queue;
   mixpanel = options.mixpanel;
 
   topics = queue.topics;
-  events = mixpanel.events;
+  event_type = mixpanel.event_type;
 
   listen_to_opencalais();
 }//start()
@@ -52,7 +52,7 @@ function process_opencalais_message(json, message) {
   var date_published = opencalais.date_published || null;
 
   if(date_published === null) {
-    mixpanel.track(events.entities.EMPTY_DATE_PUBLISHED);
+    mixpanel.track(event_type.entities.EMPTY_DATE_PUBLISHED);
   }//if
 
   if(!url)  {
@@ -60,7 +60,7 @@ function process_opencalais_message(json, message) {
       url: url
     }, "EMPTY url! Cannot persist Opencalais object to datastore.");
 
-    mixpanel.track(events.entities.URL_NOT_IN_OPENCALAIS);
+    mixpanel.track(event_type.entities.URL_NOT_IN_OPENCALAIS);
 
     return;
   }//if
@@ -137,7 +137,7 @@ function extract_nlp_objects(opencalais, message, url) {
 
 
 function extract_people(nlp_object, url) {
-  mixpanel.track(events.entities.PEOPLE, {
+  mixpanel.track(event_type.entities.PEOPLE, {
     url: url,
   });
 
@@ -146,7 +146,7 @@ function extract_people(nlp_object, url) {
 
 
 function extract_places(nlp_object, url) {
-  mixpanel.track(events.entities.PLACES, {
+  mixpanel.track(event_type.entities.PLACES, {
     url: url,
   });
 
@@ -155,7 +155,7 @@ function extract_places(nlp_object, url) {
 
 
 function extract_companies(nlp_object, url) {
-  mixpanel.track(events.entities.COMPANIES, {
+  mixpanel.track(event_type.entities.COMPANIES, {
     url: url,
   });
 
@@ -164,7 +164,7 @@ function extract_companies(nlp_object, url) {
 
 
 function extract_things(nlp_object, url) {
-  mixpanel.track(events.entities.THINGS, {
+  mixpanel.track(event_type.entities.THINGS, {
     url: url,
   });
 
@@ -173,7 +173,7 @@ function extract_things(nlp_object, url) {
 
 
 function extract_events(nlp_object, url) {
-  mixpanel.track(events.entities.EVENTS, {
+  mixpanel.track(event_type.entities.EVENTS, {
     url: url,
   });
 
@@ -182,7 +182,7 @@ function extract_events(nlp_object, url) {
 
 
 function extract_relations(nlp_object, url) {
-  mixpanel.track(events.entities.RELATIONS, {
+  mixpanel.track(event_type.entities.RELATIONS, {
     url: url,
   });
 
@@ -191,7 +191,7 @@ function extract_relations(nlp_object, url) {
 
 
 function extract_topics(nlp_object, url) {
-  mixpanel.track(events.entities.TOPICS, {
+  mixpanel.track(event_type.entities.TOPICS, {
     url: url,
   });
 
@@ -200,7 +200,7 @@ function extract_topics(nlp_object, url) {
 
 
 function extract_tags(nlp_object, url) {
-  mixpanel.track(events.entities.TAGS, {
+  mixpanel.track(event_type.entities.TAGS, {
     url: url,
   });
 
@@ -219,7 +219,7 @@ function extract_default(nlp_object, url) {
 
     var language = nlp_object.meta.language || undefined;
 
-    mixpanel.track(events.entities.LANGUAGE + language);
+    mixpanel.track(event_type.entities.LANGUAGE + language);
 
   } else {
 
@@ -227,7 +227,7 @@ function extract_default(nlp_object, url) {
       nlp_object: nlp_object,
     }, "new, undefined _type/_typeGroup encountered.");
 
-    mixpanel.track(events.entities.UNDEFINED_NLP_OBJECT, {
+    mixpanel.track(event_type.entities.UNDEFINED_NLP_OBJECT, {
       url: url,
     });
 

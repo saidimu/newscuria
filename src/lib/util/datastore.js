@@ -24,14 +24,14 @@ var util = require('util');
 var datastore_api = require('_/util/datastore-api.js');
 var client = datastore_api.client;
 
-var queue, topics, mixpanel, events;
+var queue, topics, mixpanel, event_type;
 
 function start(options)    {
   queue = options.queue;
   mixpanel = options.mixpanel;
 
   topics = queue.topics;
-  events = mixpanel.events;
+  event_type = mixpanel.event_type;
 
   listen_to_urls_received();
   listen_to_readability();
@@ -94,7 +94,7 @@ function process_url_received_message(json, message) {
         insert_stmt: insert_stmt,
       });
 
-      mixpanel.track(events.datastore.INSERT_ERROR, {
+      mixpanel.track(event_type.datastore.INSERT_ERROR, {
         table: 'nuzli.received_urls'
       });
     }//if
@@ -116,15 +116,15 @@ function process_readability_message(json, message) {
   var word_count = readability.word_count || 0;
 
   if(date_published === null) {
-    mixpanel.track(events.readability.EMPTY_DATE_PUBLISHED);
+    mixpanel.track(event_type.readability.EMPTY_DATE_PUBLISHED);
   }//if
 
   if(author === '') {
-    mixpanel.track(events.readability.EMPTY_AUTHOR);
+    mixpanel.track(event_type.readability.EMPTY_AUTHOR);
   }//if
 
   if(domain === '') {
-    mixpanel.track(events.readability.EMPTY_DOMAIN);
+    mixpanel.track(event_type.readability.EMPTY_DOMAIN);
   }//if
 
   // save Readability object to datastore
@@ -164,11 +164,11 @@ function process_opencalais_message(json, message) {
   var date_published = opencalais.date_published || null;
 
   if(date_published === null) {
-    mixpanel.track(events.opencalais.EMPTY_DATE_PUBLISHED);
+    mixpanel.track(event_type.opencalais.EMPTY_DATE_PUBLISHED);
   }//if
 
   if(url === '') {
-    mixpanel.track(events.opencalais.EMPTY_URL);
+    mixpanel.track(event_type.opencalais.EMPTY_URL);
   }//if
 
   if(!url)  {
@@ -206,7 +206,7 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
           err: err
         }, 'Error persisting domain metadata to datastore');
 
-        mixpanel.track(events.datastore.INSERT_ERROR, {
+        mixpanel.track(event_type.datastore.INSERT_ERROR, {
           table: table,
         });
       }//if
@@ -219,7 +219,7 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
     //   url: url
     // }, "EMPTY domain name for url");
 
-    mixpanel.track(events.datastore.EMPTY_DOMAIN);
+    mixpanel.track(event_type.datastore.EMPTY_DOMAIN);
   }//if
 
   var statement = util.format('INSERT INTO %s (domain, url, word_count, date_published, created_date) VALUES (?, ?, ?, ?, ?)', table);
@@ -252,7 +252,7 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
           err: err
         }, 'Error persisting author metadata to datastore');
 
-        mixpanel.track(events.datastore.INSERT_ERROR, {
+        mixpanel.track(event_type.datastore.INSERT_ERROR, {
           table: table,
         });
       }//if
@@ -265,7 +265,7 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
     //   url: url
     // }, "EMPTY author name for url");
 
-    mixpanel.track(events.datastore.EMPTY_AUTHOR);
+    mixpanel.track(event_type.datastore.EMPTY_AUTHOR);
   }//if
 
   var statement = util.format('INSERT INTO %s (author, url, word_count, date_published, created_date) VALUES (?, ?, ?, ?, ?)', table);
@@ -298,7 +298,7 @@ function save_document(object, url, date_published, table, callback)    {
           err: err
         }, 'Error persisting document to datastore');
 
-        mixpanel.track(events.datastore.INSERT_ERROR, {
+        mixpanel.track(event_type.datastore.INSERT_ERROR, {
           table: table,
         });
       }//if
@@ -311,7 +311,7 @@ function save_document(object, url, date_published, table, callback)    {
       table: table,
     }, "EMPTY object cannot be saved to table.");
 
-    mixpanel.track(events.datastore.EMPTY_OBJECT, {
+    mixpanel.track(event_type.datastore.EMPTY_OBJECT, {
       table: table,
     });
 
@@ -330,7 +330,7 @@ function save_document(object, url, date_published, table, callback)    {
       json: object,
     }, "Error converting JSON object to a Buffer object;");
 
-    mixpanel.track(events.datastore.JSON_PARSE_ERROR);
+    mixpanel.track(event_type.datastore.JSON_PARSE_ERROR);
 
     return;
   }//try-catch
@@ -362,7 +362,7 @@ function date_string_to_iso_object(date_string, url)  {
       date_string: date_string,
     }, "Cannot convert date string to Date object.");
 
-    mixpanel.track(events.datastore.DATE_CONVERSION_ERROR);
+    mixpanel.track(event_type.datastore.DATE_CONVERSION_ERROR);
 
     iso_object = new Date('1970-01-01 00:00:00 +0000').toISOString();
   }//try-catch

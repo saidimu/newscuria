@@ -19,14 +19,14 @@
 var appname = "filter";
 var log = require('_/util/logging.js')(appname);
 
-var queue, topics, mixpanel, events;
+var queue, topics, mixpanel, event_type;
 
 function start(options)    {
   queue = options.queue;
   mixpanel = options.mixpanel;
 
   topics = queue.topics;
-  events = mixpanel.events;
+  event_type = mixpanel.event_type;
 
   listen_to_urls_received();
 }//start()
@@ -57,7 +57,7 @@ function listen_to_urls_received()  {
           err: err
         }, "json message has no URL.");
 
-        mixpanel.track(events.url.ERROR, {
+        mixpanel.track(event_type.url.ERROR, {
           source: appname,
           message: "URL not found in queue message JSON.",
           data: json,

@@ -26,7 +26,7 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var mixpanel = require('_util/util/mixpanel.js');
-var events = mixpanel.events;
+var event_type = mixpanel.event_type;
 
 var filter = require('_/util/filter.js');
 var readability = require('_/util/readability.js');

@@ -22,14 +22,14 @@ var log = require('_/util/logging.js')(appname);
 var datastore_api = require('_/util/datastore-api.js');
 var opencalais_api = require('_/util/opencalais-api.js');
 
-var queue, topics, mixpanel, events;
+var queue, topics, mixpanel, event_type;
 
 function start(options)    {
   queue = options.queue;
   mixpanel = options.mixpanel;
 
   topics = queue.topics;
-  events = mixpanel.events;
+  event_type = mixpanel.event_type;
 
   listen_to_readability();
 }//start()
@@ -67,7 +67,7 @@ function get_opencalais(json)	{
 	var datastore_fetch_callback = function onDatastoreFetch(err, response)	{
 		if(err)	{
 			// log.error({ err: err });
-      mixpanel.track(events.datastore.GENERIC_ERROR, {
+      mixpanel.track(event_type.datastore.GENERIC_ERROR, {
         table: 'opencalais',
       });
 
@@ -82,7 +82,7 @@ function get_opencalais(json)	{
       } catch(err)  {
         log.error({ err: err });
 
-        mixpanel.track(events.opencalais.JSON_PARSE_ERROR);
+        mixpanel.track(event_type.opencalais.JSON_PARSE_ERROR);
       }//try-catch
 
 			if(opencalais)	{
@@ -94,7 +94,7 @@ function get_opencalais(json)	{
           opencalais: opencalais
         }, "EMPTY Opencalais object... re-fetching from Opencalais API");
 
-        mixpanel.track(events.opencalais.EMPTY_OBJECT);
+        mixpanel.track(event_type.opencalais.EMPTY_OBJECT);
 
 				fetch_opencalais_content(readability, api_fetch_callback);
 			}//if-else
@@ -104,7 +104,7 @@ function get_opencalais(json)	{
       //   url: url
       // }, "URL not in datastore... fetching from remote Opencalais API");
 
-      mixpanel.track(events.opencalais.URL_NOT_IN_DB);
+      mixpanel.track(event_type.opencalais.URL_NOT_IN_DB);
 
 			fetch_opencalais_content(readability, api_fetch_callback);
 
@@ -119,7 +119,7 @@ function get_opencalais(json)	{
         err: err
       }, "Error fetching from the Opencalais API.");
 
-      mixpanel.track(events.opencalais.API_ERROR);
+      mixpanel.track(event_type.opencalais.API_ERROR);
 
 		} else {
 
@@ -130,7 +130,7 @@ function get_opencalais(json)	{
 
 
   try {
-    mixpanel.track(events.datastore.FETCHED_URL, {
+    mixpanel.track(event_type.datastore.FETCHED_URL, {
       table: 'opencalais',
     });
 
@@ -140,7 +140,7 @@ function get_opencalais(json)	{
     // log.error({
     //   err: err
     // }, "Error fetching Opencalais from datastore.");
-    mixpanel.track(events.datastore.GENERIC_ERROR, {
+    mixpanel.track(event_type.datastore.GENERIC_ERROR, {
       table: 'opencalais',
     });
 
@@ -168,7 +168,7 @@ function fetch_opencalais_content(readability, callback)	{
       url: url,
     }, "EMPTY url in Readability object. Cannot fetch Opencalais content.");
 
-    mixpanel.track(events.opencalais.URL_NOT_IN_READABILITY);
+    mixpanel.track(event_type.opencalais.URL_NOT_IN_READABILITY);
 
 		return;
 	}//if
@@ -178,13 +178,13 @@ function fetch_opencalais_content(readability, callback)	{
       url: url,
    }, "EMPTY text in Readability object. Cannot fetch Opencalais content.");
 
-    mixpanel.track(events.opencalais.TEXT_NOT_IN_READABILITY);
+    mixpanel.track(event_type.opencalais.TEXT_NOT_IN_READABILITY);
 
     return;
   }//if
 
   try {
-    mixpanel.track(events.opencalais.FETCHED_API);
+    mixpanel.track(event_type.opencalais.FETCHED_API);
 
     opencalais_api.get_content(text, callback);
 
@@ -194,7 +194,7 @@ function fetch_opencalais_content(readability, callback)	{
       err: err
     }, "Error fetching content from Opencalais API.");
 
-    mixpanel.track(events.opencalais.API_ERROR);
+    mixpanel.track(event_type.opencalais.API_ERROR);
   }//try-catch
 }//fetch_opencalais_content
 
