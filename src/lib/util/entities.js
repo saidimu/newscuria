@@ -21,16 +21,15 @@ var log = require('_/util/logging.js')(appname);
 
 var opencalais_config = require('config');
 
-var queue, topics, mixpanel, event_type;
+var mixpanel = require('_/util/mixpanel.js');
+var event_type = mixpanel.event_type;
 
-function start(options)    {
-  queue = options.queue;
-  mixpanel = options.mixpanel;
+var queue = require('_/util/queue.js');
+var topics = queue.topics;
 
-  topics = queue.topics;
-  event_type = mixpanel.event_type;
-
-  listen_to_opencalais();
+function start()    {
+  // connect to the message queue
+  queue.connect(listen_to_opencalais);
 }//start()
 
 

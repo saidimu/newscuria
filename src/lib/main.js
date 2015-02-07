@@ -21,12 +21,12 @@ process.env.NODE_ENV = "entities";
 
 var appname = process.env.APP_NAME;
 var log = require('_/util/logging.js')(appname);
-
-var mixpanel = require('_/util/mixpanel.js');
-var event_type = mixpanel.event_type;
-
-var queue = require('_/util/queue.js');
-var topics = queue.topics;
+//
+// var mixpanel = require('_/util/mixpanel.js');
+// var event_type = mixpanel.event_type;
+//
+// var queue = require('_/util/queue.js');
+// var topics = queue.topics;
 
 var filter = require('_/util/filter.js');
 var readability = require('_/util/readability.js');
@@ -37,39 +37,17 @@ var cartodb = require('_/util/cartodb.js');
 
 
 //==BEGIN here
+start();
 // connect to the message queue
-queue.connect(start);
+// queue.connect(start);
 //==BEGIN here
 
 
 function start()    {
-  filter.start({
-    queue: queue,
-    mixpanel: mixpanel,
-  });
-
-  readability.start({
-    queue: queue,
-    mixpanel: mixpanel,
-  });
-
-  opencalais.start({
-    queue: queue,
-    mixpanel: mixpanel,
-  });
-
-  datastore.start({
-    queue: queue,
-    mixpanel: mixpanel,
-  });
-
-  entities.start({
-    queue: queue,
-    mixpanel: mixpanel,
-  });
-
-  cartodb.start({
-    queue: queue,
-    mixpanel: mixpanel,
-  });
+  filter.start();
+  readability.start();
+  opencalais.start();
+  datastore.start();
+  entities.start();
+  cartodb.start();
 }//start()

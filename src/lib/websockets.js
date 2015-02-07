@@ -25,11 +25,11 @@ var util = require('util');
 var app = require('http').createServer(http_handler);
 var io = require('socket.io')(app);
 
-var queue = require('_/util/queue.js');
-var topics = queue.topics;
-
 var mixpanel = require('_/util/mixpanel.js');
 var event_type = mixpanel.event_type;
+
+var queue = require('_/util/queue.js');
+var topics = queue.topics;
 
 var client_events = {
   URL: 'url',

@@ -27,27 +27,27 @@ var CartoDB = require('cartodb');
 
 var client;
 
-var queue, topics, mixpanel, event_type;
+var mixpanel = require('_/util/mixpanel.js');
+var event_type = mixpanel.event_type;
 
-function start(options)    {
-  return;
+var queue = require('_/util/queue.js');
+var topics = queue.topics;
 
-  queue = options.queue;
-  mixpanel = options.mixpanel;
 
-  topics = queue.topics;
-  event_type = mixpanel.event_type;
+function start()    {
+  // connect to the message queue
+  queue.connect(function onQueueConnect() {
+    client = new CartoDB({
+      user: CARTODB_USER,
+      api_key: CARTODB_API_KEY
+    });//client
 
-  client = new CartoDB({
-    user: CARTODB_USER,
-    api_key: CARTODB_API_KEY
-  });//client
+    client.on('connect', function() {
+      listen_to_entities();
+    });
 
-  client.on('connect', function() {
-    listen_to_entities();
-  });
-
-  client.connect();
+    client.connect();
+  });//queue.connect
 }//start()
 
 
