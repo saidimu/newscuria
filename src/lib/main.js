@@ -22,11 +22,11 @@ process.env.NODE_ENV = "entities";
 var appname = process.env.APP_NAME;
 var log = require('_/util/logging.js')(appname);
 
-var queue = require('_/util/queue.js');
-var topics = queue.topics;
-
 var mixpanel = require('_/util/mixpanel.js');
 var event_type = mixpanel.event_type;
+
+var queue = require('_/util/queue.js');
+var topics = queue.topics;
 
 var filter = require('_/util/filter.js');
 var readability = require('_/util/readability.js');
