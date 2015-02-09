@@ -22,9 +22,6 @@ var log = require('_/util/logging.js')(appname);
 var readability_api = require('_/util/readability-api.js');
 var datastore_api = require('_/util/datastore-api.js');
 
-var mixpanel = require('_/util/mixpanel.js');
-var event_type = mixpanel.event_type;
-
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
@@ -63,13 +60,11 @@ function get_readability(url)	{
   // CALLBACK
   var datastore_fetch_callback = function onDatastoreFetch(err, response)  {
     if(err) {
-      // log.error({
-      //   url: url,
-      //   err: err
-      // }, "Error fetching from the datastore.");
-      mixpanel.track(event_type.datastore.GENERIC_ERROR, {
-        table: 'readability',
-      });
+      log.error({
+        url: url,
+        err: err,
+        log_type: log.types.datastore.GENERIC_ERROR,
+      }, "Error fetching from the datastore.");
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -81,9 +76,10 @@ function get_readability(url)	{
       try {
         readability = JSON.parse(buf.toString('utf8'));
       } catch(err)  {
-        log.error({ err: err });
-
-        mixpanel.track(event_type.readability.JSON_PARSE_ERROR);
+        log.error({
+          err: err,
+          log_type: log.types.readability.JSON_PARSE_ERROR,
+        }, 'Error JSON.parse()ing Readability oject');
       }//try-catch
 
       // publish text if it isn't empty
@@ -92,27 +88,24 @@ function get_readability(url)	{
 
       } else if(!readability.plaintext) {
         log.error({
-          readability: readability
+          url: url,
+          log_type: log.types.readability.EMPTY_PLAINTEXT,
         }, "EMPTY Readability PLAINTEXT.");
-
-        mixpanel.track(event_type.readability.EMPTY_PLAINTEXT);
 
       } else if(!readability) {
         log.info({
-          readability: readability
+          url: url,
+          log_type: log.types.readability.EMPTY_OBJECT,
         }, "EMPTY Readability object... re-fetching from remote Readability API");
-
-        mixpanel.track(event_type.readability.EMPTY_OBJECT);
 
         fetch_readability_content(url, api_fetch_callback);
       }//if-else
 
     } else {
-      // log.info({
-      //   url: url
-      // }, "URL not in datastore... fetching from remote Readability API");
-
-      mixpanel.track(event_type.readability.URL_NOT_IN_DB);
+      log.info({
+        url: url,
+        log_type: log.types.readability.URL_NOT_IN_DB,
+      }, "URL not in datastore... fetching from remote Readability API");
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -125,10 +118,9 @@ function get_readability(url)	{
     if(err) {
       log.error({
         url: url,
-        err: err
+        err: err,
+        log_type: log.types.readability.API_ERROR,
       }, "Error fetching from the Readability API.");
-
-      mixpanel.track(event_type.readability.API_ERROR);
 
     } else {
 
@@ -138,20 +130,19 @@ function get_readability(url)	{
   };//api_fetch_callback
 
   try {
-    mixpanel.track(event_type.datastore.FETCHED_URL, {
-      table: 'readability',
-    });
+    log.info({
+      url: url,
+      log_type: log.types.datastore.FETCHED_URL,
+    }, "Fetching url from the datastore.");
 
     datastore_api.client.execute(query_stmt, params, datastore_fetch_callback);
 
   } catch(err)  {
-    // log.error({
-    //   url: url,
-    //   err: err
-    // }, "Error fetching URL from the datastore... fetching from remote Readability API");
-    mixpanel.track(event_type.datastore.GENERIC_ERROR, {
-      table: 'readability',
-    });
+    log.error({
+      url: url,
+      err: err,
+      log_types: log.type.datastore.GENERIC_ERROR,
+    }, "Error fetching URL from the datastore... fetching from remote Readability API");
 
     fetch_readability_content(url, api_fetch_callback);
   }//try-catch
@@ -161,17 +152,19 @@ function get_readability(url)	{
 
 function fetch_readability_content(url, callback)	{
   try {
-    mixpanel.track(event_type.readability.FETCHED_API);
+    log.info({
+      url: url,
+      log_type: log.types.readability.FETCHED_API,
+    }, "Fetching url from the Readability API.");
 
   	readability_api.scrape(url, callback);
 
   } catch(err)  {
     log.error({
       url: url,
-      err: err
+      err: err,
+      log_type: log.types.readability.API_ERROR,
     }, "Error fetching URL content from Readability API");
-
-    mixpanel.track(event_type.readability.API_ERROR);
   }//try-catch
 }//fetch_readability_content()
 
