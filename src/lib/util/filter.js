@@ -19,9 +19,6 @@
 var appname = "filter";
 var log = require('_/util/logging.js')(appname);
 
-var mixpanel = require('_/util/mixpanel.js');
-var event_type = mixpanel.event_type;
-
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
@@ -53,15 +50,9 @@ function listen_to_urls_received()  {
           channel: channel,
           json: json,
           queue_msg: message,
-          err: err
-        }, "json message has no URL.");
-
-        mixpanel.track(event_type.url.ERROR, {
-          source: appname,
-          message: "URL not found in queue message JSON.",
-          data: json,
-        });
-
+          err: err,
+          log_type: log.types.url.ERROR,
+        }, "URL not found in queue message JSON.");
       }//if-else
 
       message.finish();
