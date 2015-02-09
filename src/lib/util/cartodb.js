@@ -27,9 +27,6 @@ var CartoDB = require('cartodb');
 
 var client;
 
-var mixpanel = require('_/util/mixpanel.js');
-var event_type = mixpanel.event_type;
-
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 

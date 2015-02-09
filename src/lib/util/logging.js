@@ -14,17 +14,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 'use strict';
 
 var bunyan = require('bunyan');
-var bsyslog = require('bunyan-syslog');
+// var bsyslog = require('bunyan-syslog');
+var loggly = require('bunyan-loggly').Bunyan2Loggly;
 var hostname = require('os').hostname();
 
-var config = require('config').get("logging");
+// var config = require('config').get("logging").papertrail;
+var config = require('config').get("logging").loggly;
+
+var log_types = require('_/util/logging-types.js');
 
 // catch uncaught exceptions and print error message and stack before exiting cleanly
 // process restart is handled externally
 process.on('uncaughtException', function (err) {
   var now = new Date().toUTCString();
+
   console.error(now + ': uncaughtException:', err.message);
   console.error(err.stack);
+
+  get_logger('logging').fatal({
+    err: err
+  }, 'uncaughtException. Exiting process.');
+
   process.exit(1);
 });
 
@@ -49,16 +59,23 @@ function get_logger(name) {
       {
         level: config.get('level'),
         type: 'raw',
-        stream: bsyslog.createBunyanStream({
-          name: hostname,
-          type: config.get('type'),
-          facility: bsyslog.local0,
-          host: config.get('host'),
-          port: config.get('port')
+        stream: new loggly({
+          token: config.get('token'),
+          subdomain: config.get('subdomain')
         })
+        // stream: bsyslog.createBunyanStream({
+        //   name: hostname,
+        //   type: config.get('papertrail_type'),
+        //   facility: bsyslog.local0,
+        //   host: config.get('host'),
+        //   port: config.get('port')
+        // })
       }
     ],
   });//bunyan.createLogger()
+
+  // FIXME: better way to augment logger with custom log message "types"?
+  logger.types = log_types;
 
   return logger;
 }//get_logger()

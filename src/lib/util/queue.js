@@ -16,9 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 var appname = "queue";
 var log = require('_/util/logging.js')(appname);
 
-var mixpanel = require('_/util/mixpanel.js');
-var event_type = mixpanel.event_type;
-
 var nsq = require('nsqjs');
 var util = require('util');
 
@@ -55,29 +52,28 @@ function connect(callback) {
 
   nsqd_writer.on('error', function(err) {
     if(err) {
-      mixpanel.track(event_type.queue.writer.ERROR);
-
       log.fatal({
         err: err,
+        log_type: log.types.queue.writer.ERROR,
       }, "nsqd Writer error.");
     }//if
   });//writer.on
 
 
   nsqd_writer.on('ready', function() {
-    log.info("nsqd Writer ready.");
+    log.info({
+      log_type: log.types.queue.writer.READY,
+    }, "nsqd Writer ready.");
 
     writer = nsqd_writer;
-
-    mixpanel.track(event_type.queue.writer.READY);
 
     callback();
   });//writer.on
 
   nsqd_writer.on('closed', function() {
-    log.info("nsqd Writer closed.");
-
-    mixpanel.track(event_type.queue.writer.CLOSED);
+    log.info({
+      log_type: log.types.queue.writer.CLOSED,
+    }, "nsqd Writer closed.");
   });//writer.on
 
   nsqd_writer.connect();
@@ -86,9 +82,9 @@ function connect(callback) {
 
 function read_message(topic, channel, callback)	{
 	if(channel === undefined)	{
-		log.fatal("Must provide a channel name to listen on.");
-
-    mixpanel.track(event_type.queue.reader.INVALID_CHANNEL_NAME);
+		log.fatal({
+      log_type: log.types.queue.reader.INVALID_CHANNEL_NAME,
+    }, "Must provide a channel name to listen on.");
 
 		throw new Error("Must provide a channel name to listen on.");
 	}//if
@@ -109,9 +105,10 @@ function read_message(topic, channel, callback)	{
     try {
       var json = message.json();
 
-      mixpanel.track(event_type.queue.reader.MESSAGE, {
+      log.info({
         topic: topic,
         channel: channel,
+        log_type: log.types.queue.reader.MESSAGE,
       });
 
       callback(undefined, json, message, reader);
@@ -119,18 +116,12 @@ function read_message(topic, channel, callback)	{
     } catch(err)  {
       message.body = '';  // hide verbose message body from logging
 
-      // log.error({
-      //   topic: topic,
-      //   channel: channel,
-      //   err: err,
-      //   queue_msg: message,
-      // }, "Error getting message from queue!");
-
-      mixpanel.track(event_type.queue.reader.MESSAGE_ERROR, {
+      log.error({
         topic: topic,
         channel: channel,
-        json: json,
-      });//mixpanel.track
+        err: err,
+        log_type: log.types.queue.reader.MESSAGE_ERROR,
+      }, "Error getting message from queue!");
 
       // FIXME: save these json-error messages for analysis
       try {
@@ -142,15 +133,9 @@ function read_message(topic, channel, callback)	{
           topic: topic,
           channel: channel,
           json: json,
-          queue_msg: message,
-          err: err
+          err: err,
+          log_type: log.types.queue.message.FINISH_ERROR,
         }, "Error executing message.finish()");
-
-        mixpanel.track(event_type.queue.message.FINISH_ERROR, {
-          topic: topic,
-          channel: channel,
-          json: json,
-        });//mixpanel.track
       }//try-catch
 
     }//try-catch
@@ -162,13 +147,9 @@ function read_message(topic, channel, callback)	{
       topic: topic,
       channel: channel,
       err: err,
-      options: options
+      options: options,
+      log_type: log.types.queue.reader.ERROR,
     }, "nsq Reader error.");
-
-    mixpanel.track(event_type.queue.reader.ERROR, {
-      topic: topic,
-      channel: channel,
-    });//mixpanel.track
 
     callback(err, undefined, undefined, reader);
   });//reader.on
@@ -180,15 +161,9 @@ function read_message(topic, channel, callback)	{
       channel: channel,
       nsqd_host: host,
       nsqd_port: port,
-      options: options
+      options: options,
+      log_type: log.types.queue.reader.NSQD_CONNECTED,
     }, "Reader connected to nsqd.");
-
-
-    mixpanel.track(event_type.queue.reader.NSQD_CONNECTED, {
-      topic: topic,
-      channel: channel,
-    });//mixpanel.track
-
   });//reader.on
 
 
@@ -198,13 +173,9 @@ function read_message(topic, channel, callback)	{
       channel: channel,
       nsqd_host: host,
       nsqd_port: port,
-      options: options
+      options: options,
+      log_type: log.types.queue.reader.NSQD_CLOSED,
     }, "Reader disconnected from nsqd.");
-
-    mixpanel.track(event_type.queue.reader.NSQD_CLOSED, {
-      topic: topic,
-      channel: channel,
-    });//mixpanel.track
   });//reader.on
 
 
@@ -219,7 +190,8 @@ function publish_message(topic, message)	{
 
 	writer.publish(topic, message);
 
-  mixpanel.track(event_type.queue.message.PUBLISHED, {
+  log.info({
+    log_type: log.types.queue.message.PUBLISHED,
     topic: topic,
   });
 }//publish_message
