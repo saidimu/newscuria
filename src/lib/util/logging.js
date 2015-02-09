@@ -21,6 +21,8 @@ var hostname = require('os').hostname();
 // var config = require('config').get("logging").papertrail;
 var config = require('config').get("logging").loggly;
 
+var log_types = require('_/util/logging-types.js');
+
 // catch uncaught exceptions and print error message and stack before exiting cleanly
 // process restart is handled externally
 process.on('uncaughtException', function (err) {
@@ -71,6 +73,9 @@ function get_logger(name) {
       }
     ],
   });//bunyan.createLogger()
+
+  // FIXME: better way to augment logger with custom log message "types"?
+  logger.types = log_types;
 
   return logger;
 }//get_logger()
