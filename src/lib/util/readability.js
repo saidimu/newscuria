@@ -132,6 +132,7 @@ function get_readability(url)	{
   try {
     log.info({
       url: url,
+      table: 'readability',
       log_type: log.types.datastore.FETCHED_URL,
     }, "Fetching url from the datastore.");
 
