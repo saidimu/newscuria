@@ -90,10 +90,8 @@ function process_url_received_message(json, message) {
       log.error({
         err: err,
         insert_stmt: insert_stmt,
-      });
-
-      mixpanel.track(event_type.datastore.INSERT_ERROR, {
-        table: 'nuzli.received_urls'
+        table: 'nuzli.received_urls',
+        log_type: log.types.datastore.INSERT_ERROR,
       });
     }//if
   });
