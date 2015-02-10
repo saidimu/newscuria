@@ -36,14 +36,14 @@ function listen_to_urls_received()  {
     if(!err) {
       var url = json.url || '';
 
-      // FIXME: Save url-less messages for later analysis
-      if(url !== '') {
+      if(url) {
 
         queue.publish_message(topics.URLS_APPROVED, {
           url: url
         });
 
       } else {
+        // FIXME: Save url-less messages for later analysis
 
         log.error({
           topic: topic,

@@ -243,7 +243,7 @@ function extract_default(nlp_object, url) {
 
 
 function publish_message(topic, nlp_object) {
-  queue.publish_message(topics, nlp_object);
+  queue.publish_message(topic, nlp_object);
 }//publish_message
 
 

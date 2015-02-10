@@ -64,7 +64,7 @@ function get_readability(url)	{
         url: url,
         err: err,
         log_type: log.types.datastore.GENERIC_ERROR,
-      }, "Error fetching from the datastore.");
+      }, "Error fetching Readability from the datastore. Fetching from remote Readability API.");
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -84,16 +84,18 @@ function get_readability(url)	{
 
       // publish text if it isn't empty
       if((readability) && (readability.plaintext))  {
+
         queue.publish_message(topics.READABILITY, readability);
 
       } else if(!readability.plaintext) {
+        // FIXME: What to do about this empty Readability plaintext?
         log.error({
           url: url,
           log_type: log.types.readability.EMPTY_PLAINTEXT,
         }, "EMPTY Readability PLAINTEXT.");
 
       } else if(!readability) {
-        log.info({
+        log.error({
           url: url,
           log_type: log.types.readability.EMPTY_OBJECT,
         }, "EMPTY Readability object... re-fetching from remote Readability API");
