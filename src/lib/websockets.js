@@ -25,9 +25,6 @@ var util = require('util');
 var app = require('http').createServer(http_handler);
 var io = require('socket.io')(app);
 
-var mixpanel = require('_/util/mixpanel.js');
-var event_type = mixpanel.event_type;
-
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
@@ -47,10 +44,9 @@ app.listen(8080, function onAppListen() {
 
   log.info({
     address: address.address,
-    port: address.port
+    port: address.port,
+    log_type: log.types.websockets.server.LISTENING,
   }, "Listening...");
-
-  mixpanel.track(event_type.websockets.server.LISTENING);
 });
 
 // connect to the message queue
@@ -61,7 +57,10 @@ queue.connect(start);
 
 function start() {
   io.on('connection', function onSocketConnect(socket) {
-    mixpanel.track(event_type.websockets.client.CONNECTED);
+    // TODO: log additional client info
+    log.info({
+      log_type: log.types.websockets.client.CONNECTED
+    }, 'Websockets client connected.');
 
     client_socket = socket;
 
@@ -70,19 +69,22 @@ function start() {
     });
 
     client_socket.on(client_events.URL, function(msg) {
-      mixpanel.track(event_type.websockets.client.MESSAGE);
+      // XXX Should this be logged at all? What is the benefit?
+      log.info({
+        log_type: log.types.websockets.client.MESSAGE
+      }, 'Received websockets client URL message.');
+
       url_msg_processor(msg);
     });//client_socket.on
 
     // close open connections to the queue server
     // FIXME: reuse these connections instead of closing them
     client_socket.on('disconnect', function()  {
-      mixpanel.track(event_type.websockets.client.DISCONNECTED);
-
-      log.debug({
+      log.info({
         client_id: client_socket.id,
         req: client_socket.request,
         queue_reader: queue_reader,
+        log_type: log.types.websockets.client.DISCONNECTED
       }, "Websocket client disconnected. Starting disconnection from NSQ reader.");
 
       queue_reader.close();
@@ -102,10 +104,9 @@ function url_msg_processor(msg)	{
 
 	} else {
 
-    mixpanel.track(event_type.websockets.client.URL_ERROR);
-
 		log.error({
-      client_sockets_msg: msg
+      client_sockets_msg: msg,
+      log_type: log.types.websockets.client.URL_ERROR,
     }, "URL not found in client_sockets payload.");
 
 	}//if-else
@@ -137,9 +138,11 @@ function process_entities(json, message)	{
 
 
 function emit(event, message) {
-  mixpanel.track(event_type.websockets.server.EMITTED_TO_CLIENT);
-
   client_socket.emit(event, message);
+
+  log.info({
+    log_type: log.types.websockets.server.EMITTED_TO_CLIENT,
+  }, 'Emitted message to websocket client.');
 }//emit()
 
 
