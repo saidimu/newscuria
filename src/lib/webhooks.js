@@ -79,7 +79,9 @@ function process_googlenews_webhook(webhook)  {
     var url = headline.href || undefined;
 
     if(url) {
+      
       publish_url_message(url);
+
     } else {
       log.error({
         results_content: article,

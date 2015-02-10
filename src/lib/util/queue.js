@@ -184,10 +184,6 @@ function read_message(topic, channel, callback)	{
 
 
 function publish_message(topic, message)	{
-  // log.debug({
-  //   topic: topic,
-  // }, "Publishing message.");
-
 	writer.publish(topic, message);
 
   log.info({
