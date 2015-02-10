@@ -69,7 +69,7 @@ function get_logger(name) {
       {
         level: config_logentries.get('level'),
         type: 'raw',
-        stream: logentries.createLogger({
+        stream: logentries.createStream({
           token: config_logentries.get('token'),
         })
       },
