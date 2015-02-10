@@ -33,7 +33,8 @@
     "config": "^1.10.0",
     "newrelic": "^1.15.0",
     "mixpanel": "0.0.20",
-    "bunyan-loggly": "0.0.5"
+    "bunyan-loggly": "0.0.5",
+    "bunyan-logentries": "^0.1.0"
   },
   "devDependencies": {},
   "scripts": {

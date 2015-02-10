@@ -16,10 +16,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 var bunyan = require('bunyan');
 // var bsyslog = require('bunyan-syslog');
 var loggly = require('bunyan-loggly').Bunyan2Loggly;
+var logentries = require('bunyan-logentries');
 var hostname = require('os').hostname();
 
 // var config = require('config').get("logging").papertrail;
-var config = require('config').get("logging").loggly;
+var config_loggly = require('config').get("logging").loggly;
+var config_logentries = require('config').get("logging").loggly;
 
 var log_types = require('_/util/logging-types.js');
 
@@ -53,24 +55,24 @@ function get_logger(name) {
     },
     streams: [
       {
-        level: config.get('level'),
+        level: config_loggly.get('level'),
         stream: process.stdout
       },
       {
-        level: config.get('level'),
+        level: config_loggly.get('level'),
         type: 'raw',
         stream: new loggly({
-          token: config.get('token'),
-          subdomain: config.get('subdomain')
+          token: config_loggly.get('token'),
+          subdomain: config_loggly.get('subdomain')
         })
-        // stream: bsyslog.createBunyanStream({
-        //   name: hostname,
-        //   type: config.get('papertrail_type'),
-        //   facility: bsyslog.local0,
-        //   host: config.get('host'),
-        //   port: config.get('port')
-        // })
-      }
+      },
+      {
+        level: config_logentries.get('level'),
+        type: 'raw',
+        stream: logentries.createLogger({
+          token: config_logentries.get('token'),
+        })
+      },
     ],
   });//bunyan.createLogger()
 
