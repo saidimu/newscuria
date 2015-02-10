@@ -21,7 +21,7 @@ var hostname = require('os').hostname();
 
 // var config = require('config').get("logging").papertrail;
 var config_loggly = require('config').get("logging").loggly;
-var config_logentries = require('config').get("logging").loggly;
+var config_logentries = require('config').get("logging").logentries;
 
 var log_types = require('_/util/logging-types.js');
 
