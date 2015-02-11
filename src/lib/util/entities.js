@@ -86,6 +86,9 @@ function extract_nlp_objects(opencalais, message, url) {
       var nlp_type = nlp_object._type;
       var nlp_typeGroup = nlp_object._typeGroup;
 
+      // associate this object with its ancestors: Opencalais --> Readability --> original url
+      nlp_object.url = url;
+
       switch(true)  {
         case PEOPLE.indexOf(nlp_type) >= 0:
           extract_people(nlp_object, url);
