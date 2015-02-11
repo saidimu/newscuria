@@ -47,6 +47,7 @@ function process_opencalais_message(json, message) {
   var url = opencalais.url || '';
   var date_published = opencalais.date_published || null;
 
+  // FIXME: What to do about empty date_published?
   if(date_published === null) {
     log.error({
       url: url,
@@ -60,15 +61,16 @@ function process_opencalais_message(json, message) {
       log_type: log.types.entities.URL_NOT_IN_OPENCALAIS,
     }, "EMPTY url! Cannot persist Opencalais object to datastore.");
 
+    // FIXME: Really? Just bail b/c of non-existing URL?
     return;
   }//if
 
   // extract and organize chosen 'NLP objects' from Opencalais object
-  extract_nlp_objects(opencalais, message, url);
+  extract_nlp_objects(opencalais, message, url, date_published);
 }//process_opencalais_message
 
 
-function extract_nlp_objects(opencalais, message, url) {
+function extract_nlp_objects(opencalais, message, url, date_published) {
 
   var PEOPLE = opencalais_config.get('PEOPLE');
   var PLACES = opencalais_config.get('PLACES');
@@ -88,6 +90,9 @@ function extract_nlp_objects(opencalais, message, url) {
 
       // associate this object with its ancestors: Opencalais --> Readability --> original url
       nlp_object.url = url;
+
+      // append date_published of parent Opencalais object.
+      nlp_object.date_published = date_published;
 
       switch(true)  {
         case PEOPLE.indexOf(nlp_type) >= 0:

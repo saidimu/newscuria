@@ -23,7 +23,7 @@ var hostname = require('os').hostname();
 var config_loggly = require('config').get("logging").loggly;
 var config_logentries = require('config').get("logging").logentries;
 
-var log_types = require('_/util/logging-types.js');
+var log_types = require('_/util/log-types.js');
 
 // catch uncaught exceptions and print error message and stack before exiting cleanly
 // process restart is handled externally

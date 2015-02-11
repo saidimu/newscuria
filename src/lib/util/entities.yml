@@ -134,6 +134,7 @@ RELATIONS:
   - FamilyRelation
   - PoliticalRelationship
   - PersonRelation
+  - ContactDetails
 
 TOPICS:
 SOCIALTAGS:
