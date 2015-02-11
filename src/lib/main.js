@@ -16,20 +16,27 @@
  */
 'use strict';
 
-var cql = require('node-cassandra-cql');
+// FIXME: workaround 'config' bug regarding multiple confg files
+process.env.NODE_ENV = "entities";
 
-var config = require('config').get("cassandra");
-var hosts = config.get('hosts');
-var keyspace = config.get('keyspace');
-
-// FIXME: wait for connection success before proceeding
-var client = new cql.Client({
-    hosts: hosts,
-    keyspace: keyspace
-});
+var filter = require('_/util/filter.js');
+var readability = require('_/util/readability.js');
+var opencalais = require('_/util/opencalais.js');
+var datastore = require('_/util/datastore.js');
+var entities = require('_/util/entities.js');
+var cartodb = require('_/util/cartodb.js');
 
 
-module.exports = {
-  client: client,
-  types: cql.types
-};//module.exports
+//==BEGIN here
+start();
+//==BEGIN here
+
+
+function start()    {
+  filter.start();
+  readability.start();
+  opencalais.start();
+  datastore.start();
+  entities.start();
+  cartodb.start();
+}//start()

@@ -1,41 +1,32 @@
 /**
-Copyright (C) 2015  Saidimu Apale
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
+ * Copyright (C) 2015  Saidimu Apale
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 'use strict';
 
-var appname = "webhooks";
+var appname = process.env.APP_NAME;
 var log = require('_/util/logging.js')(appname);
 
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var restify = require('restify');
-//var kimono = require('_/util/kimono.js');
 
 //==BEGIN here
 // connect to the message queue
-queue.connect(function onQueueConnect(err) {
-  if(err) {
-    log.fatal({
-      err: err,
-    }, "Cannot connect to message queue!");
-
-  } else {
-    
-    start();
-
-  }//if-else
-});
+queue.connect(start);
 //==BEGIN here
 
 var server;
@@ -47,7 +38,7 @@ function start()    {
 
 
 function handle_googlenews_webhooks() {
-  server.post('/googlenews', function webhook(req, res, next) {
+  server.post('/googlenews', function onGoogleNews(req, res, next) {
     var webhook = req.body;
 
     var webhook_header = {
@@ -62,6 +53,10 @@ function handle_googlenews_webhooks() {
     };
 
     req.log.info(webhook_header);
+
+    log.info({
+      log_type: log.types.webhook.GOOGLE_NEWS,
+    });
 
     process_googlenews_webhook(webhook);
 
@@ -79,15 +74,18 @@ function process_googlenews_webhook(webhook)  {
   var related = results.related || [];
 
   content.forEach(function(article)  {
+    // TODO: also process Google News article headlines
     var headline = article.headline || {};
     var url = headline.href || undefined;
 
     if(url) {
+      
       publish_url_message(url);
 
     } else {
       log.error({
-        results_content: article
+        results_content: article,
+        log_type: log.types.webhook.URL_ERROR,
       }, "No URL found in GoogleNews webhook results payload.");
     }//if-else
 
@@ -98,12 +96,16 @@ function process_googlenews_webhook(webhook)  {
     var url = article.headline || undefined;
 
     if(url) {
+
       publish_url_message(url);
 
     } else {
+
       log.error({
-        results_content: article
+        results_content: article,
+        log_type: log.types.webhook.URL_ERROR,
       }, "No URL found in GoogleNews webhook results payload.");
+
     }//if-else
   });//related.forEach
 

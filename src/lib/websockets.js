@@ -1,22 +1,22 @@
 /**
-Copyright (C) 2015  Saidimu Apale
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
+ * Copyright (C) 2015  Saidimu Apale
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 'use strict';
 
-var appname = "client_sockets";
+var appname = process.env.APP_NAME;
 var log = require('_/util/logging.js')(appname);
 
 var fs = require('fs');
@@ -44,44 +44,47 @@ app.listen(8080, function onAppListen() {
 
   log.info({
     address: address.address,
-    port: address.port
+    port: address.port,
+    log_type: log.types.websockets.server.LISTENING,
   }, "Listening...");
 });
 
 // connect to the message queue
 // then start listening for client_socket messages
-queue.connect(function onQueueConnect(err) {
-  if(err) {
-    log.fatal({
-      err: err,
-    }, "Cannot connect to message queue!");
-
-  } else {
-    
-    start();
-
-  }//if-else
-});
+queue.connect(start);
 //==BEGIN here
 
 
 function start() {
   io.on('connection', function onSocketConnect(socket) {
+    // TODO: log additional client info
+    log.info({
+      log_type: log.types.websockets.client.CONNECTED
+    }, 'Websockets client connected.');
+
     client_socket = socket;
 
     emit(client_events.STATUS, {
       status: 'Connected to Socket.io server!'
     });
 
-    client_socket.on(client_events.URL, url_msg_processor);
+    client_socket.on(client_events.URL, function(msg) {
+      // XXX Should this be logged at all? What is the benefit?
+      log.info({
+        log_type: log.types.websockets.client.MESSAGE
+      }, 'Received websockets client URL message.');
+
+      url_msg_processor(msg);
+    });//client_socket.on
 
     // close open connections to the queue server
     // FIXME: reuse these connections instead of closing them
     client_socket.on('disconnect', function()  {
-      log.debug({
+      log.info({
         client_id: client_socket.id,
         req: client_socket.request,
         queue_reader: queue_reader,
+        log_type: log.types.websockets.client.DISCONNECTED
       }, "Websocket client disconnected. Starting disconnection from NSQ reader.");
 
       queue_reader.close();
@@ -93,21 +96,18 @@ function start() {
 
 
 function url_msg_processor(msg)	{
-  // log.info({
-  //   client_sockets_msg: msg
-  // }, "RECEIVED from client_socket.");
-
 	if(msg.url)	{
+
 		queue.publish_message(topics.URLS_RECEIVED, {
       url: msg.url
     });
 
-    // emit(client_events.ACK, msg.url);
-
 	} else {
+
 		log.error({
-      client_sockets_msg: msg
-    }, "No URL found in client_sockets payload.");
+      client_sockets_msg: msg,
+      log_type: log.types.websockets.client.URL_ERROR,
+    }, "URL not found in client_sockets payload.");
 
 	}//if-else
 }//url_msg_processor
@@ -120,29 +120,7 @@ function listen_to_entities()	{
   queue.read_message(topic, channel, function onReadMessage(err, json, message, reader) {
     queue_reader = reader;
 
-    if(err) {
-      log.error({
-        topic: topic,
-        channel: channel,
-        json: json,
-        queue_msg: message,
-        err: err
-      }, "Error getting message from queue!");
-
-      // FIXME: save these json-error messages for analysis
-      try {
-        message.finish();        
-      } catch(err)  {
-        log.error({
-          topic: topic,
-          channel: channel,
-          json: json,
-          queue_msg: message,
-          err: err
-        }, "Error executing message.finish()");
-      }//try-catch
-      
-    } else {
+    if(!err) {
       process_entities(json, message);
     }//if-else
   });
@@ -161,6 +139,10 @@ function process_entities(json, message)	{
 
 function emit(event, message) {
   client_socket.emit(event, message);
+
+  log.info({
+    log_type: log.types.websockets.server.EMITTED_TO_CLIENT,
+  }, 'Emitted message to websocket client.');
 }//emit()
 
 

@@ -25,15 +25,23 @@ var nsqd_port = config.writer.get('port');
 var lookupdHTTPAddresses = config.reader.get('lookupdHTTPAddresses');
 
 var topics = {
-	URLS_RECEIVED: "newscuria.urls_received",
-	URLS_APPROVED: "newscuria.urls_approved",
-	URLS_DENIED: "newscuria.urls_denied",
-	OPENCALAIS: "newscuria.opencalais",
-	READABILITY: "newscuria.readability",
-  ENTITIES: "newscuria.entities",
+  URLS_RECEIVED      : "newscuria.urls_received",
+  URLS_APPROVED      : "newscuria.urls_approved",
+  URLS_DENIED        : "newscuria.urls_denied",
+  OPENCALAIS         : "newscuria.opencalais",
+  READABILITY        : "newscuria.readability",
+  ENTITIES           : "newscuria.entities",
+  ENTITIES_PEOPLE    : "newscuria.entities.people",
+  ENTITIES_PLACES    : "newscuria.entities.places",
+  ENTITIES_COMPANIES : "newscuria.entities.companies",
+  ENTITIES_THINGS    : "newscuria.entities.things",
+  ENTITIES_EVENTS    : "newscuria.entities.events",
+  ENTITIES_RELATIONS : "newscuria.entities.relations",
+  ENTITIES_TOPICS    : "newscuria.entities.topics",
+  ENTITIES_TAGS      : "newscuria.entities.tags",
 };//topics
 
-var writer = undefined;
+var writer;
 
 function connect(callback) {
   if (!callback)  {
@@ -43,21 +51,29 @@ function connect(callback) {
   var nsqd_writer = new nsq.Writer(nsqd_host, nsqd_port);
 
   nsqd_writer.on('error', function(err) {
-    log.error({err: err}, "nsqd Writer error.");
-    
-    callback(err);
+    if(err) {
+      log.fatal({
+        err: err,
+        log_type: log.types.queue.writer.ERROR,
+      }, "nsqd Writer error.");
+    }//if
   });//writer.on
 
+
   nsqd_writer.on('ready', function() {
-    log.info("nsqd Writer ready.");
+    log.info({
+      log_type: log.types.queue.writer.READY,
+    }, "nsqd Writer ready.");
 
     writer = nsqd_writer;
-    
-    callback(undefined);
+
+    callback();
   });//writer.on
 
   nsqd_writer.on('closed', function() {
-    log.info("nsqd Writer closed.");
+    log.info({
+      log_type: log.types.queue.writer.CLOSED,
+    }, "nsqd Writer closed.");
   });//writer.on
 
   nsqd_writer.connect();
@@ -66,7 +82,10 @@ function connect(callback) {
 
 function read_message(topic, channel, callback)	{
 	if(channel === undefined)	{
-		log.fatal("Must provide a channel name to listen on.");
+		log.fatal({
+      log_type: log.types.queue.reader.INVALID_CHANNEL_NAME,
+    }, "Must provide a channel name to listen on.");
+
 		throw new Error("Must provide a channel name to listen on.");
 	}//if
 
@@ -86,31 +105,55 @@ function read_message(topic, channel, callback)	{
     try {
       var json = message.json();
 
+      log.info({
+        topic: topic,
+        channel: channel,
+        log_type: log.types.queue.reader.MESSAGE,
+      });
+
       callback(undefined, json, message, reader);
 
     } catch(err)  {
       message.body = '';  // hide verbose message body from logging
-      // log.error({
-      //   topic: topic,
-      //   channel: channel,
-      //   err: err,
-      //   queue_msg: message,
-      // }, "Error getting message from queue!");
 
-      callback(err, undefined, message, reader);
-    }//try-catcg
-  });
+      log.error({
+        topic: topic,
+        channel: channel,
+        err: err,
+        log_type: log.types.queue.reader.MESSAGE_ERROR,
+      }, "Error getting message from queue!");
+
+      // FIXME: save these json-error messages for analysis
+      try {
+
+        message.finish();
+
+      } catch(err)  {
+        log.error({
+          topic: topic,
+          channel: channel,
+          json: json,
+          err: err,
+          log_type: log.types.queue.message.FINISH_ERROR,
+        }, "Error executing message.finish()");
+      }//try-catch
+
+    }//try-catch
+  });//reader,on
+
 
   reader.on('error', function onError(err) {
     log.error({
       topic: topic,
       channel: channel,
       err: err,
-      options: options
+      options: options,
+      log_type: log.types.queue.reader.ERROR,
     }, "nsq Reader error.");
 
     callback(err, undefined, undefined, reader);
-  });
+  });//reader.on
+
 
   reader.on('nsqd_connected', function onNsqdConnected(host, port) {
     log.info({
@@ -118,12 +161,11 @@ function read_message(topic, channel, callback)	{
       channel: channel,
       nsqd_host: host,
       nsqd_port: port,
-      options: options
+      options: options,
+      log_type: log.types.queue.reader.NSQD_CONNECTED,
     }, "Reader connected to nsqd.");
+  });//reader.on
 
-    // callback(undefined, reader);
-    // return reader;
-  });
 
   reader.on('nsqd_closed', function onNsqdClosed(host, port) {
     log.info({
@@ -131,21 +173,23 @@ function read_message(topic, channel, callback)	{
       channel: channel,
       nsqd_host: host,
       nsqd_port: port,
-      options: options
+      options: options,
+      log_type: log.types.queue.reader.NSQD_CLOSED,
     }, "Reader disconnected from nsqd.");
-  });
+  });//reader.on
+
 
 	reader.connect();
 }//read_message()
 
 
 function publish_message(topic, message)	{
-  log.debug({
-    topic: topic,
-    // payload: message,
-  }, "Publishing message.");
-
 	writer.publish(topic, message);
+
+  log.info({
+    log_type: log.types.queue.message.PUBLISHED,
+    topic: topic,
+  });
 }//publish_message
 
 
