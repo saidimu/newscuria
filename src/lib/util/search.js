@@ -23,6 +23,8 @@ var log = require('_/util/logging.js')(appname);
 var search_api = require('_/util/search-api.js');
 var client = search_api.client;
 
+var config = require('config');
+
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
@@ -98,8 +100,19 @@ function process_entities_message(json, message)  {
 function index_entity(doc_type, url, body, message) {
   var id = hash(url);
 
-  // 'second', 'minute', 'day', or a number of milliseconds
-  var limiter = new RateLimiter(1, 250); // 1 every 250 milliseconds
+  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
+  // default of 1 request every 500 milliseconds
+  var num_requests = 1;
+  var time_period = 500;
+
+  // override defaults from optional configuration
+  if(config.has('ratelimiter.elasticsearch')) {
+    var ratelimiter_config = config.get('ratelimiter.elasticsearch');
+    num_requests = ratelimiter_config.get('num_requests');
+    time_period = ratelimiter_config.get('time_period');
+  }//if
+
+  var limiter = new RateLimiter(num_requests, time_period);
 
   // Throttle requests
   limiter.removeTokens(1, function(err, remainingRequests) {
