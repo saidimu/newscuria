@@ -52,9 +52,9 @@ function start()    {
 function listen_to_entities()  {
   var channel = 'index-to-elasticsearch';
 
-  var onReadMessage = function (err, json, message) {
+  var onReadMessage = function (err, json, message, topic) {
     if(!err) {
-      process_entities_message(json, message);
+      process_entities_message(json, message, topic);
     }//if
   };//onReadMessage
 
@@ -62,38 +62,35 @@ function listen_to_entities()  {
   // FIXME: listen to wildcard topics when NSQD supports that.
   for(var topic in topics_and_indices)  {
     if(topics_and_indices.hasOwnProperty(topic)) {
-      queue.read_message(topic, channel, onReadMessage);
+      queue.read_message(topic, channel, function (err, json, message) {
+        onReadMessage(err, json, message, topic);
+      });
     }//if
   }//for
 
 }//listen_to_entities
 
 
-function process_entities_message(json, message)  {
-  for(var topic in topics_and_indices)  {
-    if(topics_and_indices.hasOwnProperty(topic)) {
-      var doc_type = topics_and_indices[topic];
+function process_entities_message(json, message, topic)  {
+    var doc_type = topics_and_indices[topic];
 
-      var url = json.url || '';
-      if(url) {
+    var url = json.url || '';
+    if(url) {
 
-        index_entity(doc_type, url, json, message);
+      index_entity(doc_type, url, json, message);
 
-      } else {
+    } else {
 
-        // FIXME: publish to a special queue for further analysis?
-        log.error({
-          doc_type: doc_type,
-          msg_body: json,
-          log_type: log.types.elasticsearch.EMPTY_URL,
-        }, 'Empty URL in NLP entity object');
+      // FIXME: publish to a special queue for further analysis?
+      log.error({
+        doc_type: doc_type,
+        msg_body: json,
+        log_type: log.types.elasticsearch.EMPTY_URL,
+      }, 'Empty URL in NLP entity object');
 
-        message.finish();
+      message.finish();
 
-      }//if-else
-
-    }//if
-  }//for
+    }//if-else
 }//process_entities_message
 
 
