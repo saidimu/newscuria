@@ -159,6 +159,19 @@ function extract_places(nlp_object, url) {
     log_type: log.types.entities.PLACES,
   });
 
+  // map existing latitude/longitude properties to a new 'geo_point' property
+  // to satisfy Elasticsearch. Much easier than messing around with Elasticsearch transform scripts
+  // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping-geo-point-type.html
+  var resolutions = nlp_object.resolutions || [];
+  resolutions.forEach(function(resolution)  {
+    var lat = resolution.latitude;
+    var lon = resolution.longitude;
+
+    if(lat && lon)  {
+      resolution.geo_point = lat + "," + lon;
+    }//if
+  });//resolutions.forEach
+
   publish_message(topics.ENTITIES_PLACES, nlp_object);
 }//extract_places
 
