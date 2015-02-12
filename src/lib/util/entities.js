@@ -92,6 +92,7 @@ function extract_nlp_objects(opencalais, message, url, date_published) {
       nlp_object.url = url;
 
       // append date_published of parent Opencalais object.
+      // FIXME: Should be the date_published of the Readability object.
       nlp_object.date_published = date_published;
 
       switch(true)  {
@@ -257,5 +258,4 @@ function publish_message(topic, nlp_object) {
 
 module.exports = {
   start: start,
-  extract_nlp_objects: extract_nlp_objects,
 };//module.exports
