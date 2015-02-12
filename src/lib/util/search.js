@@ -68,17 +68,17 @@ function listen_to_entities()  {
 function process_entities_message(json, message)  {
   for(var topic in topics_and_indices)  {
     if(topics_and_indices.hasOwnProperty(topic)) {
-      var type = topics_and_indices[topic];
+      var doc_type = topics_and_indices[topic];
 
       var url = json.url || '';
       if(url) {
 
-        index_entity(type, url, json);
+        index_entity(doc_type, url, json);
 
       } else {
 
         log.error({
-          type: type,
+          doc_type: doc_type,
           msg_body: json,
           log_type: log.types.elasticsearch.EMPTY_URL,
         }, 'Empty URL in NLP entity object');
@@ -90,29 +90,29 @@ function process_entities_message(json, message)  {
 }//process_entities_message
 
 
-function index_entity(type, url, body) {
+function index_entity(doc_type, url, body) {
   var id = hash(url);
 
   log.info({
-    type: type,
+    doc_type: doc_type,
     log_type: log.types.elasticsearch.INDEXED_URL,
   }, 'Indexed url to Elasticsearch.');
 
   client.index({
     index: 'nuzli',
-    type: type,
+    type: doc_type,
     id: id,
     body: body,
   }, function(err, response)  {
-
-    log.error({
-      id: id,
-      type: type,
-      err: err,
-      log_type: log.types.elasticsearch.INDEX_ERROR,
-      response: response,
-    }, 'Elasticsearch index error.');
-
+    if(err) {
+      log.error({
+        id: id,
+        doc_type: doc_type,
+        err: err,
+        log_type: log.types.elasticsearch.INDEX_ERROR,
+        response: response,
+      }, 'Elasticsearch index error.');
+    }//if
   });//client.index
 }//index_entity
 

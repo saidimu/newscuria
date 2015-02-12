@@ -23,11 +23,11 @@ var hosts = config.get('hosts');
 var apiVersion = config.get('apiVersion');
 
 // FIXME: wait for connection success before proceeding
-  var client = new elasticsearch.Client({
-    hosts: hosts,
-    apiVersion: apiVersion,
-    log: 'info',  // FIXME: use a child-logger instead
-  });
+var client = new elasticsearch.Client({
+  hosts: hosts,
+  apiVersion: apiVersion,
+  log: 'info',  // FIXME: use a child-logger instead
+});
 
 module.exports = {
   client: client
