@@ -107,6 +107,13 @@ log_types.datastore = {
   GENERIC_ERROR         : 'datastore_generic_error',
 };//log_types.datastore
 
+// ELASTICSEARCH events
+log_types.elasticsearch = {
+  INDEXED_URL : 'elasticsearch_indexed_url',
+  INDEX_ERROR : 'elasticsearch_index_error',
+  EMPTY_URL   : 'elasticsearch _empty_url',
+};//log_typpes.elasticsearch
+
 // ENTITIES events
 log_types.entities = {
   PEOPLE                : 'entities_people',

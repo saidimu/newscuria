@@ -16,29 +16,19 @@
  */
 'use strict';
 
-// FIXME: workaround 'config' bug regarding multiple confg files
-process.env.NODE_ENV = "entities";
+var elasticsearch = require('elasticsearch');
 
-var filter = require('_/util/filter.js');
-var readability = require('_/util/readability.js');
-var opencalais = require('_/util/opencalais.js');
-var datastore = require('_/util/datastore.js');
-var entities = require('_/util/entities.js');
-var search = require('_/util/search.js');
-var cartodb = require('_/util/cartodb.js');
+var config = require('config').get('elasticsearch');
+var hosts = config.get('hosts');
+var apiVersion = config.get('apiVersion');
 
+// FIXME: wait for connection success before proceeding
+  var client = new elasticsearch.Client({
+    hosts: hosts,
+    apiVersion: apiVersion,
+    log: 'info',  // FIXME: use a child-logger instead
+  });
 
-//==BEGIN here
-start();
-//==BEGIN here
-
-
-function start()    {
-  filter.start();
-  readability.start();
-  opencalais.start();
-  datastore.start();
-  entities.start();
-  search.start();
-  cartodb.start();
-}//start()
+module.exports = {
+  client: client
+};//module.exports
