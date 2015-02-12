@@ -27,6 +27,8 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var hash = require('string-hash');
+var RateLimiter = require('limiter').RateLimiter;
+
 
 var topics_and_indices = {};
 topics_and_indices[topics.ENTITIES_PEOPLE]    = "people";
@@ -73,49 +75,74 @@ function process_entities_message(json, message)  {
       var url = json.url || '';
       if(url) {
 
-        index_entity(doc_type, url, json);
+        index_entity(doc_type, url, json, message);
 
       } else {
 
+        // FIXME: publish to a special queue for further analysis?
         log.error({
           doc_type: doc_type,
           msg_body: json,
           log_type: log.types.elasticsearch.EMPTY_URL,
         }, 'Empty URL in NLP entity object');
 
+        message.finish();
+
       }//if-else
 
     }//if
   }//for
-
-  message.finish();
 }//process_entities_message
 
 
-function index_entity(doc_type, url, body) {
+function index_entity(doc_type, url, body, message) {
   var id = hash(url);
 
-  log.info({
-    doc_type: doc_type,
-    log_type: log.types.elasticsearch.INDEXED_URL,
-  }, 'Indexed url to Elasticsearch.');
+  // 'second', 'minute', 'day', or a number of milliseconds
+  var limiter = new RateLimiter(1, 250); // 1 every 250 milliseconds
 
-  client.index({
-    index: 'nuzli',
-    type: doc_type,
-    id: id,
-    body: body,
-  }, function(err, response)  {
-    if(err) {
-      log.error({
-        id: id,
-        doc_type: doc_type,
-        err: err,
-        log_type: log.types.elasticsearch.INDEX_ERROR,
-        response: response,
-      }, 'Elasticsearch index error.');
-    }//if
-  });//client.index
+  // Throttle requests
+  limiter.removeTokens(1, function(err, remainingRequests) {
+    // err will only be set if we request more than the maximum number of
+    // requests we set in the constructor
+
+    // remainingRequests tells us how many additional requests could be sent
+    // right this moment
+
+    log.info({
+      doc_type: doc_type,
+      log_type: log.types.elasticsearch.INDEXED_URL,
+    }, 'Indexed url to Elasticsearch.');
+
+    client.index({
+      index: 'nuzli',
+      type: doc_type,
+      id: id,
+      body: body,
+    }, function(err, response)  {
+
+      if(err) {
+
+        log.error({
+          id: id,
+          doc_type: doc_type,
+          err: err,
+          log_type: log.types.elasticsearch.INDEX_ERROR,
+          response: response,
+        }, 'Elasticsearch index error.');
+
+        message.requeue();
+
+      } else {
+
+        message.finish();
+
+      }//if-else
+
+    });//client.index
+
+  });//limiter
+
 }//index_entity
 
 
