@@ -87,6 +87,8 @@ function process_entities_message(json, message)  {
 
     }//if
   }//for
+
+  message.finish();
 }//process_entities_message
 
 
