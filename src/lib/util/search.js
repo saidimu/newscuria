@@ -136,6 +136,7 @@ function index_entity(doc_type, url, body, message) {
         log.error({
           id: id,
           doc_type: doc_type,
+          body: body,
           err: err,
           log_type: log.types.elasticsearch.INDEX_ERROR,
           response: response,
