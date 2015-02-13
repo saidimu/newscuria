@@ -109,7 +109,7 @@
             "type": "string"
           },
           "date": {
-            "type": "date"
+            "type": "string"
           },
           "datestring": {
             "type": "string"
@@ -524,7 +524,7 @@
             "type": "string"
           },
           "date": {
-            "type": "date"
+            "type": "string"
           },
           "datestring": {
             "type": "string"
@@ -939,7 +939,7 @@
             "type": "string"
           },
           "date": {
-            "type": "date"
+            "type": "string"
           },
           "datestring": {
             "type": "string"
@@ -1354,7 +1354,7 @@
             "type": "string"
           },
           "date": {
-            "type": "date"
+            "type": "string"
           },
           "datestring": {
             "type": "string"
@@ -1769,7 +1769,7 @@
             "type": "string"
           },
           "date": {
-            "type": "date"
+            "type": "string"
           },
           "datestring": {
             "type": "string"
@@ -2184,7 +2184,7 @@
             "type": "string"
           },
           "date": {
-            "type": "date"
+            "type": "string"
           },
           "datestring": {
             "type": "string"
@@ -2599,7 +2599,7 @@
             "type": "string"
           },
           "date": {
-            "type": "date"
+            "type": "string"
           },
           "datestring": {
             "type": "string"
@@ -3014,7 +3014,7 @@
             "type": "string"
           },
           "date": {
-            "type": "date"
+            "type": "string"
           },
           "datestring": {
             "type": "string"
