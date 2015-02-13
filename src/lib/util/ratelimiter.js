@@ -43,14 +43,31 @@ function ratelimit(callback, options)  {
   // safely check for app-specific rate-limiting (if any)
   // and over-ride provided fallback values
   if(config.has(app)) {
-    num_requests = config.get('num_requests');
-    time_period = config.get('time_period');
+
+    // safely check for app's values (if any)
+    if( config.get(app).has('num_requests') && config.get(app).has('time_period') ) {
+
+      num_requests = config.get(app).get('num_requests');
+      time_period = config.get(app).get('time_period');
+
+    } else {
+
+      log.error({
+        app: app,
+        fallback: options,
+        log_type: log.types.ratelimiter.CONFIG_NOT_FOUND,
+      }, 'One or more rate-limiter config values for app not found. Using fallback values.');
+
+    }//if-else
+
   } else {
+
     log.error({
       app: app,
       fallback: options,
       log_type: log.types.ratelimiter.CONFIG_NOT_FOUND,
-    }, 'Rate-limiter config values not found. Using fallback values.');
+    }, 'All rate-limiter config values for app not found. Using fallback values.');
+
   }//if-else
 
   // if config rate-limit values not found AND no fallback values provided,
