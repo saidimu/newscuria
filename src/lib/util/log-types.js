@@ -130,4 +130,12 @@ log_types.entities = {
   URL_NOT_IN_OPENCALAIS : 'entities_url_not_in_opencalais_object',
 };//log_types.entities
 
+// RATELIMITER events
+log_types.ratelimiter = {
+  RATE_LIMITING_APP  : 'ratelimiter_app_being_ratelimited',
+  CONFIG_NOT_FOUND   : 'ratelimiter_config_not_found',
+  FALLBACK_NOT_FOUND : 'ratelimiter_fallback_not_found',
+};//log_types.ratelimiter
+
+
 module.exports = log_types;

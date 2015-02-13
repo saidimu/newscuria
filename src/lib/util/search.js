@@ -98,9 +98,9 @@ function index_entity(doc_type, url, body, message) {
   var id = hash(url);
 
   // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
-  // default of 1 request every 500 milliseconds
+  // default of 1 request every 1000 milliseconds
   var num_requests = 1;
-  var time_period = 500;
+  var time_period = 1000;
 
   // override defaults from optional configuration
   if(config.has('ratelimiter.elasticsearch')) {
