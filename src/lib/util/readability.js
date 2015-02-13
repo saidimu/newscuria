@@ -25,6 +25,8 @@ var datastore_api = require('_/util/datastore-api.js');
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
+var ratelimiter = require('_/util/ratelimiter.js');
+
 function start()    {
   // connect to the message queue
   queue.connect(listen_to_urls_approved);
@@ -35,9 +37,20 @@ function listen_to_urls_approved()  {
   var topic = topics.URLS_APPROVED;
   var channel = "fetch-readability-content";
 
+  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
+  var options = {
+    app: appname,
+    fallback_num_requests: 1,
+    fallback_time_period: 100
+  };//options
+
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
-      process_url_approved_message(json, message);
+      
+      ratelimiter.limit_app(options, function() {
+        process_url_approved_message(json, message);
+      });//ratelimiter.limit_app
+
     }//if
   });
 }//listen_to_urls_approved

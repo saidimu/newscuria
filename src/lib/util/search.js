@@ -29,8 +29,8 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var hash = require('string-hash');
-var RateLimiter = require('limiter').RateLimiter;
 
+var ratelimiter = require('_/util/ratelimiter.js');
 
 var topics_and_indices = {};
 topics_and_indices[topics.ENTITIES_PEOPLE]    = "people";
@@ -98,27 +98,13 @@ function index_entity(doc_type, url, body, message) {
   var id = hash(url);
 
   // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
-  // default of 1 request every 1000 milliseconds
-  var num_requests = 1;
-  var time_period = 1000;
+  var options = {
+    app: appname,
+    fallback_num_requests: 1,
+    fallback_time_period: 1000
+  };//options
 
-  // override defaults from optional configuration
-  if(config.has('ratelimiter.elasticsearch')) {
-    var ratelimiter_config = config.get('ratelimiter.elasticsearch');
-    num_requests = ratelimiter_config.get('num_requests');
-    time_period = ratelimiter_config.get('time_period');
-  }//if
-
-  var limiter = new RateLimiter(num_requests, time_period);
-
-  // Throttle requests
-  limiter.removeTokens(1, function(err, remainingRequests) {
-    // err will only be set if we request more than the maximum number of
-    // requests we set in the constructor
-
-    // remainingRequests tells us how many additional requests could be sent
-    // right this moment
-
+  var rateLimitCallback = function() {
     log.info({
       doc_type: doc_type,
       log_type: log.types.elasticsearch.INDEXED_URL,
@@ -149,10 +135,13 @@ function index_entity(doc_type, url, body, message) {
         message.finish();
 
       }//if-else
-
     });//client.index
 
-  });//limiter
+  };//onUnderRateLimit
+
+
+  // rate-limit this app
+  ratelimiter.limit_app(options, rateLimitCallback);
 
 }//index_entity
 

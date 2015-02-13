@@ -22,6 +22,8 @@ var log = require('_/util/logging.js')(appname);
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
+var ratelimiter = require('_/util/ratelimiter.js');
+
 function start()    {
   // connect to the message queue
   queue.connect(listen_to_urls_received);
@@ -32,15 +34,26 @@ function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
   var channel = "filter-unwanted-urls";
 
+  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
+  var options = {
+    app: appname,
+    fallback_num_requests: 1,
+    fallback_time_period: 100
+  };//options
+
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
       var url = json.url || '';
 
       if(url) {
 
-        queue.publish_message(topics.URLS_APPROVED, {
-          url: url
-        });
+        var rateLimitCallback = function() {
+          queue.publish_message(topics.URLS_APPROVED, {
+            url: url
+          });//queue.publish_message
+        };//rateLimitCallback
+
+        ratelimiter.limit_app(options, rateLimitCallback);
 
       } else {
         // FIXME: Save url-less messages for later analysis

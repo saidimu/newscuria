@@ -24,6 +24,8 @@ var opencalais_config = require('config');
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
+var ratelimiter = require('_/util/ratelimiter.js');
+
 function start()    {
   // connect to the message queue
   queue.connect(listen_to_opencalais);
@@ -34,9 +36,20 @@ function listen_to_opencalais()  {
   var topic = topics.OPENCALAIS;
   var channel = "extract-entities";
 
+  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
+  var options = {
+    app: appname,
+    fallback_num_requests: 1,
+    fallback_time_period: 100
+  };//options
+
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
-      process_opencalais_message(json, message);
+
+      ratelimiter.limit_app(options, function() {
+        process_opencalais_message(json, message);
+      });//ratelimiter.limit_app
+
     }//if
   });
 }//listen_to_opencalais

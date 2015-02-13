@@ -23,7 +23,7 @@ var config = require('config').ratelimiter;
 var RateLimiter = require('limiter').RateLimiter;
 
 
-function ratelimit(callback, options)  {
+function limit_app(options, callback)  {
 
   if(!options)  {
     log.error({
@@ -112,9 +112,9 @@ function ratelimit(callback, options)  {
 
   });//limiter
 
-}//ratelimit
+}//limit_app
 
 
 module.exports = {
-  ratelimit: ratelimit,
+  limit_app: limit_app,
 };//module.exports
