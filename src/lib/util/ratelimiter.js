@@ -105,7 +105,7 @@ function limit_app(options, callback)  {
       app: app,
       num_requests: num_requests,
       time_period: time_period,
-      log_type: log.types.RATE_LIMITING_APP,
+      log_type: log.types.ratelimiter.RATE_LIMITING_APP,
     }, 'Rate-limiting app.');
 
     callback();
