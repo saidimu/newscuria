@@ -36,6 +36,7 @@ var server;
 function start()    {
   server = start_rest_server();
   kimono_googlenews_handler();
+  ducksboard_loggly_handler();
 }//start()
 
 
