@@ -50,32 +50,50 @@ function ducksboard_loggly_handler() {
     var metric = req.params.metric;
     console.log(req.params);
 
-    request
-      .get(api_endpoint)
-      .auth(loggly_user, loggly_password)
-      .end(function(loggly_err, loggly_res){
-        if(loggly_err || loggly_res.error) {
-          console.log(loggly_err);
-          res.send(500);
-        } else {
-          console.log(loggly_res.body);
-
-          var metric_count;
-
-          loggly_res.body['json.log_type'].forEach(function(log_event) {
-            if(log_event.term === metric) {
-              metric_count = log_event.count;
-            }//if
-          });//forEach
-
-          if(metric_count)  {
-            res.send(metric_count);
-          } else {
+    if(metric)  {
+      request
+        .get(api_endpoint)
+        .auth(loggly_user, loggly_password)
+        .end(function(loggly_err, loggly_res){
+          if(loggly_err || loggly_res.error) {
+            console.log(loggly_err);
             res.send(500);
-          }//if
+          } else {
+            var log_events = loggly_res.body;
 
-        }//if-else
-      });//request
+            console.log(log_events);
+
+            var metric_count;
+
+            log_events['json.log_type'].forEach(function(log_event) {
+              if(log_event.term === metric) {
+                console.log("=====log event matching metric param=====");
+                console.log(log_event);
+                console.log("=====log event matching metric param=====");
+                
+                metric_count = log_event.count;
+
+              }//if
+            });//forEach
+
+            if(metric_count)  {
+
+              res.send(metric_count);
+
+            } else {
+
+              res.send(500);  // 500 Internal Server Error
+
+            }//if
+          }//if-else
+
+        });//request
+
+    } else {
+
+      res.send(400);  //400 Bad Request
+
+    }//if-else
 
   });//server.get
 
