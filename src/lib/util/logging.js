@@ -20,8 +20,8 @@ var logentries = require('bunyan-logentries');
 var hostname = require('os').hostname();
 
 // var config = require('config').get("logging").papertrail;
-var config_loggly = require('config').get("logging").loggly;
-var config_logentries = require('config').get("logging").logentries;
+var config_loggly = require('config').get("logging").get('loggly');
+var config_logentries = require('config').get("logging").get('logentries');
 
 var log_types = require('_/util/log-types.js');
 

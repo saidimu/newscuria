@@ -19,7 +19,7 @@
 var appname = "ratelimiter";
 var log = require('_/util/logging.js')(appname);
 
-var config = require('config').ratelimiter;
+var config = require('config').get('ratelimiter');
 var RateLimiter = require('limiter').RateLimiter;
 
 

@@ -24,6 +24,8 @@ var topics = queue.topics;
 
 var restify = require('restify');
 
+var request = require('superagent');
+
 //==BEGIN here
 // connect to the message queue
 queue.connect(start);
@@ -33,11 +35,53 @@ var server;
 
 function start()    {
   server = start_rest_server();
-  handle_googlenews_webhooks();
+  kimono_googlenews_handler();
 }//start()
 
 
-function handle_googlenews_webhooks() {
+function ducksboard_loggly_handler() {
+  var config_loggly = require('config').get("logging").get('loggly');
+  var loggly_user = config_loggly.get('user');
+  var loggly_password = config_loggly.get('password');
+  var api_endpoint = config_loggly.get('api_endpoint');
+
+  server.get('/ducksboard/:metric', function onDucksboard(req, res, next)  {
+    var metric = req.params.metric;
+
+    request
+      .get(api_endpoint)
+      .auth(loggly_user, loggly_password)
+      .end(function(loggly_err, loggly_res){
+        if(loggly_err || loggly_res.error) {
+          console.log(loggly_err);
+          res.send(500);
+        } else {
+          console.log(loggly_res.body);
+
+          var metric_count;
+
+          loggly_res.body['json.log_type'].forEach(function(log_event) {
+            if(log_event.term === metric) {
+              console.log();
+              metric_count = log_event.count;
+            }//if
+          });//forEach
+
+          if(metric_count)  {
+            res.send(metric_count);
+          } else {
+            res.send(200);
+          }//if
+
+        }//if-else
+      });//request
+
+  });//server.get
+
+}//ducksboard_loggly_handler
+
+
+function kimono_googlenews_handler() {
   server.post('/googlenews', function onGoogleNews(req, res, next) {
     var webhook = req.body;
 
@@ -63,7 +107,7 @@ function handle_googlenews_webhooks() {
     res.send(204);
   });//server.post
 
-}//handle_googlenews_webhooks
+}//kimono_googlenews_handler
 
 
 function process_googlenews_webhook(webhook)  {
@@ -79,7 +123,7 @@ function process_googlenews_webhook(webhook)  {
     var url = headline.href || undefined;
 
     if(url) {
-      
+
       publish_url_message(url);
 
     } else {

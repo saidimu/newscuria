@@ -35,7 +35,9 @@
     "mixpanel": "0.0.20",
     "bunyan-loggly": "0.0.5",
     "bunyan-logentries": "^0.1.0",
-    "string-hash": "^1.1.0"
+    "string-hash": "^1.1.0",
+    "superagent": "^0.21.0",
+    "loggly": "^1.0.8"
   },
   "devDependencies": {},
   "scripts": {
