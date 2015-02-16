@@ -46,7 +46,8 @@ function ducksboard_loggly_handler() {
   var loggly_password = config_loggly.get('password');
   var api_endpoint = config_loggly.get('api_endpoint');
 
-  server.get('/ducksboard/:metric/:from/:until/', function onDucksboard(req, res, next)  {
+  // server.get('/ducksboard/:metric/:from/:until/', function onDucksboard(req, res, next)  {
+  server.get('/ducksboard/:metric/', function onDucksboard(req, res, next)  {
     var metric = req.params.metric;
     var from = req.params.from || '-1h';  // default 'from': past 1-hr
     var until = req.params.until || 'now';      // default 'to': until now
