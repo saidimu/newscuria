@@ -48,20 +48,31 @@ function ducksboard_loggly_handler() {
 
   server.get('/ducksboard/:metric', function onDucksboard(req, res, next)  {
     var metric = req.params.metric;
-    console.log(req.params);
+
+    req.log.debug(req.params);
 
     if(metric)  {
       request
         .get(api_endpoint)
         .auth(loggly_user, loggly_password)
         .end(function(loggly_err, loggly_res){
+
           if(loggly_err || loggly_res.error) {
-            console.log(loggly_err);
-            res.send(500);
+
+            req.log.error({
+              err: loggly_err
+            }, 'Error in Loggly search/events API call.');
+
+            return next(
+              new restify.InternalError('Error in Loggly search/events API call')
+            );
+
           } else {
             var log_events = loggly_res.body;
 
-            console.log(log_events);
+            req.log.debug(req);
+
+            req.log.debug(log_events);
 
             var metric_count;
 
@@ -70,7 +81,7 @@ function ducksboard_loggly_handler() {
                 console.log("=====log event matching metric param=====");
                 console.log(log_event);
                 console.log("=====log event matching metric param=====");
-                
+
                 metric_count = log_event.count;
 
               }//if
@@ -82,7 +93,9 @@ function ducksboard_loggly_handler() {
 
             } else {
 
-              res.send(500);  // 500 Internal Server Error
+              return next(
+                new restify.ResourceNotFound('Metric "%s" not found.', metric)
+              );
 
             }//if
           }//if-else
@@ -91,7 +104,10 @@ function ducksboard_loggly_handler() {
 
     } else {
 
-      res.send(400);  //400 Bad Request
+      // res.send(400);  //400 Bad Request
+      return next(
+        new restify.InvalidArgument('Metric name must be supplied.')
+      );
 
     }//if-else
 
