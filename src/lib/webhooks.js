@@ -51,6 +51,8 @@ function ducksboard_loggly_handler() {
     var from = req.params.from || '-1h';  // default 'from': past 1-hr
     var until = req.params.until || 'now';      // default 'to': until now
 
+    var facet_size = 200;   // https://www.loggly.com/docs/api-retrieving-data/
+
     req.log.debug({
       req_params: req.params
     });
@@ -60,7 +62,8 @@ function ducksboard_loggly_handler() {
         .get(api_endpoint)
         .query({
           from: from,
-          until: until
+          until: until,
+          facet_size: facet_size,
         })
         .auth(loggly_user, loggly_password)
         .end(function(loggly_err, loggly_res){
