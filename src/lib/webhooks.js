@@ -48,6 +48,7 @@ function ducksboard_loggly_handler() {
 
   server.get('/ducksboard/:metric', function onDucksboard(req, res, next)  {
     var metric = req.params.metric;
+    console.log(req.params);
 
     request
       .get(api_endpoint)
@@ -63,7 +64,6 @@ function ducksboard_loggly_handler() {
 
           loggly_res.body['json.log_type'].forEach(function(log_event) {
             if(log_event.term === metric) {
-              console.log();
               metric_count = log_event.count;
             }//if
           });//forEach
@@ -71,7 +71,7 @@ function ducksboard_loggly_handler() {
           if(metric_count)  {
             res.send(metric_count);
           } else {
-            res.send(200);
+            res.send(500);
           }//if
 
         }//if-else
