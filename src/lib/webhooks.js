@@ -70,17 +70,17 @@ function ducksboard_loggly_handler() {
           } else {
             var log_events = loggly_res.body;
 
-            req.log.debug(req);
-
-            req.log.debug(log_events);
+            req.log.debug({
+              log_events: log_events
+            });
 
             var metric_count;
 
             log_events['json.log_type'].forEach(function(log_event) {
               if(log_event.term === metric) {
-                console.log("=====log event matching metric param=====");
-                console.log(log_event);
-                console.log("=====log event matching metric param=====");
+                // console.log("=====log event matching metric param=====");
+                // console.log(log_event);
+                // console.log("=====log event matching metric param=====");
 
                 metric_count = log_event.count;
 
@@ -89,7 +89,7 @@ function ducksboard_loggly_handler() {
 
             if(metric_count)  {
 
-              res.send(metric_count);
+              res.send(200, metric_count);
 
             } else {
 
