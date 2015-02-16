@@ -45,12 +45,12 @@ function ducksboard_loggly_handler() {
   var loggly_user = config_loggly.get('user');
   var loggly_password = config_loggly.get('password');
   var api_endpoint = config_loggly.get('api_endpoint');
+  var from_period  = config_loggly.get('search').get('from') || '-1h';
+  var until_period  = config_loggly.get('search').get('until') || 'now';
 
   // server.get('/ducksboard/:metric/:from/:until/', function onDucksboard(req, res, next)  {
   server.get('/ducksboard/:metric/', function onDucksboard(req, res, next)  {
     var metric = req.params.metric;
-    var from = req.params.from || '-1h';  // default 'from': past 1-hr
-    var until = req.params.until || 'now';      // default 'to': until now
 
     var facet_size = 200;   // https://www.loggly.com/docs/api-retrieving-data/
 
@@ -62,8 +62,8 @@ function ducksboard_loggly_handler() {
       request
         .get(api_endpoint)
         .query({
-          from: from,
-          until: until,
+          from: from_period,
+          until: until_period,
           facet_size: facet_size,
         })
         .auth(loggly_user, loggly_password)
