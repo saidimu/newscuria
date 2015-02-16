@@ -46,14 +46,20 @@ function ducksboard_loggly_handler() {
   var loggly_password = config_loggly.get('password');
   var api_endpoint = config_loggly.get('api_endpoint');
 
-  server.get('/ducksboard/:metric', function onDucksboard(req, res, next)  {
+  server.get('/ducksboard/:metric/:from/:until/', function onDucksboard(req, res, next)  {
     var metric = req.params.metric;
+    var from = req.params.from || '-1h';  // default 'from': past 1-hr
+    var until = req.params.until || 'now';      // default 'to': until now
 
     req.log.debug(req.params);
 
     if(metric)  {
       request
         .get(api_endpoint)
+        .query({
+          from: from,
+          until: until
+        })
         .auth(loggly_user, loggly_password)
         .end(function(loggly_err, loggly_res){
 
@@ -84,7 +90,11 @@ function ducksboard_loggly_handler() {
 
                 metric_count = log_event.count;
 
-              }//if
+              } else {
+
+                metric_count = -1;
+
+              }
             });//forEach
 
             if(metric_count)  {
