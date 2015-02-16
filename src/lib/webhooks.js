@@ -44,7 +44,7 @@ function ducksboard_loggly_handler() {
   var config_loggly = require('config').get("logging").get('loggly');
   var loggly_user = config_loggly.get('user');
   var loggly_password = config_loggly.get('password');
-  var api_endpoint = config_loggly.get('api_endpoint');
+  var api_endpoint = config_loggly.get('search').get('api_endpoint');
   var from_period  = config_loggly.get('search').get('from') || '-1h';
   var until_period  = config_loggly.get('search').get('until') || 'now';
 
