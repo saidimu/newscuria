@@ -51,7 +51,9 @@ function ducksboard_loggly_handler() {
     var from = req.params.from || '-1h';  // default 'from': past 1-hr
     var until = req.params.until || 'now';      // default 'to': until now
 
-    req.log.debug(req.params);
+    req.log.debug({
+      req_params: req.params
+    });
 
     if(metric)  {
       request
@@ -214,6 +216,7 @@ function start_rest_server()  {
     log: log
   });
 
+  server.pre(restify.pre.sanitizePath());
   server.use(restify.acceptParser(server.acceptable));
   server.use(restify.authorizationParser());
   server.use(restify.dateParser());
