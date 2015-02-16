@@ -82,24 +82,15 @@ function ducksboard_loggly_handler() {
               log_events: log_events
             });
 
-            var metric_count;
+            var metric_count = -1; // default 'not found' value
 
             log_events['json.log_type'].forEach(function(log_event) {
               if(log_event.term === metric) {
-                // console.log("=====log event matching metric param=====");
-                // console.log(log_event);
-                // console.log("=====log event matching metric param=====");
-
                 metric_count = log_event.count;
-
-              } else {
-
-                metric_count = -1;
-
-              }
+              }//if
             });//forEach
 
-            if(metric_count)  {
+            if(metric_count > -1)  {
 
               res.send(200, metric_count);
 
