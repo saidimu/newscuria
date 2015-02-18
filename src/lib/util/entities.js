@@ -75,6 +75,7 @@ function process_opencalais_message(json, message) {
     }, "EMPTY url! Cannot persist Opencalais object to datastore.");
 
     // FIXME: Really? Just bail b/c of non-existing URL?
+    message.finish();
     return;
   }//if
 
