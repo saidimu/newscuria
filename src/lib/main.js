@@ -16,6 +16,14 @@
  */
 'use strict';
 
+// increase global maxSockets (NodeJS default is 5)
+// TODO: may need to disable socket pooling all together
+var http = require('http');
+var max = Infinity;
+if(http.globalAgent.maxSockets < max) {
+  http.globalAgent.maxSockets = max;
+}//if
+
 var config = require('config').get("nodetime");
 require('nodetime').profile({
   accountKey: config.get('api_key'),
