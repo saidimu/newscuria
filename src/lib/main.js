@@ -16,6 +16,12 @@
  */
 'use strict';
 
+var config = require('config').get("nodetime");
+require('nodetime').profile({
+  accountKey: config.get('api_key'),
+  appName: config.get('appname')
+});
+
 // FIXME: workaround 'config' bug regarding multiple confg files
 process.env.NODE_ENV = "entities";
 

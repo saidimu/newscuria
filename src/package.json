@@ -37,7 +37,8 @@
     "bunyan-logentries": "^0.1.0",
     "string-hash": "^1.1.0",
     "superagent": "^0.21.0",
-    "loggly": "^1.0.8"
+    "loggly": "^1.0.8",
+    "nodetime": "^0.8.15"
   },
   "devDependencies": {},
   "scripts": {
