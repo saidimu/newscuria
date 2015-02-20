@@ -23,6 +23,11 @@ var config = require('config').get('ratelimiter');
 var RateLimiter = require('limiter').RateLimiter;
 
 
+function passthru(options, callback)  {
+  callback();
+}//passthru
+
+
 function limit_app(options, callback)  {
 
   if(!options)  {
@@ -116,5 +121,6 @@ function limit_app(options, callback)  {
 
 
 module.exports = {
-  limit_app: limit_app,
+  // limit_app: limit_app,
+  limit_app: passthru,
 };//module.exports
