@@ -14,14 +14,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 'use strict';
 
 var bunyan = require('bunyan');
-// var bsyslog = require('bunyan-syslog');
 var loggly = require('bunyan-loggly').Bunyan2Loggly;
-var logentries = require('bunyan-logentries');
 var hostname = require('os').hostname();
 
-// var config = require('config').get("logging").papertrail;
 var config_loggly = require('config').get("logging").get('loggly');
-var config_logentries = require('config').get("logging").get('logentries');
 
 var log_types = require('_/util/log-types.js');
 
@@ -64,13 +60,6 @@ function get_logger(name) {
         stream: new loggly({
           token: config_loggly.get('token'),
           subdomain: config_loggly.get('subdomain')
-        })
-      },
-      {
-        level: config_logentries.get('level'),
-        type: 'raw',
-        stream: logentries.createStream({
-          token: config_logentries.get('token'),
         })
       },
     ],

@@ -39,7 +39,6 @@ var opencalais = require('_/util/opencalais.js');
 var datastore = require('_/util/datastore.js');
 var entities = require('_/util/entities.js');
 var search = require('_/util/search.js');
-// var cartodb = require('_/util/cartodb.js');
 
 
 //==BEGIN here
@@ -54,5 +53,4 @@ function start()    {
   datastore.start();
   entities.start();
   search.start();
-  // cartodb.start();
 }//start()
