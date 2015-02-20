@@ -17,11 +17,18 @@
 'use strict';
 
 // increase global maxSockets (NodeJS default is 5)
+// for both http and https
 // TODO: may need to disable socket pooling all together
+var maxSockets = Infinity;
+
 var http = require('http');
-var max = Infinity;
-if(http.globalAgent.maxSockets < max) {
-  http.globalAgent.maxSockets = max;
+if(http.globalAgent.maxSockets < maxSockets) {
+  http.globalAgent.maxSockets = maxSockets;
+}//if
+
+var https = require('https');
+if(https.globalAgent.maxSockets < maxSockets) {
+  https.globalAgent.maxSockets = maxSockets;
 }//if
 
 var config = require('config').get("nodetime");
