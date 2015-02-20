@@ -121,6 +121,6 @@ function limit_app(options, callback)  {
 
 
 module.exports = {
-  // limit_app: limit_app,
-  limit_app: passthru,
+  limit_app: limit_app,
+  passthru: passthru,
 };//module.exports
