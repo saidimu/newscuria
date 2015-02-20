@@ -31,11 +31,8 @@ if(https.globalAgent.maxSockets < maxSockets) {
   https.globalAgent.maxSockets = maxSockets;
 }//if
 
-var config = require('config').get("nodetime");
-require('nodetime').profile({
-  accountKey: config.get('api_key'),
-  appName: config.get('appname')
-});
+// init the SaaS profiler
+require('_/util/profiler.js').appdynamics();
 
 // FIXME: workaround 'config' bug regarding multiple confg files
 process.env.NODE_ENV = "entities";
