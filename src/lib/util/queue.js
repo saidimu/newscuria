@@ -105,11 +105,11 @@ function read_message(topic, channel, callback)	{
     try {
       var json = message.json();
 
-      log.info({
-        topic: topic,
-        channel: channel,
-        log_type: log.types.queue.reader.MESSAGE,
-      });
+      // log.info({
+      //   topic: topic,
+      //   channel: channel,
+      //   log_type: log.types.queue.reader.MESSAGE,
+      // });
 
       callback(undefined, json, message, reader);
 
@@ -186,10 +186,10 @@ function read_message(topic, channel, callback)	{
 function publish_message(topic, message)	{
 	writer.publish(topic, message);
 
-  log.info({
-    log_type: log.types.queue.message.PUBLISHED,
-    topic: topic,
-  });
+  // log.info({
+  //   log_type: log.types.queue.message.PUBLISHED,
+  //   topic: topic,
+  // });
 }//publish_message
 
 

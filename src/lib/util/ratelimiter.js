@@ -56,12 +56,14 @@ function limit_app(options, callback)  {
       time_period = config.get(app).get('time_period');
 
     } else {
+      
+      console.log();
 
-      log.error({
-        app: app,
-        fallback: options,
-        log_type: log.types.ratelimiter.CONFIG_NOT_FOUND,
-      }, 'One or more rate-limiter config values for app not found. Using fallback values.');
+      // log.error({
+      //   app: app,
+      //   fallback: options,
+      //   log_type: log.types.ratelimiter.CONFIG_NOT_FOUND,
+      // }, 'One or more rate-limiter config values for app not found. Using fallback values.');
 
     }//if-else
 
