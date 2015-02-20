@@ -24,23 +24,6 @@ function nodetime() {
   });
 }//nodetime
 
-
-function appdynamics()  {
-  var config = require('config').get('profiler').get("appdynamics");
-  require("appdynamics").profile({
-    controllerHostName   : config.get('controllerHostName'),
-    controllerPort       : config.get('controllerPort'), // If SSL, be sure to enable the next line
-    accountName          : config.get('accountName'), // Required for a controller running in multi-tenant mode
-    accountAccessKey     : config.get('accountAccessKey'), // Required for a controller running in multi-tenant mode
-    applicationName      : config.get('applicationName'),
-    tierName             : config.get('tierName'),
-    nodeName             : config.get('nodeName'), // Node names must be unique. A unique name has been generated for you.
-    controllerSslEnabled : config.get('controllerSslEnabled') // Optional - use if connecting to controller via SSL
-  });//require
-}//appdynamics
-
-
 module.exports = {
-  nodetime: nodetime,
-  appdynamics: appdynamics
+  nodetime: nodetime
 };//module.exports

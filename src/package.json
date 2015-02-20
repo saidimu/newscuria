@@ -23,8 +23,7 @@
     "bunyan-loggly": "0.0.5",
     "string-hash": "^1.1.0",
     "superagent": "^0.21.0",
-    "nodetime": "^0.8.15",
-    "appdynamics": "^4.0.1"
+    "nodetime": "^0.8.15"
   },
   "devDependencies": {},
   "scripts": {
