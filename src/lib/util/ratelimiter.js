@@ -56,14 +56,14 @@ function limit_app(options, callback)  {
       time_period = config.get(app).get('time_period');
 
     } else {
-      
+
       console.log();
 
-      // log.error({
-      //   app: app,
-      //   fallback: options,
-      //   log_type: log.types.ratelimiter.CONFIG_NOT_FOUND,
-      // }, 'One or more rate-limiter config values for app not found. Using fallback values.');
+      log.error({
+        app: app,
+        fallback: options,
+        log_type: log.types.ratelimiter.CONFIG_NOT_FOUND,
+      }, 'One or more rate-limiter config values for app not found. Using fallback values.');
 
     }//if-else
 
@@ -108,12 +108,12 @@ function limit_app(options, callback)  {
     // remainingRequests tells us how many additional requests could be sent
     // right this moment
 
-    log.info({
-      app: app,
-      num_requests: num_requests,
-      time_period: time_period,
-      log_type: log.types.ratelimiter.RATE_LIMITING_APP,
-    }, 'Rate-limiting app.');
+    // log.info({
+    //   app: app,
+    //   num_requests: num_requests,
+    //   time_period: time_period,
+    //   log_type: log.types.ratelimiter.RATE_LIMITING_APP,
+    // }, 'Rate-limiting app.');
 
     callback();
 
