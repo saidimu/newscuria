@@ -55,7 +55,7 @@ function ducksboard_loggly_handler() {
 
     var facet_size = 200;   // https://www.loggly.com/docs/api-retrieving-data/
 
-    req.log.debug({
+    req.log.info({
       req_params: req.params
     });
 
@@ -83,7 +83,7 @@ function ducksboard_loggly_handler() {
           } else {
             var log_events = loggly_res.body;
 
-            req.log.debug({
+            req.log.info({
               log_events: log_events
             });
 
