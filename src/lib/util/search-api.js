@@ -32,8 +32,30 @@ var client = new elasticsearch.Client({
   requestTimeout: requestTimeout,
   keepAlive: keepAlive,
   maxSockets: maxSockets,
-  log: 'info',  // FIXME: use a child-logger instead
+  log: LogToBunyan,
 });
+
+
+function LogToBunyan(config) {
+  // config is the object passed to the client constructor.
+  var bunyan_logger = require('_/util/logging.js')('elasticsearch-client');
+
+  this.error = bunyan_logger.error.bind(bunyan_logger);
+  this.warning = bunyan_logger.warn.bind(bunyan_logger);
+  this.info = bunyan_logger.info.bind(bunyan_logger);
+  this.debug = bunyan_logger.debug.bind(bunyan_logger);
+  this.trace = function (method, requestUrl, body, responseBody, responseStatus) {
+    bunyan_logger.trace({
+      method: method,
+      requestUrl: requestUrl,
+      body: body,
+      responseBody: responseBody,
+      responseStatus: responseStatus
+    });
+  };
+  this.close = function () { /* bunyan's loggers do not need to be closed */ };
+}//LogToBunyan
+
 
 module.exports = {
   client: client
