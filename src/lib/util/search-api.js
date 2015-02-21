@@ -32,7 +32,7 @@ var client = new elasticsearch.Client({
   requestTimeout: requestTimeout,
   keepAlive: keepAlive,
   maxSockets: maxSockets,
-  log: LogToBunyan,
+  // log: LogToBunyan,
 });
 
 
