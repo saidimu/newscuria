@@ -44,7 +44,7 @@ function ducksboard_loggly_handler() {
   var config_loggly = require('config').get("logging").get('loggly');
   var loggly_user = config_loggly.get('user');
   var loggly_password = config_loggly.get('password');
-  
+
   var api_endpoint = config_loggly.get('search').get('api_endpoint');
   var from_period  = config_loggly.get('search').get('from') || '-1h';
   var until_period  = config_loggly.get('search').get('until') || 'now';
@@ -139,11 +139,8 @@ function kimono_googlenews_handler() {
       count: webhook.count
     };
 
+    webhook_header.log_type = log.types.webhook.GOOGLE_NEWS;
     req.log.info(webhook_header);
-
-    log.info({
-      log_type: log.types.webhook.GOOGLE_NEWS,
-    });
 
     process_googlenews_webhook(webhook);
 

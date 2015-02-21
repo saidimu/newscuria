@@ -110,6 +110,8 @@ function index_entity(doc_type, url, body, message) {
       log_type: log.types.elasticsearch.INDEXED_URL,
     }, 'Indexed url to Elasticsearch.');
 
+    // TODO: Perform multiple index operations in a single API call.
+    // http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/api-reference-1-3.html#api-bulk-1-3
     client.index({
       index: 'nuzli',
       type: doc_type,
