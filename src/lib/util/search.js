@@ -105,18 +105,14 @@ function index_entity(doc_type, url, body, message) {
   };//options
 
   var rateLimitCallback = function() {
-    log.info({
-      doc_type: doc_type,
-      log_type: log.types.elasticsearch.INDEXED_URL,
-    }, 'Indexed url to Elasticsearch.');
-
     // TODO: Perform multiple index operations in a single API call.
     // http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/api-reference-1-3.html#api-bulk-1-3
-    client.index({
+    client.create({
       index: 'nuzli',
       type: doc_type,
       id: id,
       body: body,
+      ignore: [409],  // ignore 'error' if document already exists
     }, function(err, response)  {
 
       if(err) {
@@ -133,6 +129,11 @@ function index_entity(doc_type, url, body, message) {
         message.requeue();
 
       } else {
+
+        log.info({
+          doc_type: doc_type,
+          log_type: log.types.elasticsearch.INDEXED_URL,
+        }, 'Indexed url to Elasticsearch.');
 
         message.finish();
 
