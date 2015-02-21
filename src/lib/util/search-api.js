@@ -21,11 +21,17 @@ var elasticsearch = require('elasticsearch');
 var config = require('config').get('elasticsearch');
 var hosts = config.get('hosts');
 var apiVersion = config.get('apiVersion');
+var requestTimeout = config.get('requestTimeout');
+var keepAlive = config.get('keepAlive');
+var maxSockets = config.get('maxSockets');
 
 // FIXME: wait for connection success before proceeding
 var client = new elasticsearch.Client({
   hosts: hosts,
   apiVersion: apiVersion,
+  requestTimeout: requestTimeout,
+  keepAlive: keepAlive,
+  maxSockets: maxSockets,
   log: 'info',  // FIXME: use a child-logger instead
 });
 
