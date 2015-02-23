@@ -43,6 +43,7 @@ var opencalais = require('_/util/opencalais.js');
 var datastore = require('_/util/datastore.js');
 var entities = require('_/util/entities.js');
 var search = require('_/util/search.js');
+var twitter = require('_/util/twitter.js');
 
 
 //==BEGIN here
@@ -51,6 +52,7 @@ start();
 
 
 function start()    {
+  twitter.start();
   filter.start();
   readability.start();
   opencalais.start();
