@@ -19,6 +19,8 @@
 // application's logging types
 var log_types = {};
 
+module.exports = log_types;
+
 // QUEUE events
 log_types.queue = {};
 
@@ -137,5 +139,7 @@ log_types.ratelimiter = {
   FALLBACK_NOT_FOUND : 'ratelimiter_fallback_not_found',
 };//log_types.ratelimiter
 
-
-module.exports = log_types;
+// TWITTER events
+log_types.twitter = {
+  STREAM_ERROR: 'twitter_stream_error',
+};//log_types.twitter
