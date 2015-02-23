@@ -157,6 +157,8 @@ function process_googlenews_webhook(webhook)  {
   var metadata = results.metadata || [];
   var related = results.related || [];
 
+  // FIXME: beware of duplicate URLs in 'content' and 'related' arrays.
+
   content.forEach(function(article)  {
     // TODO: also process Google News article headlines
     var headline = article.headline || {};
