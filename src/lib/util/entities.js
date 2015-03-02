@@ -92,9 +92,9 @@ function extract_nlp_objects(opencalais, message, url, date_published) {
   var EVENTS = opencalais_config.get('EVENTS');
   var THINGS = opencalais_config.get('THINGS');
   var RELATIONS = opencalais_config.get('RELATIONS');
-  // var TOPICS = opencalais_config.get('TOPICS') || [];
-  // var TAGS = opencalais_config.get('SOCIALTAGS') || [];
-  // var LANGUAGE = opencalais_config.get('LANGUAGE') || [];
+  var TOPICS = opencalais_config.get('TOPICS') || [];
+  var TAGS = opencalais_config.get('SOCIALTAGS') || [];
+  var LANGUAGE = opencalais_config.get('LANGUAGE') || [];
 
   for(var hash in opencalais) {
     if(opencalais.hasOwnProperty(hash))  {
