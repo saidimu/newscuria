@@ -32,7 +32,7 @@ if(https.globalAgent.maxSockets < maxSockets) {
 }//if
 
 // init the SaaS profiler
-require('_/util/profiler.js').nodetime();
+//require('_/util/profiler.js').nodetime();
 
 // FIXME: workaround 'config' bug regarding multiple confg files
 process.env.NODE_ENV = "entities";

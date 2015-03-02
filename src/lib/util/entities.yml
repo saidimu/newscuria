@@ -136,6 +136,6 @@ RELATIONS:
   - PersonRelation
   - ContactDetails
 
-TOPICS:
-SOCIALTAGS:
-LANGUAGE:
+# TOPICS:
+# SOCIALTAGS:
+# LANGUAGE:
