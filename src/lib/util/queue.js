@@ -22,7 +22,6 @@ var util = require('util');
 var config = require('config').get("nsqd");
 var nsqd_host = config.writer.get('host');
 var nsqd_port = config.writer.get('port');
-var lookupdHTTPAddresses = config.reader.get('lookupdHTTPAddresses');
 
 var topics = {
   URLS_RECEIVED      : "newscuria.urls_received",
@@ -91,11 +90,12 @@ function read_message(topic, channel, callback)	{
 
   // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
   var options = {
-    maxInFlight: config.reader.get('maxInFlight'),
-    maxAttempts: config.reader.get('maxAttempts'),
-    requeueDelay: config.reader.get('requeueDelay'),  // in seconds
-    lookupdHTTPAddresses: lookupdHTTPAddresses,
-    lookupdPollInterval: config.reader.get('lookupdPollInterval'),  // in seconds
+    maxInFlight          : config.reader.get('maxInFlight'),
+    maxAttempts          : config.reader.get('maxAttempts'),
+    requeueDelay         : config.reader.get('requeueDelay'),  // in seconds
+    nsqdTCPAddresses     : config.reader.get('nsqdTCPAddresses'),
+    // lookupdHTTPAddresses : config.reader.get('lookupdHTTPAddresses'),
+    // lookupdPollInterval  : config.reader.get('lookupdPollInterval'),  // in seconds
   };//options
 
 	var reader = new nsq.Reader(topic, channel, options);
