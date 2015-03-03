@@ -141,5 +141,6 @@ log_types.ratelimiter = {
 
 // TWITTER events
 log_types.twitter = {
+  STREAM_INFO: 'twitter_stream_info',
   STREAM_ERROR: 'twitter_stream_error',
 };//log_types.twitter

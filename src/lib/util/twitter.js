@@ -43,7 +43,22 @@ var client = new Twitter({
 
 
 function start()    {
-  stream();
+  if(config.get('activate')) { // only run if config file allows
+    log.info({
+      log_type: log.types.twitter.STREAM_INFO,
+      streaming_endpoint: STREAMING_ENDPOINT,
+    }, 'Twitter Streaming is ACTIVATED.');
+
+    stream();
+
+  } else{
+
+    log.info({
+      log_type: log.types.twitter.STREAM_INFO,
+      streaming_endpoint: STREAMING_ENDPOINT,
+    }, 'Twitter Streaming not ACTIVATED.');
+
+  }//if-else
 }//start()
 
 
