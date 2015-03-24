@@ -60,7 +60,7 @@ function get_logger(name) {
         stream: new loggly({
           token: config_loggly.get('token'),
           subdomain: config_loggly.get('subdomain')
-        }, config_loggly.get('buffer') || 1)
+        }, config_loggly.get('buffer') || 100)
       },
     ],
   });//bunyan.createLogger()
