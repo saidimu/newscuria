@@ -144,3 +144,9 @@ log_types.twitter = {
   STREAM_INFO: 'twitter_stream_info',
   STREAM_ERROR: 'twitter_stream_error',
 };//log_types.twitter
+
+// LIMITD events
+log_types.limitd = {
+  TOKEN_GET_ERROR: 'limitd_token_get_error',
+  SLEEP_DURATION: 'limitd_sleep_duration'
+};//log_types.limitd
