@@ -45,10 +45,20 @@ function take(bucket_obj, callback) {
 
     } else {
 
-      // if token remove successfull...
+      // callback ONLY if token remove successfull
       if(response.conformant) {
         callback();
 
+      // else log error if tokens requested greater than max. bucket size
+      } else if(response.limit > num_tokens) {
+        log.error({
+          bucket: bucket,
+          key: key,
+          num_tokens: num_tokens,
+          log_type: log.types.limitd.TOKEN_REQUEST_TOO_BIG,
+        }, 'Error. Tokens requested greater than max. bucket size.');
+
+      // wait until bucket refills to re-request tokens
       } else {
 
         var sleep_duration = response.reset - (Date.now() / 1000);
@@ -59,7 +69,7 @@ function take(bucket_obj, callback) {
           num_tokens: num_tokens,
           sleep_duration: sleep_duration,
           log_type: log.types.limitd.SLEEP_DURATION,
-        }, util.format('Sleeping for %s seconds for lack of tokens.' % sleep_duration));
+        }, util.format('Sleeping for %s seconds for lack of tokens.', sleep_duration));
 
         // try getting the token after a sleep duration determined by limitd response
         setTimeout(function onTimeoutWake() {
