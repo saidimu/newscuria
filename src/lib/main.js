@@ -52,7 +52,7 @@ start();
 
 
 function start()    {
-  twitter.start();
+  // twitter.start();
   filter.start();
   readability.start();
   opencalais.start();
