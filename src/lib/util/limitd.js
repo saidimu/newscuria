@@ -17,6 +17,7 @@
 'use strict';
 
 var appname = "limitd";
+var util = require('util');
 var log = require('_/util/logging.js')(appname);
 
 var config = require('config').get('limitd');
@@ -28,10 +29,10 @@ var limitd = new LimitdClient({
 });
 
 
-function take(bucket, key, num_tokens, callback) {
-  if(!num_tokens) {
-    num_tokens = 1; // 1-token at a time.
-  }//if
+function take(bucket_obj, callback) {
+  var bucket     = bucket_obj.bucket;
+  var key        = bucket_obj.key;
+  var num_tokens = bucket_obj.num_tokens || 1; // 1-token at a time.
 
   limitd.take(bucket, key, num_tokens, function(err, response)  {
     if(err) {
@@ -50,7 +51,7 @@ function take(bucket, key, num_tokens, callback) {
 
       } else {
 
-        var sleep_duration = (Date.now() / 1000) - response.reset;
+        var sleep_duration = response.reset - (Date.now() / 1000);
 
         log.info({
           bucket: bucket,
@@ -58,7 +59,7 @@ function take(bucket, key, num_tokens, callback) {
           num_tokens: num_tokens,
           sleep_duration: sleep_duration,
           log_type: log.types.limitd.SLEEP_DURATION,
-        }, 'Sleeping for %s seconds for lack of tokens.' % sleep_duration);
+        }, util.format('Sleeping for %s seconds for lack of tokens.' % sleep_duration));
 
         // try getting the token after a sleep duration determined by limitd response
         setTimeout(function onTimeoutWake() {
