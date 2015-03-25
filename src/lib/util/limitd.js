@@ -50,7 +50,7 @@ function take(bucket_obj, callback) {
         callback();
 
       // else log error if tokens requested greater than max. bucket size
-      } else if(response.limit > num_tokens) {
+    } else if(num_tokens > response.limit) {
         log.error({
           bucket: bucket,
           key: key,
@@ -73,7 +73,7 @@ function take(bucket_obj, callback) {
 
         // try getting the token after a sleep duration determined by limitd response
         setTimeout(function onTimeoutWake() {
-          take(bucket, key, num_tokens, callback);
+          take(bucket_obj, callback);
         }, sleep_duration * 1000);
 
       }//if-else
