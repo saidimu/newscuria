@@ -147,7 +147,7 @@ log_types.twitter = {
 
 // LIMITD events
 log_types.limitd = {
-  TOKEN_GET_ERROR: 'limitd_token_get_error',
-  TOKEN_REQUEST_TOO_BIG: 'limitd_token_request_too_big',
-  SLEEP_DURATION: 'limitd_sleep_duration'
+  TOKEN_GET_ERROR       : 'limitd_token_get_error',
+  TOKEN_REQUEST_TOO_BIG : 'limitd_token_request_too_big',
+  SLEEP_RECOMMENDATION  : 'limitd_sleep_recommendation'
 };//log_types.limitd

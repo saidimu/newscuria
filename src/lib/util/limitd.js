@@ -64,20 +64,10 @@ function take(bucket_obj, callback) {
       // wait until bucket refills to re-request tokens
       } else {
 
-        var sleep_duration = response.reset - (Date.now() / 1000);
+        var sleep_duration_seconds = response.reset - (Date.now() / 1000);
 
-        log.info({
-          bucket: bucket,
-          key: key,
-          num_tokens: num_tokens,
-          sleep_duration: sleep_duration,
-          log_type: log.types.limitd.SLEEP_DURATION,
-        }, util.format('Sleeping for %s seconds for lack of tokens.', sleep_duration));
-
-        // try getting the token after a sleep duration determined by limitd response
-        setTimeout(function onTimeoutWake() {
-          take(bucket_obj, callback);
-        }, sleep_duration * 1000);
+        // callback with recommended sleep duration. Upto callback to implement recommendation.
+        callback(sleep_duration_seconds);
 
       }//if-else
 

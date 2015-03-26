@@ -38,7 +38,7 @@ function listen_to_urls_received()  {
   var limit_options = {
     bucket: appname,
     // key: 1, // TODO: FIXME: os.hostname()?
-    num_tokens: 1
+    num_tokens: 1,
   };//options
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
@@ -47,10 +47,28 @@ function listen_to_urls_received()  {
 
       if(url) {
 
-        var rateLimitCallback = function() {
-          queue.publish_message(topics.URLS_APPROVED, {
-            url: url
-          });//queue.publish_message
+        var rateLimitCallback = function(sleep_duration_seconds) {
+
+          if(sleep_duration_seconds)  {
+            log.info({
+              bucket: limit_options.bucket,
+              key: limit_options.key,
+              num_tokens: limit_options.num_tokens,
+              sleep_duration: sleep_duration_seconds,
+              log_type: log.types.limitd.SLEEP_RECOMMENDATION,
+            }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
+
+            // not backing-off since we don't want "punishment" from queue server
+            // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+            message.requeue(sleep_duration_seconds, false);
+
+          } else {
+
+            queue.publish_message(topics.URLS_APPROVED, {
+              url: url
+            });//queue.publish_message
+
+          }//if-else
         };//rateLimitCallback
 
         ratelimiter.limit_app(limit_options, rateLimitCallback);
