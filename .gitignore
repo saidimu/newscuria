@@ -4,9 +4,10 @@ shipitfile.js
 ## NewRelic.com config file
 newrelic.js
 
-## Docker fig & crane config files
+## app config files: fig, crane etc
 fig.yml
 crane.yml
+limitd.yml
 
 # configuration files
 config

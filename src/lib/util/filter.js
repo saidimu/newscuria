@@ -22,7 +22,7 @@ var log = require('_/util/logging.js')(appname);
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
-var ratelimiter = require('_/util/ratelimiter.js');
+var ratelimiter = require('_/util/limitd.js');
 
 function start()    {
   // connect to the message queue
@@ -34,11 +34,11 @@ function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
   var channel = "filter-unwanted-urls";
 
-  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
-  var options = {
-    app: appname,
-    fallback_num_requests: 1,
-    fallback_time_period: 100
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1
   };//options
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
@@ -53,7 +53,7 @@ function listen_to_urls_received()  {
           });//queue.publish_message
         };//rateLimitCallback
 
-        ratelimiter.limit_app(options, rateLimitCallback);
+        ratelimiter.limit_app(limit_options, rateLimitCallback);
 
       } else {
         // FIXME: Save url-less messages for later analysis

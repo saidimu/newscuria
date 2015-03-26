@@ -31,7 +31,7 @@ var limitd = new LimitdClient({
 
 function take(bucket_obj, callback) {
   var bucket     = bucket_obj.bucket;
-  var key        = bucket_obj.key;
+  var key        = bucket_obj.key || process.env.HOSTNAME;  // TODO: FIXME: os.hostname()?
   var num_tokens = bucket_obj.num_tokens || 1; // 1-token at a time.
 
   limitd.take(bucket, key, num_tokens, function(err, response)  {
@@ -42,6 +42,9 @@ function take(bucket_obj, callback) {
         num_tokens: num_tokens,
         log_type: log.types.limitd.TOKEN_GET_ERROR,
       }, 'Error getting token from bucket.');
+
+      // force client to handle rate-limit error
+      throw new Error(err);
 
     } else {
 
@@ -86,5 +89,5 @@ function take(bucket_obj, callback) {
 
 
 module.exports = {
-  take: take,
+  limit_app: take,
 };//module.exports
