@@ -48,7 +48,6 @@ function listen_to_urls_received()  {
       if(url) {
 
         var rateLimitCallback = function(sleep_duration_seconds) {
-
           if(sleep_duration_seconds)  {
             log.info({
               bucket: limit_options.bucket,
