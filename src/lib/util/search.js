@@ -30,7 +30,7 @@ var topics = queue.topics;
 
 var hash = require('string-hash');
 
-var ratelimiter = require('_/util/ratelimiter.js');
+var ratelimiter = require('_/util/limitd.js');
 
 var topics_and_indices = {};
 topics_and_indices[topics.ENTITIES_PEOPLE]    = "people";
@@ -97,54 +97,72 @@ function process_entities_message(json, message, topic)  {
 function index_entity(doc_type, url, body, message) {
   var id = hash(url);
 
-  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
-  var options = {
-    app: appname,
-    fallback_num_requests: 1,
-    fallback_time_period: 1000
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
   };//options
 
-  var rateLimitCallback = function() {
-    // TODO: Perform multiple index operations in a single API call.
-    // http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/api-reference-1-3.html#api-bulk-1-3
-    client.create({
-      index: 'nuzli',
-      type: doc_type,
-      id: id,
-      body: body,
-      ignore: [409],  // ignore 'error' if document already exists
-    }, function(err, response)  {
+  var rateLimitCallback = function(sleep_duration_seconds) {
+    if(sleep_duration_seconds)  {
+      log.info({
+        bucket: limit_options.bucket,
+        key: limit_options.key,
+        num_tokens: limit_options.num_tokens,
+        sleep_duration: sleep_duration_seconds,
+        log_type: log.types.limitd.SLEEP_RECOMMENDATION,
+      }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
 
-      if(err) {
+      // now backing-off to prevent other messages from being pushed from the server
+      // initially wasn't backing-off to prevent "punishment" by the server
+      // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+      message.requeue(sleep_duration_seconds, true);
 
-        log.error({
-          id: id,
-          doc_type: doc_type,
-          body: body,
-          err: err,
-          log_type: log.types.elasticsearch.INDEX_ERROR,
-          response: response,
-        }, 'Elasticsearch index error.');
+    } else {
 
-        message.requeue();
+      // TODO: Perform multiple index operations in a single API call.
+      // http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/api-reference-1-3.html#api-bulk-1-3
+      client.create({
+        index: 'nuzli',
+        type: doc_type,
+        id: id,
+        body: body,
+        ignore: [409],  // ignore 'error' if document already exists
+      }, function(err, response)  {
 
-      } else {
+        if(err) {
 
-        log.info({
-          doc_type: doc_type,
-          log_type: log.types.elasticsearch.INDEXED_URL,
-        }, 'Indexed url to Elasticsearch.');
+          log.error({
+            id: id,
+            doc_type: doc_type,
+            body: body,
+            err: err,
+            log_type: log.types.elasticsearch.INDEX_ERROR,
+            response: response,
+          }, 'Elasticsearch index error.');
 
-        message.finish();
+          message.requeue();
 
-      }//if-else
-    });//client.index
+        } else {
 
-  };//onUnderRateLimit
+          log.info({
+            doc_type: doc_type,
+            log_type: log.types.elasticsearch.INDEXED_URL,
+          }, 'Indexed url to Elasticsearch.');
+
+          message.finish();
+
+        }//if-else
+      });//client.create
+
+    }//if-else (sleep_duration_seconds)
+
+  };//rateLimitCallback
 
 
   // rate-limit this app
-  ratelimiter.limit_app(options, rateLimitCallback);
+  ratelimiter.limit_app(limit_options, rateLimitCallback);
 
 }//index_entity
 

@@ -24,7 +24,7 @@ var opencalais_config = require('config');
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
-var ratelimiter = require('_/util/ratelimiter.js');
+var ratelimiter = require('_/util/limitd.js');
 
 function start()    {
   // connect to the message queue
@@ -36,18 +36,37 @@ function listen_to_opencalais()  {
   var topic = topics.OPENCALAIS;
   var channel = "extract-entities";
 
-  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
-  var options = {
-    app: appname,
-    fallback_num_requests: 1,
-    fallback_time_period: 100
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
   };//options
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
-      ratelimiter.limit_app(options, function() {
-        process_opencalais_message(json, message);
+      ratelimiter.limit_app(limit_options, function(sleep_duration_seconds) {
+        if(sleep_duration_seconds)  {
+          log.info({
+            bucket: limit_options.bucket,
+            key: limit_options.key,
+            num_tokens: limit_options.num_tokens,
+            sleep_duration: sleep_duration_seconds,
+            log_type: log.types.limitd.SLEEP_RECOMMENDATION,
+          }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
+
+          // now backing-off to prevent other messages from being pushed from the server
+          // initially wasn't backing-off to prevent "punishment" by the server
+          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+          message.requeue(sleep_duration_seconds, true);
+
+        } else {
+
+          process_opencalais_message(json, message);
+
+        }//if-else
+
       });//ratelimiter.limit_app
 
     }//if

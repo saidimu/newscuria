@@ -27,7 +27,7 @@ var client = datastore_api.client;
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
-var ratelimiter = require('_/util/ratelimiter.js');
+var ratelimiter = require('_/util/limitd.js');
 
 function start()    {
   // connect to the message queue
@@ -43,18 +43,37 @@ function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
   var channel = "save-to-datastore";
 
-  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
-  var options = {
-    app: appname,
-    fallback_num_requests: 1,
-    fallback_time_period: 100
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
   };//options
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
-      ratelimiter.limit_app(options, function() {
-        process_url_received_message(json, message);
+      ratelimiter.limit_app(limit_options, function(sleep_duration_seconds) {
+        if(sleep_duration_seconds)  {
+          log.info({
+            bucket: limit_options.bucket,
+            key: limit_options.key,
+            num_tokens: limit_options.num_tokens,
+            sleep_duration: sleep_duration_seconds,
+            log_type: log.types.limitd.SLEEP_RECOMMENDATION,
+          }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
+
+          // now backing-off to prevent other messages from being pushed from the server
+          // initially wasn't backing-off to prevent "punishment" by the server
+          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+          message.requeue(sleep_duration_seconds, true);
+
+        } else {
+
+          process_url_received_message(json, message);
+
+        }//if-else(sleep_duration_seconds)
+
       });//ratelimiter.limit_app
 
     }//if
@@ -66,18 +85,37 @@ function listen_to_readability()  {
   var topic = topics.READABILITY;
   var channel = "save-to-datastore";
 
-  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
-  var options = {
-    app: appname,
-    fallback_num_requests: 1,
-    fallback_time_period: 100
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
   };//options
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
-      ratelimiter.limit_app(options, function() {
-        process_readability_message(json, message);
+      ratelimiter.limit_app(limit_options, function(sleep_duration_seconds) {
+        if(sleep_duration_seconds)  {
+          log.info({
+            bucket: limit_options.bucket,
+            key: limit_options.key,
+            num_tokens: limit_options.num_tokens,
+            sleep_duration: sleep_duration_seconds,
+            log_type: log.types.limitd.SLEEP_RECOMMENDATION,
+          }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
+
+          // now backing-off to prevent other messages from being pushed from the server
+          // initially wasn't backing-off to prevent "punishment" by the server
+          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+          message.requeue(sleep_duration_seconds, true);
+
+        } else {
+
+          process_readability_message(json, message);
+
+        }//if-else(sleep_duration_seconds)
+
       });//ratelimiter.limit_app
 
     }//if
@@ -89,18 +127,37 @@ function listen_to_opencalais()  {
   var topic = topics.OPENCALAIS;
   var channel = "save-to-datastore";
 
-  // 'second', 'minute', 'day', or a number of milliseconds: https://github.com/jhurliman/node-rate-limiter
-  var options = {
-    app: appname,
-    fallback_num_requests: 1,
-    fallback_time_period: 100
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
   };//options
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
-      ratelimiter.limit_app(options, function() {
-        process_opencalais_message(json, message);
+      ratelimiter.limit_app(limit_options, function(sleep_duration_seconds) {
+        if(sleep_duration_seconds)  {
+          log.info({
+            bucket: limit_options.bucket,
+            key: limit_options.key,
+            num_tokens: limit_options.num_tokens,
+            sleep_duration: sleep_duration_seconds,
+            log_type: log.types.limitd.SLEEP_RECOMMENDATION,
+          }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
+
+          // now backing-off to prevent other messages from being pushed from the server
+          // initially wasn't backing-off to prevent "punishment" by the server
+          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+          message.requeue(sleep_duration_seconds, true);
+
+        } else {
+
+          process_opencalais_message(json, message);
+
+        }//if-else(sleep_duration_seconds)
+
       });//ratelimiter.limit_app
 
     }//if
@@ -114,11 +171,6 @@ function process_url_received_message(json, message) {
   var insert_stmt = "INSERT INTO nuzli.received_urls (url, latest_received_date) VALUES (?, ?)";
   var received_date = new Date().toISOString();
   var params = [url, received_date];
-
-  // log.info({
-  //   url: url,
-  //   table: 'nuzli.received_urls',
-  // }, "Persisting to datastore");
 
   client.execute(insert_stmt, params, function onDatastoreClientExecute(err, response) {
     if(err) {
@@ -233,11 +285,6 @@ function process_opencalais_message(json, message) {
 
 
 function save_domain_metadata(domain, url, word_count, date_published, table, callback) {
-  // log.info({
-  //   url: url,
-  //   table: table,
-  // }, "Persisting to datastore");
-
   if(!callback)   {
     callback = function(err, result)  {
       if(err)   {
@@ -276,11 +323,6 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
 
 
 function save_author_metadata(author, url, word_count, date_published, table, callback) {
-  // log.info({
-  //   url: url,
-  //   table: table,
-  // }, "Persisting to datastore");
-
   if(!callback)   {
     callback = function(err, result)  {
       if(err)   {
@@ -319,11 +361,6 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
 
 
 function save_document(object, url, date_published, table, callback)    {
-  // log.info({
-  //   url: url,
-  //   table: table,
-  // }, "Persisting to datastore");
-
   if(!callback)   {
     callback = function(err, result)  {
       if(err)   {
