@@ -66,7 +66,7 @@ function listen_to_urls_approved()  {
 
           process_url_approved_message(json, message);
 
-        }//if-else
+        }//if-else(sleep_duration_seconds)
 
       });//ratelimiter.limit_app
 
