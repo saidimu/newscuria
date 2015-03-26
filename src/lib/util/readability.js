@@ -37,18 +37,17 @@ function listen_to_urls_approved()  {
   var topic = topics.URLS_APPROVED;
   var channel = "fetch-readability-content";
 
-  // 'second', 'minute', 'day', or a number of millis  // https://github.com/auth0/limitd
-    var limit_options = {
-      bucket: appname,
-      // key: 1, // TODO: FIXME: os.hostname()?
-      num_tokens: 1,
-    };//options
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
+  };//options
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
       ratelimiter.limit_app(limit_options, function(sleep_duration_seconds) {
-
         if(sleep_duration_seconds)  {
           log.info({
             bucket: limit_options.bucket,
@@ -64,7 +63,7 @@ function listen_to_urls_approved()  {
           message.requeue(sleep_duration_seconds, true);
 
         } else {
-          
+
           process_url_approved_message(json, message);
 
         }//if-else
