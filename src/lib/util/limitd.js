@@ -64,7 +64,7 @@ function take(bucket_obj, callback) {
       // wait until bucket refills to re-request tokens
       } else {
 
-        var sleep_duration_seconds = response.reset - (Date.now() / 1000);
+        var sleep_duration_seconds = Math.ceil(response.reset - (Date.now() / 1000));
 
         // callback with recommended sleep duration. Upto callback to implement recommendation.
         callback(sleep_duration_seconds);
