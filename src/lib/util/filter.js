@@ -58,9 +58,10 @@ function listen_to_urls_received()  {
               log_type: log.types.limitd.SLEEP_RECOMMENDATION,
             }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
 
-            // not backing-off since we don't want "punishment" from queue server
+            // now backing-off to prevent other messages from being pushed from the server
+            // initially wasn't backing-off to prevent "punishment" by the server
             // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
-            message.requeue(sleep_duration_seconds, false);
+            message.requeue(sleep_duration_seconds, true);
 
           } else {
 
