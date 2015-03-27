@@ -178,7 +178,6 @@ function extract_nlp_objects(opencalais, message, url, date_published) {
 
 function extract_people(nlp_object, url) {
   log.info({
-    url: url,
     log_type: log.types.entities.PEOPLE,
   });
 
@@ -188,7 +187,6 @@ function extract_people(nlp_object, url) {
 
 function extract_places(nlp_object, url) {
   log.info({
-    url: url,
     log_type: log.types.entities.PLACES,
   });
 
@@ -211,7 +209,6 @@ function extract_places(nlp_object, url) {
 
 function extract_companies(nlp_object, url) {
   log.info({
-    url: url,
     log_type: log.types.entities.COMPANIES,
   });
 
@@ -221,7 +218,6 @@ function extract_companies(nlp_object, url) {
 
 function extract_things(nlp_object, url) {
   log.info({
-    url: url,
     log_type: log.types.entities.THINGS,
   });
 
@@ -231,7 +227,6 @@ function extract_things(nlp_object, url) {
 
 function extract_events(nlp_object, url) {
   log.info({
-    url: url,
     log_type: log.types.entities.EVENTS,
   });
 
@@ -241,7 +236,6 @@ function extract_events(nlp_object, url) {
 
 function extract_relations(nlp_object, url) {
   log.info({
-    url: url,
     log_type: log.types.entities.RELATIONS,
   });
 
@@ -251,7 +245,6 @@ function extract_relations(nlp_object, url) {
 
 function extract_topics(nlp_object, url) {
   log.info({
-    url: url,
     log_type: log.types.entities.TOPICS,
   });
 
@@ -261,7 +254,6 @@ function extract_topics(nlp_object, url) {
 
 function extract_tags(nlp_object, url) {
   log.info({
-    url: url,
     log_type: log.types.entities.TAGS,
   });
 
@@ -281,7 +273,6 @@ function extract_default(nlp_object, url) {
     var language = nlp_object.meta.language || undefined;
 
     log.info({
-      url: url,
       log_type: log.types.entities.LANGUAGE + language,
     });
 
