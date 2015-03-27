@@ -187,7 +187,6 @@ function publish_message(topic, message)	{
 	writer.publish(topic, message, function(err) {
     log.error({
       topic: topic,
-      message: message,
       err: err,
       log_type: log.types.queue.writer.ERROR,
     }, "nsq Writer error: message not published.");
