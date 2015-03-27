@@ -5,9 +5,7 @@
 # Expects CASSANDRA_CONFIG and CASSANDRA_CLUSTERNAME env variables to be set.
 # If either CASSANDRA_CONFIG or CASSANDRA_CLUSTERNAME is not set, startup process is aborted
 
-FROM nuzli/base:latest
-
-USER root
+FROM dockerfile/java:oracle-java7
 
 # Add DataStax sources
 ADD datastax_key /tmp/datastax_key
