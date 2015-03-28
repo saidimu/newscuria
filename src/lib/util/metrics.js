@@ -22,24 +22,38 @@ var log = require('_/util/logging.js')(appname);
 var influx = require('influx');
 var config = require('config').get("metrics");
 
-var client = influx({
-  // or single-host configuration
-  host     : config.get('host'),
-  port     : config.get('port'),
-  username : config.get('username'),
-  password : config.get('password'),
-  database : config.get('database'),
-  requestTimeout: config.get('requestTimeout')
-});
+// only run if config file allows
+if(config.get('activate')) {
+  log.info('metrics collection is ACTIVATED.');
 
-log.info({
-  metrics_hosts: client.getHostsAvailable(),
-  log_type: log.types.metrics.AVAILABLE_HOSTS,
-}, "Metrics-server available hosts.");
+  var client = influx({
+    // or single-host configuration
+    host     : config.get('host'),
+    port     : config.get('port'),
+    username : config.get('username'),
+    password : config.get('password'),
+    database : config.get('database'),
+    requestTimeout: config.get('requestTimeout')
+  });
 
+  log.info({
+    metrics_hosts: client.getHostsAvailable(),
+    log_type: log.types.metrics.AVAILABLE_HOSTS,
+  }, "Metrics-server available hosts.");
+
+} else{
+
+  log.info('metrics collection is NOT ACTIVATED.');
+
+}//if-else
 
 
 function store(series, value)  {
+  // only run if config file allows
+  if(!config.get('activate')) {
+    return;
+  }//if-else
+
   var timestamp = new Date(); // TODO: allow timestamp override?
 
   var point = {
