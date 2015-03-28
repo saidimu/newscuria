@@ -25,6 +25,7 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var ratelimiter = require('_/util/limitd.js');
+var metrics = require('_/util/metrics.js');
 
 function start()    {
   // connect to the message queue
@@ -56,6 +57,8 @@ function listen_to_opencalais()  {
             log_type: log.types.limitd.SLEEP_RECOMMENDATION,
           }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
 
+          metrics.store(log.types.limitd.SLEEP_RECOMMENDATION, sleep_duration_seconds);
+
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
           // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
@@ -85,6 +88,9 @@ function process_opencalais_message(json, message) {
       url: url,
       log_type: log.types.entities.EMPTY_DATE_PUBLISHED,
     }, "Empty 'date_published'.");
+
+    metrics.store(log.types.entities.EMPTY_DATE_PUBLISHED, 1);
+
   }//if
 
   if(!url)  {
@@ -92,6 +98,8 @@ function process_opencalais_message(json, message) {
       url: url,
       log_type: log.types.entities.URL_NOT_IN_OPENCALAIS,
     }, "EMPTY url! Cannot persist Opencalais object to datastore.");
+
+    metrics.store(log.types.entities.URL_NOT_IN_OPENCALAIS, 1);
 
     // FIXME: Really? Just bail b/c of non-existing URL?
     message.finish();
@@ -181,6 +189,8 @@ function extract_people(nlp_object, url) {
     log_type: log.types.entities.PEOPLE,
   });
 
+  metrics.store(log.types.entities.PEOPLE, 1);
+
   publish_message(topics.ENTITIES_PEOPLE, nlp_object);
 }//extract_people
 
@@ -189,6 +199,8 @@ function extract_places(nlp_object, url) {
   log.info({
     log_type: log.types.entities.PLACES,
   });
+
+  metrics.store(log.types.entities.PLACES, 1);
 
   // map existing latitude/longitude properties to a new 'geo_point' property
   // to satisfy Elasticsearch. Much easier than messing around with Elasticsearch transform scripts
@@ -212,6 +224,8 @@ function extract_companies(nlp_object, url) {
     log_type: log.types.entities.COMPANIES,
   });
 
+  metrics.store(log.types.entities.COMPANIES, 1);
+
   publish_message(topics.ENTITIES_COMPANIES, nlp_object);
 }//extract_companies
 
@@ -220,6 +234,8 @@ function extract_things(nlp_object, url) {
   log.info({
     log_type: log.types.entities.THINGS,
   });
+
+  metrics.store(log.types.entities.THINGS, 1);
 
   publish_message(topics.ENTITIES_THINGS, nlp_object);
 }//extract_things
@@ -230,6 +246,8 @@ function extract_events(nlp_object, url) {
     log_type: log.types.entities.EVENTS,
   });
 
+  metrics.store(log.types.entities.EVENTS, 1);
+
   publish_message(topics.ENTITIES_EVENTS, nlp_object);
 }//extract_events
 
@@ -238,6 +256,8 @@ function extract_relations(nlp_object, url) {
   log.info({
     log_type: log.types.entities.RELATIONS,
   });
+
+  metrics.store(log.types.entities.RELATIONS, 1);
 
   publish_message(topics.ENTITIES_RELATIONS, nlp_object);
 }//extract_relations
@@ -248,6 +268,8 @@ function extract_topics(nlp_object, url) {
     log_type: log.types.entities.TOPICS,
   });
 
+  metrics.store(log.types.entities.TOPICS, 1);
+
   publish_message(topics.ENTITIES_TOPICS, nlp_object);
 }//extract_topics()
 
@@ -256,6 +278,8 @@ function extract_tags(nlp_object, url) {
   log.info({
     log_type: log.types.entities.TAGS,
   });
+
+  metrics.store(log.types.entities.TAGS, 1);
 
   publish_message(topics.ENTITIES_TAGS, nlp_object);
 }//extract_tags()
@@ -276,6 +300,8 @@ function extract_default(nlp_object, url) {
       log_type: log.types.entities.LANGUAGE + language,
     });
 
+    metrics.store(log.types.entities.LANGUAGE + language, 1);
+
   } else {
 
     log.error({
@@ -283,6 +309,8 @@ function extract_default(nlp_object, url) {
       nlp_object: nlp_object,
       log_type: log.types.entities.UNDEFINED_NLP_OBJECT,
     }, 'new, undefined _type/_typeGroup encountered.');
+
+    metrics.store(log.types.entities.UNDEFINED_NLP_OBJECT, 1);
 
   }//if-else
 }//extract_default()
