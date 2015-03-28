@@ -28,10 +28,11 @@ var client = influx({
   port     : config.get('port'),
   username : config.get('username'),
   password : config.get('password'),
-  database : config.get('database')
+  database : config.get('database'),
+  requestTimeout: config.get('requestTimeout')
 });
 
-log.error({
+log.info({
   metrics_hosts: client.getHostsAvailable(),
   log_type: log.types.metrics.AVAILABLE_HOSTS,
 }, "Metrics-server available hosts.");
