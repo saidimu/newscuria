@@ -24,6 +24,7 @@
     "superagent": "^0.21.0",
     "nodetime": "^0.8.15",
     "twat": "^0.8.5",
+    "influx": "^3.3.0",
     "limitd": "^4.1.2"
   },
   "devDependencies": {},

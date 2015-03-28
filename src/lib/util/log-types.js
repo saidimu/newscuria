@@ -151,3 +151,10 @@ log_types.limitd = {
   TOKEN_REQUEST_TOO_BIG : 'limitd_token_request_too_big',
   SLEEP_RECOMMENDATION  : 'limitd_sleep_recommendation'
 };//log_types.limitd
+
+// METRIC events
+log_types.metrics = {
+  AVAILABLE_HOSTS: 'metrics_available_hosts',
+  STORE_ERROR    : 'metrics_store_error',
+  METRICS_ERROR  : 'metrics_invalid_error',
+};//log_types.metrics
