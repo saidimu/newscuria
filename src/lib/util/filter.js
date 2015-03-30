@@ -23,6 +23,7 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var ratelimiter = require('_/util/limitd.js');
+var metrics = require('_/util/metrics.js');
 
 function start()    {
   // connect to the message queue
@@ -61,6 +62,7 @@ function listen_to_urls_received()  {
             // initially wasn't backing-off to prevent "punishment" by the server
             // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
             message.requeue(sleep_duration_seconds, true);
+            metrics.store(log.types.limitd.SLEEP_RECOMMENDATION, sleep_duration_seconds);
 
           } else {
 
@@ -84,6 +86,9 @@ function listen_to_urls_received()  {
           err: err,
           log_type: log.types.url.ERROR,
         }, "URL not found in queue message JSON.");
+
+        metrics.store(log.types.url.ERROR, 1);
+
       }//if-else
 
       message.finish();
