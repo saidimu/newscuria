@@ -41,6 +41,24 @@ function get_logger(name) {
     throw new Error("Invalid logger name '%s'. Cannot create a logger", name);
   }//if
 
+  var loggly_stream = {};
+
+  // only run if config file allows
+  if(config_loggly.get('enabled')) {
+    loggly_stream = {
+      level: config_loggly.get('level'),
+      type: 'raw',
+      stream: new loggly({
+        token: config_loggly.get('token'),
+        subdomain: config_loggly.get('subdomain')
+      }, config_loggly.get('buffer_size') || 1000)
+    };//loggly_stream
+
+  } else {
+    console.log('Loggly logging is DISABLED.');
+  }//if
+
+
   var logger = bunyan.createLogger({
     name: hostname,
     hostname: name,
@@ -54,14 +72,7 @@ function get_logger(name) {
         level: config_loggly.get('level'),
         stream: process.stdout
       },
-      // {
-      //   level: config_loggly.get('level'),
-      //   type: 'raw',
-      //   stream: new loggly({
-      //     token: config_loggly.get('token'),
-      //     subdomain: config_loggly.get('subdomain')
-      //   }, config_loggly.get('buffer') || 100)
-      // },
+      loggly_stream,
     ],
   });//bunyan.createLogger()
 

@@ -23,8 +23,8 @@ var influx = require('influx');
 var config = require('config').get("metrics");
 
 // only run if config file allows
-if(config.get('activate')) {
-  log.info('metrics collection is ACTIVATED.');
+if(config.get('enabled')) {
+  log.info('metrics collection is ENABLED.');
 
   var client = influx({
     // or single-host configuration
@@ -43,14 +43,14 @@ if(config.get('activate')) {
 
 } else{
 
-  log.info('metrics collection is NOT ACTIVATED.');
+  log.info('metrics collection is DISABLED.');
 
 }//if-else
 
 
 function store(series, value)  {
   // only run if config file allows
-  if(!config.get('activate')) {
+  if(!config.get('enabled')) {
     return;
   }//if-else
 
