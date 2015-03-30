@@ -54,14 +54,14 @@ function get_logger(name) {
         level: config_loggly.get('level'),
         stream: process.stdout
       },
-      {
-        level: config_loggly.get('level'),
-        type: 'raw',
-        stream: new loggly({
-          token: config_loggly.get('token'),
-          subdomain: config_loggly.get('subdomain')
-        }, config_loggly.get('buffer') || 100)
-      },
+      // {
+      //   level: config_loggly.get('level'),
+      //   type: 'raw',
+      //   stream: new loggly({
+      //     token: config_loggly.get('token'),
+      //     subdomain: config_loggly.get('subdomain')
+      //   }, config_loggly.get('buffer') || 100)
+      // },
     ],
   });//bunyan.createLogger()
 
