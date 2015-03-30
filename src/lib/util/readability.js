@@ -26,6 +26,7 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var ratelimiter = require('_/util/limitd.js');
+var metrics = require('_/util/metrics.js');
 
 function start()    {
   // connect to the message queue
@@ -56,6 +57,8 @@ function listen_to_urls_approved()  {
             sleep_duration: sleep_duration_seconds,
             log_type: log.types.limitd.SLEEP_RECOMMENDATION,
           }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
+
+          metrics.store(log.types.limitd.SLEEP_RECOMMENDATION, sleep_duration_seconds);
 
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
@@ -98,6 +101,8 @@ function get_readability(url)	{
         log_type: log.types.datastore.GENERIC_ERROR,
       }, "Error fetching Readability from the datastore. Fetching from remote Readability API.");
 
+      metrics.store(log.types.datastore.GENERIC_ERROR, 1);
+
       fetch_readability_content(url, api_fetch_callback);
 
     } else if(response.rows.length > 0) {
@@ -112,6 +117,9 @@ function get_readability(url)	{
           err: err,
           log_type: log.types.readability.JSON_PARSE_ERROR,
         }, 'Error JSON.parse()ing Readability oject');
+
+        metrics.store(log.types.readability.JSON_PARSE_ERROR, 1);
+
       }//try-catch
 
       // publish text if it isn't empty
@@ -126,11 +134,15 @@ function get_readability(url)	{
           log_type: log.types.readability.EMPTY_PLAINTEXT,
         }, "EMPTY Readability PLAINTEXT.");
 
+        metrics.store(log.types.readability.PLAINTEXT, 1);
+
       } else if(!readability) {
         log.error({
           url: url,
           log_type: log.types.readability.EMPTY_OBJECT,
         }, "EMPTY Readability object... re-fetching from remote Readability API");
+
+        metrics.store(log.types.readability.EMPTY_OBJECT, 1);
 
         fetch_readability_content(url, api_fetch_callback);
       }//if-else
@@ -140,6 +152,8 @@ function get_readability(url)	{
         url: url,
         log_type: log.types.readability.URL_NOT_IN_DB,
       }, "URL not in datastore... fetching from remote Readability API");
+
+      metrics.store(log.types.readability.URL_NOT_IN_DB, 1);
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -156,6 +170,8 @@ function get_readability(url)	{
         log_type: log.types.readability.API_ERROR,
       }, "Error fetching from the Readability API.");
 
+      metrics.store(log.types.readability.API_ERROR, 1);
+
     } else {
 
       queue.publish_message(topics.READABILITY, readability);
@@ -170,6 +186,8 @@ function get_readability(url)	{
       log_type: log.types.datastore.FETCHED_URL,
     }, "Fetching url from the datastore.");
 
+    metrics.store(log.types.datastore.FETCHED_URL, 1);
+
     datastore_api.client.execute(query_stmt, params, datastore_fetch_callback);
 
   } catch(err)  {
@@ -178,6 +196,8 @@ function get_readability(url)	{
       err: err,
       log_types: log.type.datastore.GENERIC_ERROR,
     }, "Error fetching URL from the datastore... fetching from remote Readability API");
+
+    metrics.store(log.types.datastore.GENERIC_ERROR, 1);
 
     fetch_readability_content(url, api_fetch_callback);
   }//try-catch
@@ -192,6 +212,8 @@ function fetch_readability_content(url, callback)	{
       log_type: log.types.readability.FETCHED_API,
     }, "Fetching url from the Readability API.");
 
+    metrics.store(log.types.readability.FETCHED_API, 1);
+
   	readability_api.scrape(url, callback);
 
   } catch(err)  {
@@ -200,6 +222,9 @@ function fetch_readability_content(url, callback)	{
       err: err,
       log_type: log.types.readability.API_ERROR,
     }, "Error fetching URL content from Readability API");
+
+    metrics.store(log.types.readability.API_ERROR, 1);
+    
   }//try-catch
 }//fetch_readability_content()
 
