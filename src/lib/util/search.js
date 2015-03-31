@@ -31,6 +31,7 @@ var topics = queue.topics;
 var hash = require('string-hash');
 
 var ratelimiter = require('_/util/limitd.js');
+var metrics = require('_/util/metrics.js');
 
 var topics_and_indices = {};
 topics_and_indices[topics.ENTITIES_PEOPLE]    = "people";
@@ -88,6 +89,8 @@ function process_entities_message(json, message, topic)  {
         log_type: log.types.elasticsearch.EMPTY_URL,
       }, 'Empty URL in NLP entity object');
 
+      metrics.store(log.types.elasticsearch.EMPTY_URL, 1);
+
       message.finish();
 
     }//if-else
@@ -113,6 +116,8 @@ function index_entity(doc_type, url, body, message) {
         expected_wait_time: expected_wait_time,
         log_type: log.types.limitd.EXPECTED_WAIT_TIME,
       }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
+
+      metrics.store(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
 
       // now backing-off to prevent other messages from being pushed from the server
       // initially wasn't backing-off to prevent "punishment" by the server
@@ -142,6 +147,8 @@ function index_entity(doc_type, url, body, message) {
             response: response,
           }, 'Elasticsearch index error.');
 
+          metrics.store(log.types.elasticsearch.INDEX_ERROR, 1);
+
           message.requeue();
 
         } else {
@@ -151,6 +158,8 @@ function index_entity(doc_type, url, body, message) {
             log_type: log.types.elasticsearch.INDEXED_URL,
           }, 'Indexed url to Elasticsearch.');
 
+          metrics.store(log.types.elasticsearch.INDEXED_URL, 1);
+          
           message.finish();
 
         }//if-else
