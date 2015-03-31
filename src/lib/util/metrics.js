@@ -22,11 +22,13 @@ var log = require('_/util/logging.js')(appname);
 var influx = require('influx');
 var config = require('config').get("metrics");
 
+var client;
+
 // only run if config file allows
 if(config.get('enabled')) {
   log.info('metrics collection is ENABLED.');
 
-  var client = influx({
+  client = influx({
     // or single-host configuration
     host     : config.get('host'),
     port     : config.get('port'),
@@ -94,4 +96,5 @@ function store(series, value)  {
 
 module.exports = {
   store: store,
+  client: client,
 };//module.exports
