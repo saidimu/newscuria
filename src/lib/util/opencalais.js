@@ -48,22 +48,22 @@ function listen_to_readability()  {
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
-      ratelimiter.limit_app(limit_options, function(sleep_duration_seconds) {
-        if(sleep_duration_seconds)  {
+      ratelimiter.limit_app(limit_options, function(expected_wait_time) {
+        if(expected_wait_time)  {
           log.info({
             bucket: limit_options.bucket,
             key: limit_options.key,
             num_tokens: limit_options.num_tokens,
-            sleep_duration: sleep_duration_seconds,
-            log_type: log.types.limitd.SLEEP_RECOMMENDATION,
-          }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
+            expected_wait_time: expected_wait_time,
+            log_type: log.types.limitd.EXPECTED_WAIT_TIME,
+          }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
-          metrics.store(log.types.limitd.SLEEP_RECOMMENDATION, sleep_duration_seconds);
+          metrics.store(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
 
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
           // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
-          message.requeue(sleep_duration_seconds, true);
+          message.requeue(expected_wait_time, true);
 
         } else {
 

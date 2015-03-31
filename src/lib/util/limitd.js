@@ -43,7 +43,7 @@ function take(bucket_obj, callback) {
         log_type: log.types.limitd.TOKEN_GET_ERROR,
       }, 'Error getting token from bucket.');
 
-      // force client to handle rate-limit error
+      // force client to handle token-getting error
       throw new Error(err);
 
     } else {
@@ -61,13 +61,32 @@ function take(bucket_obj, callback) {
           log_type: log.types.limitd.TOKEN_REQUEST_TOO_BIG,
         }, 'Error. Tokens requested greater than max. bucket size.');
 
-      // wait until bucket refills to re-request tokens
+      // OLD: wait until bucket refills to re-request tokens
+      // NEW: wait until approx. time when requested tokens have been refilled
       } else {
 
-        var sleep_duration_seconds = Math.ceil(response.reset - (Date.now() / 1000));
+        var seconds_until_reset = Math.ceil(response.reset - (Date.now() / 1000));
+        if(seconds_until_reset < 0) {
+          seconds_until_reset = 0;
+        }//if
 
-        // callback with recommended sleep duration. Upto callback to implement recommendation.
-        callback(sleep_duration_seconds);
+        var expected_wait_time = 0; // default wait time
+
+        var expected_token_refill_rate = num_tokens / seconds_until_reset;
+        // if divide-by-zero (b/c seconds_until_reset === 0),
+        // then expected_wait_time should also be zero
+        if(expected_token_refill_rate === Infinity) {
+          expected_wait_time = 0;
+
+        } else {
+          expected_wait_time = expected_token_refill_rate * num_tokens;
+
+        }//if-else
+
+        // var expected_wait_time = Math.ceil(response.reset - (Date.now() / 1000));
+
+        // callback with expected wait time. Upto callback to implement recommendation.
+        callback(expected_wait_time);
 
       }//if-else
 

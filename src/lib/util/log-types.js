@@ -149,7 +149,7 @@ log_types.twitter = {
 log_types.limitd = {
   TOKEN_GET_ERROR       : 'limitd_token_get_error',
   TOKEN_REQUEST_TOO_BIG : 'limitd_token_request_too_big',
-  SLEEP_RECOMMENDATION  : 'limitd_sleep_recommendation'
+  EXPECTED_WAIT_TIME    : 'limitd_expected_wait_time'
 };//log_types.limitd
 
 // METRIC events

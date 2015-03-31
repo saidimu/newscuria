@@ -104,20 +104,20 @@ function index_entity(doc_type, url, body, message) {
     num_tokens: 1,
   };//options
 
-  var rateLimitCallback = function(sleep_duration_seconds) {
-    if(sleep_duration_seconds)  {
+  var rateLimitCallback = function(expected_wait_time) {
+    if(expected_wait_time)  {
       log.info({
         bucket: limit_options.bucket,
         key: limit_options.key,
         num_tokens: limit_options.num_tokens,
-        sleep_duration: sleep_duration_seconds,
-        log_type: log.types.limitd.SLEEP_RECOMMENDATION,
-      }, "Rate-limited! Re-queueing message for %s seconds.", sleep_duration_seconds);
+        expected_wait_time: expected_wait_time,
+        log_type: log.types.limitd.EXPECTED_WAIT_TIME,
+      }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
       // now backing-off to prevent other messages from being pushed from the server
       // initially wasn't backing-off to prevent "punishment" by the server
       // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
-      message.requeue(sleep_duration_seconds, true);
+      message.requeue(expected_wait_time, true);
 
     } else {
 
@@ -156,7 +156,7 @@ function index_entity(doc_type, url, body, message) {
         }//if-else
       });//client.create
 
-    }//if-else (sleep_duration_seconds)
+    }//if-else (expected_wait_time)
 
   };//rateLimitCallback
 
