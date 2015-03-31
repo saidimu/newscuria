@@ -79,7 +79,8 @@ function take(bucket_obj, callback) {
           expected_wait_time = 0;
 
         } else {
-          expected_wait_time = expected_token_refill_rate * num_tokens;
+          // FIXME: round up to nearest second to prevent errors with upstream systems that cannot deal with floats
+          expected_wait_time = Math.ceil(expected_token_refill_rate * num_tokens);
 
         }//if-else
 
