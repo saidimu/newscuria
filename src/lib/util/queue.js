@@ -23,6 +23,8 @@ var config = require('config').get("nsqd");
 var nsqd_host = config.writer.get('host');
 var nsqd_port = config.writer.get('port');
 
+var metrics = require('_/util/metrics.js');
+
 var topics = {
   URLS_RECEIVED      : "newscuria.urls_received",
   URLS_APPROVED      : "newscuria.urls_approved",
@@ -55,6 +57,9 @@ function connect(callback) {
         err: err,
         log_type: log.types.queue.writer.ERROR,
       }, "nsqd Writer error.");
+
+      metrics.store(log.types.queue.writer.ERROR, 1);
+
     }//if
   });//writer.on
 
@@ -63,6 +68,8 @@ function connect(callback) {
     log.info({
       log_type: log.types.queue.writer.READY,
     }, "nsqd Writer ready.");
+
+    metrics.store(log.types.queue.writer.READY, 1);
 
     writer = nsqd_writer;
 
@@ -73,6 +80,9 @@ function connect(callback) {
     log.info({
       log_type: log.types.queue.writer.CLOSED,
     }, "nsqd Writer closed.");
+
+    metrics.store(log.types.queue.writer.CLOSED, 1);
+
   });//writer.on
 
   nsqd_writer.connect();
@@ -84,6 +94,8 @@ function read_message(topic, channel, callback)	{
 		log.fatal({
       log_type: log.types.queue.reader.INVALID_CHANNEL_NAME,
     }, "Must provide a channel name to listen on.");
+
+    metrics.store(log.types.queue.reader.INVALID_CHANNEL_NAME, 1);
 
 		throw new Error("Must provide a channel name to listen on.");
 	}//if
@@ -123,6 +135,8 @@ function read_message(topic, channel, callback)	{
         log_type: log.types.queue.reader.MESSAGE_ERROR,
       }, "Error getting message from queue!");
 
+      metrics.store(log.types.queue.reader.MESSAGE_ERROR, 1);
+
       // FIXME: save these json-error messages for analysis
       try {
 
@@ -136,6 +150,9 @@ function read_message(topic, channel, callback)	{
           err: err,
           log_type: log.types.queue.message.FINISH_ERROR,
         }, "Error executing message.finish()");
+
+        metrics.store(log.types.queue.message.FINISH_ERROR, 1);
+
       }//try-catch
 
     }//try-catch
@@ -151,6 +168,8 @@ function read_message(topic, channel, callback)	{
       log_type: log.types.queue.reader.ERROR,
     }, "nsq Reader error.");
 
+    metrics.store(log.types.queue.reader.ERROR, 1);
+
     callback(err, undefined, undefined, reader);
   });//reader.on
 
@@ -164,6 +183,9 @@ function read_message(topic, channel, callback)	{
       options: options,
       log_type: log.types.queue.reader.NSQD_CONNECTED,
     }, "Reader connected to nsqd.");
+
+    metrics.store(log.types.queue.reader.NSQD_CONNECTED, 1);
+
   });//reader.on
 
 
@@ -176,6 +198,9 @@ function read_message(topic, channel, callback)	{
       options: options,
       log_type: log.types.queue.reader.NSQD_CLOSED,
     }, "Reader disconnected from nsqd.");
+
+    metrics.store(log.types.queue.reader.NSQD_CLOSED, 1);
+
   });//reader.on
 
 
@@ -190,6 +215,9 @@ function publish_message(topic, message)	{
       err: err,
       log_type: log.types.queue.writer.ERROR,
     }, "nsq Writer error: message not published.");
+
+    metrics.store(log.types.queue.writer.ERROR, 1);
+
   });
 }//publish_message
 
