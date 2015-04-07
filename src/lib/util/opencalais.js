@@ -182,7 +182,7 @@ function get_opencalais(json)	{
   } catch(err)  {
     log.error({
       err: err,
-      log_types: log.type.datastore.GENERIC_ERROR,
+      log_type: log.type.datastore.GENERIC_ERROR,
     }, "Error fetching URL from the datastore... fetching from remote Opencalais API");
 
     metrics.store(log.types.datastore.GENERIC_ERROR, 1);

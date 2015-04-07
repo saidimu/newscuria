@@ -21,6 +21,7 @@ var log = require('_/util/logging.js')(appname);
 
 var influx = require('influx');
 var config = require('config').get("metrics");
+var stats = require('measured').createCollection();
 
 var client;
 
@@ -83,11 +84,7 @@ function store(series, value)  {
         metrics_hosts: client.getHostsAvailable(),
         log_type: log.types.metrics.STORE_ERROR,
       }, "Error storing metrics.");
-
-    } else {
-      console.log();
-
-    }//if-else
+    }//if
 
   });//client.write
 
