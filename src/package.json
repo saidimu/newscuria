@@ -25,7 +25,8 @@
     "nodetime": "^0.8.15",
     "twat": "^0.8.5",
     "influx": "^3.3.0",
-    "limitd": "^4.1.2"
+    "limitd": "^4.1.2",
+    "measured": "^1.0.0"
   },
   "devDependencies": {},
   "scripts": {
