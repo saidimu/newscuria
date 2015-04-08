@@ -102,7 +102,7 @@ function get_opencalais(json)	{
         log_type: log.types.datastore.GENERIC_ERROR,
       });
 
-      metrics.histogram(log.types.datastore.GENERIC_ERROR, 1);
+      metrics.histogram(metrics.types.datastore.GENERIC_ERROR, 1);
 
 			fetch_opencalais_content(readability, api_fetch_callback);
 
@@ -118,7 +118,7 @@ function get_opencalais(json)	{
           log_type: log.type.opencalais.JSON_PARSE_ERROR,
         }, 'Error JSON.parse()ing Readability oject');
 
-        metrics.histogram(log.types.opencalais.JSON_PARSE_ERROR, 1);
+        metrics.histogram(metrics.types.opencalais.JSON_PARSE_ERROR, 1);
 
       }//try-catch
 
@@ -132,7 +132,7 @@ function get_opencalais(json)	{
           log_type: log.types.opencalais.EMPTY_OBJECT,
         }, "EMPTY Opencalais object... re-fetching from Opencalais API");
 
-        metrics.histogram(log.types.opencalais.EMPTY_OBJECT, 1);
+        metrics.histogram(metrics.types.opencalais.EMPTY_OBJECT, 1);
 
 				fetch_opencalais_content(readability, api_fetch_callback);
 			}//if-else
@@ -143,7 +143,7 @@ function get_opencalais(json)	{
         log_type: log.types.opencalais.URL_NOT_IN_DB,
       }, "URL not in datastore... fetching from remote Opencalais API");
 
-      metrics.histogram(log.types.opencalais.URL_NOT_IN_DB, 1);
+      metrics.histogram(metrics.types.opencalais.URL_NOT_IN_DB, 1);
 
 			fetch_opencalais_content(readability, api_fetch_callback);
 		}//if-else
@@ -158,7 +158,7 @@ function get_opencalais(json)	{
         log_type: log.types.opencalais.API_ERROR,
       }, "Error fetching from the Opencalais API.");
 
-      metrics.histogram(log.types.opencalais.API_ERROR, 1);
+      metrics.histogram(metrics.types.opencalais.API_ERROR, 1);
 
 		} else {
 
@@ -175,7 +175,7 @@ function get_opencalais(json)	{
       log_type: log.types.datastore.FETCHED_URL,
     }, "Fetching url from the datastore.");
 
-    metrics.histogram(log.types.datastore.FETCHED_URL, 1);
+    metrics.histogram(metrics.types.datastore.FETCHED_URL, 1);
 
     datastore_api.client.execute(query, params, datastore_fetch_callback);
 
@@ -185,7 +185,7 @@ function get_opencalais(json)	{
       log_type: log.type.datastore.GENERIC_ERROR,
     }, "Error fetching URL from the datastore... fetching from remote Opencalais API");
 
-    metrics.histogram(log.types.datastore.GENERIC_ERROR, 1);
+    metrics.histogram(metrics.types.datastore.GENERIC_ERROR, 1);
 
 		fetch_opencalais_content(readability, api_fetch_callback);
   }//try-catch
@@ -212,7 +212,7 @@ function fetch_opencalais_content(readability, callback)	{
       log_type: log.types.opencalais.URL_NOT_IN_READABILITY,
     }, "EMPTY url in Readability object. Cannot fetch Opencalais content.");
 
-    metrics.histogram(log.types.opencalais.URL_NOT_IN_READABILITY, 1);
+    metrics.histogram(metrics.types.opencalais.URL_NOT_IN_READABILITY, 1);
 
 		return;
 	}//if
@@ -223,7 +223,7 @@ function fetch_opencalais_content(readability, callback)	{
       log_type: log.types.opencalais.TEXT_NOT_IN_READABILITY,
     }, "EMPTY text in Readability object. Cannot fetch Opencalais content.");
 
-    metrics.histogram(log.types.opencalais.TEXT_NOT_IN_READABILITY, 1);
+    metrics.histogram(metrics.types.opencalais.TEXT_NOT_IN_READABILITY, 1);
 
     return;
   }//if
@@ -234,7 +234,7 @@ function fetch_opencalais_content(readability, callback)	{
       log_type: log.types.opencalais.FETCHED_API,
     }, "Fetching url from the Opencalais API.");
 
-    metrics.histogram(log.types.opencalais.FETCHED_API, 1);
+    metrics.histogram(metrics.types.opencalais.FETCHED_API, 1);
 
     opencalais_api.get_content(text, callback);
 
@@ -245,7 +245,7 @@ function fetch_opencalais_content(readability, callback)	{
       log_type: log.types.opencalais.API_ERROR,
     }, "Error fetching content from Opencalais API.");
 
-    metrics.histogram(log.types.opencalais.API_ERROR, 1);
+    metrics.histogram(metrics.types.opencalais.API_ERROR, 1);
 
   }//try-catch
 }//fetch_opencalais_content

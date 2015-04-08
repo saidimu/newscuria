@@ -104,10 +104,19 @@ function take(bucket_obj, callback) {
         }//if-else
 
         metrics.timer(log.types.limitd.EXPECTED_WAIT_TIME, {
-          bucket: bucket,
-          key: key,
+          bucket    : bucket,
+          key       : key,
           num_tokens: num_tokens,
         }, expected_wait_time);
+
+        log.info({
+          bucket            : bucket,
+          key               : key,
+          num_tokens        : num_tokens,
+          expected_wait_time: expected_wait_time,
+          log_type          : log.types.limitd.EXPECTED_WAIT_TIME,
+        }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
+
 
         // callback with expected wait time. Upto callback to implement recommendation.
         callback(expected_wait_time);

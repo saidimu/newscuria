@@ -50,14 +50,6 @@ function listen_to_urls_received()  {
 
         var rateLimitCallback = function(expected_wait_time) {
           if(expected_wait_time)  {
-            log.info({
-              bucket: limit_options.bucket,
-              key: limit_options.key,
-              num_tokens: limit_options.num_tokens,
-              expected_wait_time: expected_wait_time,
-              log_type: log.types.limitd.EXPECTED_WAIT_TIME,
-            }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
-
             // now backing-off to prevent other messages from being pushed from the server
             // initially wasn't backing-off to prevent "punishment" by the server
             // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
@@ -86,7 +78,11 @@ function listen_to_urls_received()  {
           log_type: log.types.url.ERROR,
         }, "URL not found in queue message JSON.");
 
-        metrics.meter(log.types.url.ERROR, 1);
+        metrics.meter(log.types.url.ERROR, {
+          topic        : topic,
+          channel      : channel,
+          proc_attempts: message.attempts || undefined,
+        });
 
       }//if-else
 
