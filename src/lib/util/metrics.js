@@ -28,9 +28,9 @@ var metric_template = format("host.%s.app.%.event.%.%", hostname);
 // https://github.com/felixge/node-measured#usage
 var stats = require('measured').createCollection();
 
-
+// display stats on console every X seconds.
 setInterval(function() {
-  stats.dump();
+  dump();
 }, 10000);
 
 
