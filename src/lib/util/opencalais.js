@@ -27,6 +27,9 @@ var topics = queue.topics;
 
 var ratelimiter = require('_/util/limitd.js');
 var metrics = require('_/util/metrics.js');
+var urls = require('_/util/urls.js');
+
+var util = require('util');
 
 function start()    {
   // connect to the message queue
@@ -50,16 +53,6 @@ function listen_to_readability()  {
 
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
         if(expected_wait_time)  {
-          log.info({
-            bucket: limit_options.bucket,
-            key: limit_options.key,
-            num_tokens: limit_options.num_tokens,
-            expected_wait_time: expected_wait_time,
-            log_type: log.types.limitd.EXPECTED_WAIT_TIME,
-          }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
-
-          
-
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
           // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
@@ -79,7 +72,6 @@ function listen_to_readability()  {
 
 
 function process_readability_message(json, message)	{
-  // FIXME: fix and re-implement rate-limiting.
   get_opencalais(json);
 
   message.finish();
@@ -90,8 +82,8 @@ function get_opencalais(json)	{
   var readability = json;
 
   var url = readability.url || '';
-
-	var query = "SELECT * FROM nuzli.opencalais WHERE url=?";
+  var table = 'nuzli.opencalais';
+	var query = util.format("SELECT * FROM %s WHERE url=?", table);
   var params = [url];
 
 	// CALLBACK
@@ -102,7 +94,10 @@ function get_opencalais(json)	{
         log_type: log.types.datastore.GENERIC_ERROR,
       });
 
-      metrics.histogram(metrics.types.datastore.GENERIC_ERROR, 1);
+      metrics.meter(metrics.types.datastore.GENERIC_ERROR, {
+        table: table,
+        url_host: urls.parse(url).hostname,
+      });
 
 			fetch_opencalais_content(readability, api_fetch_callback);
 
@@ -118,7 +113,10 @@ function get_opencalais(json)	{
           log_type: log.type.opencalais.JSON_PARSE_ERROR,
         }, 'Error JSON.parse()ing Readability oject');
 
-        metrics.histogram(metrics.types.opencalais.JSON_PARSE_ERROR, 1);
+        metrics.meter(metrics.types.opencalais.JSON_PARSE_ERROR, {
+          table: table,
+          url_host: urls.parse(url).hostname,
+        });
 
       }//try-catch
 
@@ -132,7 +130,10 @@ function get_opencalais(json)	{
           log_type: log.types.opencalais.EMPTY_OBJECT,
         }, "EMPTY Opencalais object... re-fetching from Opencalais API");
 
-        metrics.histogram(metrics.types.opencalais.EMPTY_OBJECT, 1);
+        metrics.meter(metrics.types.opencalais.EMPTY_OBJECT, {
+          table: table,
+          url_host: urls.parse(url).hostname,
+        });
 
 				fetch_opencalais_content(readability, api_fetch_callback);
 			}//if-else
@@ -143,7 +144,10 @@ function get_opencalais(json)	{
         log_type: log.types.opencalais.URL_NOT_IN_DB,
       }, "URL not in datastore... fetching from remote Opencalais API");
 
-      metrics.histogram(metrics.types.opencalais.URL_NOT_IN_DB, 1);
+      metrics.meter(metrics.types.opencalais.URL_NOT_IN_DB, {
+        table: table,
+        url_host: urls.parse(url).hostname,
+      });
 
 			fetch_opencalais_content(readability, api_fetch_callback);
 		}//if-else
@@ -158,7 +162,10 @@ function get_opencalais(json)	{
         log_type: log.types.opencalais.API_ERROR,
       }, "Error fetching from the Opencalais API.");
 
-      metrics.histogram(metrics.types.opencalais.API_ERROR, 1);
+      metrics.meter(metrics.types.opencalais.API_ERROR, {
+        table: table,
+        url_host: urls.parse(url).hostname,
+      });
 
 		} else {
 
@@ -171,11 +178,14 @@ function get_opencalais(json)	{
   try {
     log.info({
       url: url,
-      table: 'opencalais',
+      table: table,
       log_type: log.types.datastore.FETCHED_URL,
     }, "Fetching url from the datastore.");
 
-    metrics.histogram(metrics.types.datastore.FETCHED_URL, 1);
+    metrics.meter(metrics.types.datastore.FETCHED_URL, {
+      table: table,
+      url_host: urls.parse(url).hostname,
+    });
 
     datastore_api.client.execute(query, params, datastore_fetch_callback);
 
@@ -185,7 +195,10 @@ function get_opencalais(json)	{
       log_type: log.type.datastore.GENERIC_ERROR,
     }, "Error fetching URL from the datastore... fetching from remote Opencalais API");
 
-    metrics.histogram(metrics.types.datastore.GENERIC_ERROR, 1);
+    metrics.meter(metrics.types.datastore.GENERIC_ERROR, {
+      table: table,
+      url_host: urls.parse(url).hostname,
+    });
 
 		fetch_opencalais_content(readability, api_fetch_callback);
   }//try-catch
@@ -212,7 +225,9 @@ function fetch_opencalais_content(readability, callback)	{
       log_type: log.types.opencalais.URL_NOT_IN_READABILITY,
     }, "EMPTY url in Readability object. Cannot fetch Opencalais content.");
 
-    metrics.histogram(metrics.types.opencalais.URL_NOT_IN_READABILITY, 1);
+    metrics.meter(metrics.types.opencalais.URL_NOT_IN_READABILITY, {
+      url_host: urls.parse(url).hostname,
+    });
 
 		return;
 	}//if
@@ -223,7 +238,9 @@ function fetch_opencalais_content(readability, callback)	{
       log_type: log.types.opencalais.TEXT_NOT_IN_READABILITY,
     }, "EMPTY text in Readability object. Cannot fetch Opencalais content.");
 
-    metrics.histogram(metrics.types.opencalais.TEXT_NOT_IN_READABILITY, 1);
+    metrics.meter(metrics.types.opencalais.TEXT_NOT_IN_READABILITY, {
+      url_host: urls.parse(url).hostname,
+    });
 
     return;
   }//if
@@ -234,7 +251,9 @@ function fetch_opencalais_content(readability, callback)	{
       log_type: log.types.opencalais.FETCHED_API,
     }, "Fetching url from the Opencalais API.");
 
-    metrics.histogram(metrics.types.opencalais.FETCHED_API, 1);
+    metrics.meter(metrics.types.opencalais.FETCHED_API, {
+      url_host: urls.parse(url).hostname,
+    });
 
     opencalais_api.get_content(text, callback);
 
@@ -245,7 +264,9 @@ function fetch_opencalais_content(readability, callback)	{
       log_type: log.types.opencalais.API_ERROR,
     }, "Error fetching content from Opencalais API.");
 
-    metrics.histogram(metrics.types.opencalais.API_ERROR, 1);
+    metrics.meter(metrics.types.opencalais.API_ERROR, {
+      url_host: urls.parse(url).hostname,
+    });
 
   }//try-catch
 }//fetch_opencalais_content

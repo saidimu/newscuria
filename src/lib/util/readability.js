@@ -120,7 +120,10 @@ function get_readability(url)	{
           log_type: log.types.readability.JSON_PARSE_ERROR,
         }, 'Error JSON.parse()ing Readability oject');
 
-        metrics.meter(metrics.types.readability.JSON_PARSE_ERROR, {});
+        metrics.meter(metrics.types.readability.JSON_PARSE_ERROR, {
+          table: table,
+          url_host: urls.parse(url).hostname,
+        });
 
       }//try-catch
 
@@ -137,6 +140,7 @@ function get_readability(url)	{
         }, "EMPTY Readability PLAINTEXT.");
 
         metrics.meter(metrics.types.readability.PLAINTEXT, {
+          table: table,
           url_host: urls.parse(url).hostname,
         });
 
@@ -147,6 +151,7 @@ function get_readability(url)	{
         }, "EMPTY Readability object... re-fetching from remote Readability API");
 
         metrics.meter(metrics.types.readability.EMPTY_OBJECT, {
+          table: table,
           url_host: urls.parse(url).hostname,
         });
 
@@ -160,6 +165,7 @@ function get_readability(url)	{
       }, "URL not in datastore... fetching from remote Readability API");
 
       metrics.meter(metrics.types.readability.URL_NOT_IN_DB, {
+        table: table,
         url_host: urls.parse(url).hostname,
       });
 
@@ -179,6 +185,7 @@ function get_readability(url)	{
       }, "Error fetching from the Readability API.");
 
       metrics.meter(metrics.types.readability.API_ERROR, {
+        table: table,
         url_host: urls.parse(url).hostname,
       });
 
@@ -211,6 +218,7 @@ function get_readability(url)	{
     }, "Error fetching URL from the datastore... fetching from remote Readability API");
 
     metrics.meter(metrics.types.datastore.GENERIC_ERROR, {
+      table: table,
       url_host: urls.parse(url).hostname,
     });
 
