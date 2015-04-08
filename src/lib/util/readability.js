@@ -58,7 +58,7 @@ function listen_to_urls_approved()  {
             log_type: log.types.limitd.EXPECTED_WAIT_TIME,
           }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
-          metrics.store(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+          metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
 
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
@@ -101,7 +101,7 @@ function get_readability(url)	{
         log_type: log.types.datastore.GENERIC_ERROR,
       }, "Error fetching Readability from the datastore. Fetching from remote Readability API.");
 
-      metrics.store(log.types.datastore.GENERIC_ERROR, 1);
+      metrics.histogram(log.types.datastore.GENERIC_ERROR, 1);
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -118,7 +118,7 @@ function get_readability(url)	{
           log_type: log.types.readability.JSON_PARSE_ERROR,
         }, 'Error JSON.parse()ing Readability oject');
 
-        metrics.store(log.types.readability.JSON_PARSE_ERROR, 1);
+        metrics.histogram(log.types.readability.JSON_PARSE_ERROR, 1);
 
       }//try-catch
 
@@ -134,7 +134,7 @@ function get_readability(url)	{
           log_type: log.types.readability.EMPTY_PLAINTEXT,
         }, "EMPTY Readability PLAINTEXT.");
 
-        metrics.store(log.types.readability.PLAINTEXT, 1);
+        metrics.histogram(log.types.readability.PLAINTEXT, 1);
 
       } else if(!readability) {
         log.error({
@@ -142,7 +142,7 @@ function get_readability(url)	{
           log_type: log.types.readability.EMPTY_OBJECT,
         }, "EMPTY Readability object... re-fetching from remote Readability API");
 
-        metrics.store(log.types.readability.EMPTY_OBJECT, 1);
+        metrics.histogram(log.types.readability.EMPTY_OBJECT, 1);
 
         fetch_readability_content(url, api_fetch_callback);
       }//if-else
@@ -153,7 +153,7 @@ function get_readability(url)	{
         log_type: log.types.readability.URL_NOT_IN_DB,
       }, "URL not in datastore... fetching from remote Readability API");
 
-      metrics.store(log.types.readability.URL_NOT_IN_DB, 1);
+      metrics.histogram(log.types.readability.URL_NOT_IN_DB, 1);
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -170,7 +170,7 @@ function get_readability(url)	{
         log_type: log.types.readability.API_ERROR,
       }, "Error fetching from the Readability API.");
 
-      metrics.store(log.types.readability.API_ERROR, 1);
+      metrics.histogram(log.types.readability.API_ERROR, 1);
 
     } else {
 
@@ -186,7 +186,7 @@ function get_readability(url)	{
       log_type: log.types.datastore.FETCHED_URL,
     }, "Fetching url from the datastore.");
 
-    metrics.store(log.types.datastore.FETCHED_URL, 1);
+    metrics.histogram(log.types.datastore.FETCHED_URL, 1);
 
     datastore_api.client.execute(query_stmt, params, datastore_fetch_callback);
 
@@ -197,7 +197,7 @@ function get_readability(url)	{
       log_type: log.type.datastore.GENERIC_ERROR,
     }, "Error fetching URL from the datastore... fetching from remote Readability API");
 
-    metrics.store(log.types.datastore.GENERIC_ERROR, 1);
+    metrics.histogram(log.types.datastore.GENERIC_ERROR, 1);
 
     fetch_readability_content(url, api_fetch_callback);
   }//try-catch
@@ -212,7 +212,7 @@ function fetch_readability_content(url, callback)	{
       log_type: log.types.readability.FETCHED_API,
     }, "Fetching url from the Readability API.");
 
-    metrics.store(log.types.readability.FETCHED_API, 1);
+    metrics.histogram(log.types.readability.FETCHED_API, 1);
 
   	readability_api.scrape(url, callback);
 
@@ -223,7 +223,7 @@ function fetch_readability_content(url, callback)	{
       log_type: log.types.readability.API_ERROR,
     }, "Error fetching URL content from Readability API");
 
-    metrics.store(log.types.readability.API_ERROR, 1);
+    metrics.histogram(log.types.readability.API_ERROR, 1);
 
   }//try-catch
 }//fetch_readability_content()

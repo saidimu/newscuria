@@ -62,7 +62,8 @@ function listen_to_urls_received()  {
             // initially wasn't backing-off to prevent "punishment" by the server
             // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
             message.requeue(expected_wait_time, true);
-            metrics.store(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+
+            metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
 
           } else {
 
@@ -87,7 +88,7 @@ function listen_to_urls_received()  {
           log_type: log.types.url.ERROR,
         }, "URL not found in queue message JSON.");
 
-        metrics.store(log.types.url.ERROR, 1);
+        metrics.histogram(log.types.url.ERROR, 1);
 
       }//if-else
 

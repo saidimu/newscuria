@@ -64,7 +64,7 @@ function listen_to_urls_received()  {
             log_type: log.types.limitd.EXPECTED_WAIT_TIME,
           }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
-          metrics.store(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+          metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
 
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
@@ -108,7 +108,7 @@ function listen_to_readability()  {
             log_type: log.types.limitd.EXPECTED_WAIT_TIME,
           }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
-          metrics.store(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+          metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
 
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
@@ -152,7 +152,7 @@ function listen_to_opencalais()  {
             log_type: log.types.limitd.EXPECTED_WAIT_TIME,
           }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
-          metrics.store(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+          metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
 
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
@@ -188,7 +188,7 @@ function process_url_received_message(json, message) {
         log_type: log.types.datastore.INSERT_ERROR,
       });
 
-      metrics.store(log.types.datastore.INSERT_ERROR, 1);
+      metrics.histogram(log.types.datastore.INSERT_ERROR, 1);
 
     }//if
   });
@@ -214,7 +214,7 @@ function process_readability_message(json, message) {
       log_type: log.types.readability.EMPTY_DATE_PUBLISHED,
     }, "Empty 'date_published' in Readability object.");
 
-    metrics.store(log.types.readability.EMPTY_DATE_PUBLISHED, 1);
+    metrics.histogram(log.types.readability.EMPTY_DATE_PUBLISHED, 1);
 
   }//if
 
@@ -224,7 +224,7 @@ function process_readability_message(json, message) {
       log_type: log.types.readability.EMPTY_AUTHOR,
     }, "Empty 'author' in Readability object.");
 
-    metrics.store(log.types.readability.EMPTY_AUTHOR, 1);
+    metrics.histogram(log.types.readability.EMPTY_AUTHOR, 1);
 
   }//if
 
@@ -234,7 +234,7 @@ function process_readability_message(json, message) {
       log_type: log.types.readability.EMPTY_DOMAIN,
     }, "Empty 'domain' in Readability object.");
 
-    metrics.store(log.types.readability.EMPTY_DOMAIN, 1);
+    metrics.histogram(log.types.readability.EMPTY_DOMAIN, 1);
 
   }//if
 
@@ -280,7 +280,7 @@ function process_opencalais_message(json, message) {
       log_type: log.types.opencalais.EMPTY_DATE_PUBLISHED,
     }, "Empty 'date_published' in Opencalais object.");
 
-    metrics.store(log.types.opencalais.EMPTY_DATE_PUBLISHED, 1);
+    metrics.histogram(log.types.opencalais.EMPTY_DATE_PUBLISHED, 1);
 
   }//if
 
@@ -290,7 +290,7 @@ function process_opencalais_message(json, message) {
       log_type: log.types.opencalais.EMPTY_URL,
     }, "EMPTY url in Opencalais object. Cannot persist to datastore.");
 
-    metrics.store(log.types.opencalais.EMPTY_URL, 1);
+    metrics.histogram(log.types.opencalais.EMPTY_URL, 1);
 
     return;
   }//if
@@ -319,7 +319,7 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
           log_type: log.types.datastore.INSERT_ERROR,
         }, 'Error persisting domain metadata to datastore');
 
-        metrics.store(log.types.datastore.INSERT_ERROR, 1);
+        metrics.histogram(log.types.datastore.INSERT_ERROR, 1);
 
       }//if
 
@@ -333,7 +333,7 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
       log_type: log.types.datastore.EMPTY_DOMAIN,
     }, "EMPTY domain name for url");
 
-    metrics.store(log.types.datastore.EMPTY_DOMAIN, 1);
+    metrics.histogram(log.types.datastore.EMPTY_DOMAIN, 1);
 
   }//if
 
@@ -365,7 +365,7 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
           log_type: log.types.datastore.INSERT_ERROR,
         }, 'Error persisting author metadata to datastore');
 
-        metrics.store(log.types.datastore.INSERT_ERROR, 1);
+        metrics.histogram(log.types.datastore.INSERT_ERROR, 1);
 
       }//if
     };//callback
@@ -378,7 +378,7 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
       log_type: log.types.datastore.EMPTY_AUTHOR,
     }, "EMPTY author name for url");
 
-    metrics.store(log.types.datastore.EMPTY_AUTHOR, 1);
+    metrics.histogram(log.types.datastore.EMPTY_AUTHOR, 1);
 
   }//if
 
@@ -409,7 +409,7 @@ function save_document(object, url, date_published, table, callback)    {
           log_type: log.types.datastore.INSERT_ERROR,
         }, 'Error persisting document to datastore');
 
-        metrics.store(log.types.datastore.INSERT_ERROR, 1);
+        metrics.histogram(log.types.datastore.INSERT_ERROR, 1);
       }//if
 
     };//callback
@@ -422,7 +422,7 @@ function save_document(object, url, date_published, table, callback)    {
       log_type: log.types.datastore.EMPTY_OBJECT,
     }, "EMPTY object cannot be saved to table.");
 
-    metrics.store(log.types.datastore.EMPTY_OBJECT, 1);
+    metrics.histogram(log.types.datastore.EMPTY_OBJECT, 1);
 
     return;
   }//if
@@ -442,7 +442,7 @@ function save_document(object, url, date_published, table, callback)    {
       log_type: log.types.datastore.JSON_PARSE_ERROR,
     }, "Error converting JSON object to a Buffer object;");
 
-    metrics.store(log.types.datastore.JSON_PARSE_ERROR, 1);
+    metrics.histogram(log.types.datastore.JSON_PARSE_ERROR, 1);
 
     return;
   }//try-catch
@@ -475,7 +475,7 @@ function date_string_to_iso_object(date_string, url)  {
       log_type: log.types.datastore.DATE_CONVERSION_ERROR,
     }, "Cannot convert date string to Date object.");
 
-    metrics.store(log.types.datastore.DATE_CONVERSION_ERROR, 1);
+    metrics.histogram(log.types.datastore.DATE_CONVERSION_ERROR, 1);
 
     iso_object = new Date('1970-01-01 00:00:00 +0000').toISOString();
   }//try-catch

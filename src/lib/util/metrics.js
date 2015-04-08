@@ -19,79 +19,85 @@
 var appname = "metrics";
 var log = require('_/util/logging.js')(appname);
 
-var influx = require('influx');
-var config = require('config').get("metrics");
+var format = require('util').format;
+
+var hostname = process.env.HOSTNAME || require('os').hostname();
+
+var metric_template = format("host.%s.app.%.event.%.%", hostname);
+
+// https://github.com/felixge/node-measured#usage
 var stats = require('measured').createCollection();
 
-var client;
 
-// only run if config file allows
-if(config.get('enabled')) {
-  log.info('metrics collection is ENABLED.');
-
-  client = influx({
-    // or single-host configuration
-    host     : config.get('host'),
-    port     : config.get('port'),
-    username : config.get('username'),
-    password : config.get('password'),
-    database : config.get('database'),
-    requestTimeout: config.get('requestTimeout')
-  });
-
-  log.info({
-    metrics_hosts: client.getHostsAvailable(),
-    log_type: log.types.metrics.AVAILABLE_HOSTS,
-  }, "Metrics-server available hosts.");
-
-} else{
-
-  log.info('metrics collection is DISABLED.');
-
-}//if-else
+setInterval(function() {
+  stats.dump();
+}, 10000);
 
 
-function store(series, value)  {
-  // only run if config file allows
-  if(!config.get('enabled')) {
-    return;
-  }//if-else
+// https://github.com/felixge/node-measured#counter
+function count(event, increment)  {
+  var converted = toIntOrFloat(increment);
 
-  var timestamp = new Date(); // TODO: allow timestamp override?
+  if(converted !== false) {
+    stats.counter(event).inc(increment);
+  }//if
+}//count()
 
-  var point = {
-    time: timestamp,
-    value: value,
-  };//point
 
-  // check for non-empty series-name and value
-  if(!series || !value) {
-    log.error({
-      series: series,
-      point: point,
-      metrics_hosts: client.getHostsAvailable(),
-      log_type: log.types.metrics.METRICS_ERROR,
-    }, "Invalid metrics.");
+// https://github.com/felixge/node-measured#meter
+function meter(event, num_events) {
+  var converted = toIntOrFloat(num_events);
 
-    return;
+  if(converted !== false) {
+    stats.meter(event).mark(converted);
+  }//if
+}//meter()
+
+
+// https://github.com/felixge/node-measured#histogram
+function histogram(event, value) {
+  var converted = toIntOrFloat(value);
+
+  if(converted !== false) {
+    stats.histogram(event).update(converted);
+  }//if
+}//histogram
+
+
+// https://github.com/felixge/node-measured#timers
+function timer(event, value)  {
+  var converted = toIntOrFloat(value);
+
+  if(converted !== false) {
+    stats.timer(event).update(converted);
   }//if
 
-  // store the metrics
-  client.writePoint(series, point, function(err)  {
-    if(err) {
-      log.error({
-        err: err,
-        metrics_hosts: client.getHostsAvailable(),
-        log_type: log.types.metrics.STORE_ERROR,
-      }, "Error storing metrics.");
-    }//if
+}//timer()
 
-  });//client.write
 
-}//store
+function toIntOrFloat(candidate)  {
+  var converted = parseFloat(candidate, 10);
+  if(isNaN(candidate)) {
+    console.error("Original: %s; NaN: %s", candidate, converted);
+    return false;
+
+  } else {
+    return converted;
+
+  }//if-else
+}//toIntOrFloat
+
+
+function dump() {
+  console.log(stats.toJSON());
+}//dump
 
 
 module.exports = {
-  store: store,
-  client: client,
+  count     : count,
+  meter     : meter,
+  timer     : timer,
+  histogram : histogram,
+  dump      : dump,
+  collection: stats,
 };//module.exports
