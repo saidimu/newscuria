@@ -43,7 +43,15 @@ function listen_to_urls_received()  {
   };//options
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
+
     if(!err) {
+
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
       var url = json.url || '';
 
       if(url) {

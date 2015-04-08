@@ -34,7 +34,7 @@ event_types.queue.writer = {
 // QUEUE reader events
 event_types.queue.reader = {
   ERROR                : 'queue.reader.error',
-  MESSAGE              : 'queue.reader.message',
+  MESSAGE_RECEIVED     : 'queue.reader.message_received',
   NSQD_CLOSED          : 'queue.reader.nsqd.closed',
   NSQD_CONNECTED       : 'queue.reader.nsqd.connected',
   MESSAGE_ERROR        : 'queue.reader.error.message',

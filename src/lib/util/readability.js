@@ -27,6 +27,9 @@ var topics = queue.topics;
 
 var ratelimiter = require('_/util/limitd.js');
 var metrics = require('_/util/metrics.js');
+var urls = require('_/util/urls.js');
+
+var util = require('util');
 
 function start()    {
   // connect to the message queue
@@ -48,18 +51,14 @@ function listen_to_urls_approved()  {
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
         if(expected_wait_time)  {
-          log.info({
-            bucket: limit_options.bucket,
-            key: limit_options.key,
-            num_tokens: limit_options.num_tokens,
-            expected_wait_time: expected_wait_time,
-            log_type: log.types.limitd.EXPECTED_WAIT_TIME,
-          }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
-
-
-
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
           // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
@@ -81,7 +80,6 @@ function listen_to_urls_approved()  {
 function process_url_approved_message(json, message)	{
   var url = json.url || '';
 
-  // FIXME: fix and re-implement rate-limiting.
   get_readability(url);
 
   message.finish();
@@ -89,7 +87,8 @@ function process_url_approved_message(json, message)	{
 
 
 function get_readability(url)	{
-	var query_stmt = "SELECT * FROM nuzli.readability WHERE url=?";
+  var table = 'nuzli.readability';
+	var query_stmt = util.format("SELECT * FROM %s WHERE url=?", table);
   var params = [url];
 
   // CALLBACK
@@ -101,7 +100,10 @@ function get_readability(url)	{
         log_type: log.types.datastore.GENERIC_ERROR,
       }, "Error fetching Readability from the datastore. Fetching from remote Readability API.");
 
-      metrics.histogram(metrics.types.datastore.GENERIC_ERROR, 1);
+      metrics.meter(metrics.types.datastore.GENERIC_ERROR, {
+        table   : table,
+        url_host: urls.parse(url).hostname,
+      });
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -118,7 +120,7 @@ function get_readability(url)	{
           log_type: log.types.readability.JSON_PARSE_ERROR,
         }, 'Error JSON.parse()ing Readability oject');
 
-        metrics.histogram(metrics.types.readability.JSON_PARSE_ERROR, 1);
+        metrics.meter(metrics.types.readability.JSON_PARSE_ERROR, {});
 
       }//try-catch
 
@@ -134,7 +136,9 @@ function get_readability(url)	{
           log_type: log.types.readability.EMPTY_PLAINTEXT,
         }, "EMPTY Readability PLAINTEXT.");
 
-        metrics.histogram(metrics.types.readability.PLAINTEXT, 1);
+        metrics.meter(metrics.types.readability.PLAINTEXT, {
+          url_host: urls.parse(url).hostname,
+        });
 
       } else if(!readability) {
         log.error({
@@ -142,7 +146,9 @@ function get_readability(url)	{
           log_type: log.types.readability.EMPTY_OBJECT,
         }, "EMPTY Readability object... re-fetching from remote Readability API");
 
-        metrics.histogram(metrics.types.readability.EMPTY_OBJECT, 1);
+        metrics.meter(metrics.types.readability.EMPTY_OBJECT, {
+          url_host: urls.parse(url).hostname,
+        });
 
         fetch_readability_content(url, api_fetch_callback);
       }//if-else
@@ -153,7 +159,9 @@ function get_readability(url)	{
         log_type: log.types.readability.URL_NOT_IN_DB,
       }, "URL not in datastore... fetching from remote Readability API");
 
-      metrics.histogram(metrics.types.readability.URL_NOT_IN_DB, 1);
+      metrics.meter(metrics.types.readability.URL_NOT_IN_DB, {
+        url_host: urls.parse(url).hostname,
+      });
 
       fetch_readability_content(url, api_fetch_callback);
 
@@ -170,7 +178,9 @@ function get_readability(url)	{
         log_type: log.types.readability.API_ERROR,
       }, "Error fetching from the Readability API.");
 
-      metrics.histogram(metrics.types.readability.API_ERROR, 1);
+      metrics.meter(metrics.types.readability.API_ERROR, {
+        url_host: urls.parse(url).hostname,
+      });
 
     } else {
 
@@ -182,11 +192,14 @@ function get_readability(url)	{
   try {
     log.info({
       url: url,
-      table: 'readability',
+      table: table,
       log_type: log.types.datastore.FETCHED_URL,
     }, "Fetching url from the datastore.");
 
-    metrics.histogram(metrics.types.datastore.FETCHED_URL, 1);
+    metrics.meter(metrics.types.datastore.FETCHED_URL, {
+      url_host: urls.parse(url).hostname,
+      table: table,
+    });
 
     datastore_api.client.execute(query_stmt, params, datastore_fetch_callback);
 
@@ -197,7 +210,9 @@ function get_readability(url)	{
       log_type: log.type.datastore.GENERIC_ERROR,
     }, "Error fetching URL from the datastore... fetching from remote Readability API");
 
-    metrics.histogram(metrics.types.datastore.GENERIC_ERROR, 1);
+    metrics.meter(metrics.types.datastore.GENERIC_ERROR, {
+      url_host: urls.parse(url).hostname,
+    });
 
     fetch_readability_content(url, api_fetch_callback);
   }//try-catch
@@ -212,7 +227,9 @@ function fetch_readability_content(url, callback)	{
       log_type: log.types.readability.FETCHED_API,
     }, "Fetching url from the Readability API.");
 
-    metrics.histogram(metrics.types.readability.FETCHED_API, 1);
+    metrics.meter(metrics.types.readability.FETCHED_API, {
+      url_host: urls.parse(url).hostname,
+    });
 
   	readability_api.scrape(url, callback);
 
@@ -223,7 +240,9 @@ function fetch_readability_content(url, callback)	{
       log_type: log.types.readability.API_ERROR,
     }, "Error fetching URL content from Readability API");
 
-    metrics.histogram(metrics.types.readability.API_ERROR, 1);
+    metrics.meter(metrics.types.readability.API_ERROR, {
+      url_host: urls.parse(url).hostname,
+    });
 
   }//try-catch
 }//fetch_readability_content()
