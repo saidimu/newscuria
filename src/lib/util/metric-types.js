@@ -149,7 +149,8 @@ event_types.twitter = {
 event_types.limitd = {
   TOKEN_GET_ERROR       : 'limitd.token.error.get',
   TOKEN_REQUEST_TOO_BIG : 'limitd.token.error.request_too_big',
-  EXPECTED_WAIT_TIME    : 'limitd.expected_wait_time'
+  EXPECTED_WAIT_TIME    : 'limitd.expected_wait_time',
+  CONFORMANT_REQUEST    : 'limitd.conformant_request',
 };//event_types.limitd
 
 // METRIC events

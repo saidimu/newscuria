@@ -64,7 +64,7 @@ function listen_to_urls_received()  {
             log_type: log.types.limitd.EXPECTED_WAIT_TIME,
           }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
-          metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+          
 
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
@@ -108,7 +108,7 @@ function listen_to_readability()  {
             log_type: log.types.limitd.EXPECTED_WAIT_TIME,
           }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
-          metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+          
 
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
@@ -152,7 +152,7 @@ function listen_to_opencalais()  {
             log_type: log.types.limitd.EXPECTED_WAIT_TIME,
           }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
-          metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+          
 
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server

@@ -19,7 +19,7 @@ var hostname = require('os').hostname();
 
 var config_loggly = require('config').get("logging").get('loggly');
 
-var event_types = require('_/util/event-types.js');
+var metric_types = require('_/util/metric-types.js');
 
 // catch uncaught exceptions and print error message and stack before exiting cleanly
 // process restart is handled externally
@@ -77,7 +77,7 @@ function get_logger(name) {
   });//bunyan.createLogger()
 
   // FIXME: better way to augment logger with custom log message "types"?
-  logger.types = event_types;
+  logger.types = metric_types;
 
   return logger;
 }//get_logger()

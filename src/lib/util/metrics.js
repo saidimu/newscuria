@@ -46,6 +46,10 @@ function count(event, increment)  {
 
 // https://github.com/felixge/node-measured#meter
 function meter(event, num_events) {
+  if(!num_events) {
+    num_events = 1;
+  }//if
+
   var converted = toIntOrFloat(num_events);
 
   if(converted !== false) {
@@ -100,4 +104,5 @@ module.exports = {
   histogram : histogram,
   dump      : dump,
   collection: stats,
+  types     : require('_/util/metric-types.js'),
 };//module.exports

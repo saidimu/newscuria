@@ -63,8 +63,6 @@ function listen_to_urls_received()  {
             // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
             message.requeue(expected_wait_time, true);
 
-            metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
-
           } else {
 
             queue.publish_message(topics.URLS_APPROVED, {
@@ -88,7 +86,7 @@ function listen_to_urls_received()  {
           log_type: log.types.url.ERROR,
         }, "URL not found in queue message JSON.");
 
-        metrics.histogram(log.types.url.ERROR, 1);
+        metrics.meter(log.types.url.ERROR, 1);
 
       }//if-else
 

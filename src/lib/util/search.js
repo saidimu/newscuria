@@ -117,7 +117,7 @@ function index_entity(doc_type, url, body, message) {
         log_type: log.types.limitd.EXPECTED_WAIT_TIME,
       }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
 
-      metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+      
 
       // now backing-off to prevent other messages from being pushed from the server
       // initially wasn't backing-off to prevent "punishment" by the server
