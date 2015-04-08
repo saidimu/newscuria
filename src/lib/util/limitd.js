@@ -44,7 +44,11 @@ function take(bucket_obj, callback) {
         log_type: log.types.limitd.TOKEN_GET_ERROR,
       }, 'Error getting token from bucket.');
 
-      metrics.meter(log.types.limitd.TOKEN_GET_ERROR);
+      metrics.meter(log.types.limitd.TOKEN_GET_ERROR, {
+        bucket: bucket,
+        key: key,
+        num_tokens: num_tokens,
+      });
 
       // force client to handle token-getting error
       throw new Error(err);
@@ -53,7 +57,11 @@ function take(bucket_obj, callback) {
 
       // callback ONLY if token remove successfull
       if(response.conformant) {
-        metrics.meter(log.types.limitd.CONFORMANT_REQUEST);
+        metrics.meter(log.types.limitd.CONFORMANT_REQUEST, {
+          bucket: bucket,
+          key: key,
+          num_tokens: num_tokens,
+        });
 
         callback();
 
@@ -66,7 +74,11 @@ function take(bucket_obj, callback) {
           log_type: log.types.limitd.TOKEN_REQUEST_TOO_BIG,
         }, 'Error. Tokens requested greater than max. bucket size.');
 
-        metrics.meter(log.types.limitd.TOKEN_REQUEST_TOO_BIG);
+        metrics.meter(log.types.limitd.TOKEN_REQUEST_TOO_BIG, {
+          bucket: bucket,
+          key: key,
+          num_tokens: num_tokens,
+        });
 
       // OLD: wait until bucket refills to re-request tokens
       // NEW: wait until approx. time when requested tokens have been refilled
@@ -91,7 +103,11 @@ function take(bucket_obj, callback) {
 
         }//if-else
 
-        metrics.timer(log.types.limitd.EXPECTED_WAIT_TIME, expected_wait_time);
+        metrics.timer(log.types.limitd.EXPECTED_WAIT_TIME, {
+          bucket: bucket,
+          key: key,
+          num_tokens: num_tokens,
+        }, expected_wait_time);
 
         // callback with expected wait time. Upto callback to implement recommendation.
         callback(expected_wait_time);

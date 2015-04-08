@@ -43,8 +43,9 @@ event_types.queue.reader = {
 
 // QUEUE message events
 event_types.queue.message = {
-  PUBLISHED    : 'queue.message.published',
-  FINISH_ERROR : 'queue.message.error.finish',
+  PUBLISHED          : 'queue.message.published',
+  FINISH_ERROR       : 'queue.message.error.finish',
+  PROCESSING_ATTEMPTS: 'queue.message.processing_attempts'
 };//event_types.queue.message
 
 // WEBSOCKET events

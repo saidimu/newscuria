@@ -58,7 +58,10 @@ function connect(callback) {
         log_type: log.types.queue.writer.ERROR,
       }, "nsqd Writer error.");
 
-      metrics.histogram(log.types.queue.writer.ERROR, 1);
+      metrics.meter(log.types.queue.writer.ERROR, {
+        nsqd_host: nsqd_host,
+        nsqd_port: nsqd_port
+      });
 
     }//if
   });//writer.on
@@ -69,7 +72,10 @@ function connect(callback) {
       log_type: log.types.queue.writer.READY,
     }, "nsqd Writer ready.");
 
-    metrics.histogram(log.types.queue.writer.READY, 1);
+    metrics.meter(log.types.queue.writer.READY, {
+      nsqd_host: nsqd_host,
+      nsqd_port: nsqd_port
+    });
 
     writer = nsqd_writer;
 
@@ -81,7 +87,10 @@ function connect(callback) {
       log_type: log.types.queue.writer.CLOSED,
     }, "nsqd Writer closed.");
 
-    metrics.histogram(log.types.queue.writer.CLOSED, 1);
+    metrics.meter(log.types.queue.writer.CLOSED, {
+      nsqd_host: nsqd_host,
+      nsqd_port: nsqd_port
+    });
 
   });//writer.on
 
@@ -95,7 +104,10 @@ function read_message(topic, channel, callback)	{
       log_type: log.types.queue.reader.INVALID_CHANNEL_NAME,
     }, "Must provide a channel name to listen on.");
 
-    metrics.histogram(log.types.queue.reader.INVALID_CHANNEL_NAME, 1);
+    metrics.meter(log.types.queue.reader.INVALID_CHANNEL_NAME, {
+      topic  : topic,
+      channel: channel,
+    });
 
 		throw new Error("Must provide a channel name to listen on.");
 	}//if
@@ -113,15 +125,17 @@ function read_message(topic, channel, callback)	{
 	var reader = new nsq.Reader(topic, channel, options);
 
   reader.on('message', function onMessage(message) {
+    var proc_attempts = message.attempts || undefined;
+
+    metrics.histogram(metrics.types.queue.message.PROCESSING_ATTEMPTS, {
+      topic: topic,
+      channel: channel,
+      options: options,
+    }, proc_attempts);
+
     // get JSON message payload
     try {
       var json = message.json();
-
-      // log.info({
-      //   topic: topic,
-      //   channel: channel,
-      //   log_type: log.types.queue.reader.MESSAGE,
-      // });
 
       callback(undefined, json, message, reader);
 
@@ -131,11 +145,18 @@ function read_message(topic, channel, callback)	{
       log.error({
         topic: topic,
         channel: channel,
+        options: options,
+        proc_attempts: proc_attempts,
         err: err,
         log_type: log.types.queue.reader.MESSAGE_ERROR,
       }, "Error getting message from queue!");
 
-      metrics.histogram(log.types.queue.reader.MESSAGE_ERROR, 1);
+      metrics.meter(log.types.queue.reader.MESSAGE_ERROR, {
+        topic        : topic,
+        channel      : channel,
+        proc_attempts: proc_attempts,
+        options      : options,
+      });
 
       // FIXME: save these json-error messages for analysis
       try {
@@ -151,7 +172,10 @@ function read_message(topic, channel, callback)	{
           log_type: log.types.queue.message.FINISH_ERROR,
         }, "Error executing message.finish()");
 
-        metrics.histogram(log.types.queue.message.FINISH_ERROR, 1);
+        metrics.meter(log.types.queue.message.FINISH_ERROR, {
+          topic  : topic,
+          channel: channel,
+        });
 
       }//try-catch
 
@@ -168,7 +192,11 @@ function read_message(topic, channel, callback)	{
       log_type: log.types.queue.reader.ERROR,
     }, "nsq Reader error.");
 
-    metrics.histogram(log.types.queue.reader.ERROR, 1);
+    metrics.meter(log.types.queue.reader.ERROR, {
+      topic  : topic,
+      channel: channel,
+      options: options,
+    });
 
     callback(err, undefined, undefined, reader);
   });//reader.on
@@ -176,30 +204,42 @@ function read_message(topic, channel, callback)	{
 
   reader.on('nsqd_connected', function onNsqdConnected(host, port) {
     log.info({
-      topic: topic,
-      channel: channel,
+      topic    : topic,
+      channel  : channel,
       nsqd_host: host,
       nsqd_port: port,
-      options: options,
-      log_type: log.types.queue.reader.NSQD_CONNECTED,
+      options  : options,
+      log_type : log.types.queue.reader.NSQD_CONNECTED,
     }, "Reader connected to nsqd.");
 
-    metrics.histogram(log.types.queue.reader.NSQD_CONNECTED, 1);
+    metrics.meter(log.types.queue.reader.NSQD_CONNECTED, {
+      topic    : topic,
+      channel  : channel,
+      nsqd_host: host,
+      nsqd_port: port,
+      options  : options,
+    });
 
   });//reader.on
 
 
   reader.on('nsqd_closed', function onNsqdClosed(host, port) {
     log.info({
-      topic: topic,
-      channel: channel,
+      topic    : topic,
+      channel  : channel,
       nsqd_host: host,
       nsqd_port: port,
-      options: options,
-      log_type: log.types.queue.reader.NSQD_CLOSED,
+      options  : options,
+      log_type : log.types.queue.reader.NSQD_CLOSED,
     }, "Reader disconnected from nsqd.");
 
-    metrics.histogram(log.types.queue.reader.NSQD_CLOSED, 1);
+    metrics.meter(log.types.queue.reader.NSQD_CLOSED, {
+      topic    : topic,
+      channel  : channel,
+      nsqd_host: host,
+      nsqd_port: port,
+      options  : options,
+    });
 
   });//reader.on
 
@@ -216,7 +256,9 @@ function publish_message(topic, message)	{
       log_type: log.types.queue.writer.ERROR,
     }, "nsq Writer error: message not published.");
 
-    metrics.histogram(log.types.queue.writer.ERROR, 1);
+    metrics.meter(log.types.queue.writer.ERROR, {
+      topic: topic,
+    });
 
   });
 }//publish_message

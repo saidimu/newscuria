@@ -35,7 +35,7 @@ setInterval(function() {
 
 
 // https://github.com/felixge/node-measured#counter
-function count(event, increment)  {
+function count(event, metadata, increment)  {
   var converted = toIntOrFloat(increment);
 
   if(converted !== false) {
@@ -45,7 +45,7 @@ function count(event, increment)  {
 
 
 // https://github.com/felixge/node-measured#meter
-function meter(event, num_events) {
+function meter(event, metadata, num_events) {
   if(!num_events) {
     num_events = 1;
   }//if
@@ -59,7 +59,7 @@ function meter(event, num_events) {
 
 
 // https://github.com/felixge/node-measured#histogram
-function histogram(event, value) {
+function histogram(event, metadata, value) {
   var converted = toIntOrFloat(value);
 
   if(converted !== false) {
@@ -69,7 +69,7 @@ function histogram(event, value) {
 
 
 // https://github.com/felixge/node-measured#timers
-function timer(event, value)  {
+function timer(event, metadata, value)  {
   var converted = toIntOrFloat(value);
 
   if(converted !== false) {
