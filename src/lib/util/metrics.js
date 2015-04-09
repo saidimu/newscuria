@@ -43,7 +43,7 @@ setInterval(function() {
 function count(event, metadata, increment)  {
   var converted = toIntOrFloat(increment);
 
-  if(converted !== false) {
+  if( (converted !== false) && (event) ) {
     stats.counter(event).inc(increment);
   }//if
 }//count()
@@ -57,7 +57,7 @@ function meter(event, metadata, num_events) {
 
   var converted = toIntOrFloat(num_events);
 
-  if(converted !== false) {
+  if( (converted !== false) && (event) ) {
     stats.meter(event).mark(converted);
   }//if
 }//meter()
@@ -67,7 +67,7 @@ function meter(event, metadata, num_events) {
 function histogram(event, metadata, value) {
   var converted = toIntOrFloat(value);
 
-  if(converted !== false) {
+  if( (converted !== false) && (event) ) {
     stats.histogram(event).update(converted);
   }//if
 }//histogram
@@ -77,7 +77,7 @@ function histogram(event, metadata, value) {
 function timer(event, metadata, value)  {
   var converted = toIntOrFloat(value);
 
-  if(converted !== false) {
+  if( (converted !== false) && (event) ) {
     stats.timer(event).update(converted);
   }//if
 
