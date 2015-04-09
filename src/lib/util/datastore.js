@@ -55,6 +55,12 @@ function listen_to_urls_received()  {
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
         if(expected_wait_time)  {
           // now backing-off to prevent other messages from being pushed from the server
@@ -89,6 +95,12 @@ function listen_to_readability()  {
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
         if(expected_wait_time)  {
           // now backing-off to prevent other messages from being pushed from the server
@@ -122,6 +134,12 @@ function listen_to_opencalais()  {
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
+
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
 
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
         if(expected_wait_time)  {

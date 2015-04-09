@@ -26,6 +26,7 @@ var topics = queue.topics;
 
 var ratelimiter = require('_/util/limitd.js');
 var metrics = require('_/util/metrics.js');
+var urls = require('_/util/urls.js');
 
 function start()    {
   // connect to the message queue
@@ -47,18 +48,14 @@ function listen_to_opencalais()  {
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
         if(expected_wait_time)  {
-          log.info({
-            bucket: limit_options.bucket,
-            key: limit_options.key,
-            num_tokens: limit_options.num_tokens,
-            expected_wait_time: expected_wait_time,
-            log_type: log.types.limitd.EXPECTED_WAIT_TIME,
-          }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
-
-          
-
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
           // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
@@ -89,7 +86,9 @@ function process_opencalais_message(json, message) {
       log_type: log.types.entities.EMPTY_DATE_PUBLISHED,
     }, "Empty 'date_published'.");
 
-    metrics.histogram(metrics.types.entities.EMPTY_DATE_PUBLISHED, 1);
+    metrics.meter(metrics.types.entities.EMPTY_DATE_PUBLISHED, {
+      url_host: urls.parse(url).hostname,
+    });
 
   }//if
 
@@ -99,7 +98,7 @@ function process_opencalais_message(json, message) {
       log_type: log.types.entities.URL_NOT_IN_OPENCALAIS,
     }, "EMPTY url! Cannot persist Opencalais object to datastore.");
 
-    metrics.histogram(metrics.types.entities.URL_NOT_IN_OPENCALAIS, 1);
+    metrics.meter(metrics.types.entities.URL_NOT_IN_OPENCALAIS, {});
 
     // FIXME: Really? Just bail b/c of non-existing URL?
     message.finish();
@@ -189,7 +188,9 @@ function extract_people(nlp_object, url) {
     log_type: log.types.entities.PEOPLE,
   });
 
-  metrics.histogram(metrics.types.entities.PEOPLE, 1);
+  metrics.meter(metrics.types.entities.PEOPLE, {
+    url_host: urls.parse(url).hostname,
+  });
 
   publish_message(topics.ENTITIES_PEOPLE, nlp_object);
 }//extract_people
@@ -200,7 +201,9 @@ function extract_places(nlp_object, url) {
     log_type: log.types.entities.PLACES,
   });
 
-  metrics.histogram(metrics.types.entities.PLACES, 1);
+  metrics.meter(metrics.types.entities.PLACES, {
+    url_host: urls.parse(url).hostname,
+  });
 
   // map existing latitude/longitude properties to a new 'geo_point' property
   // to satisfy Elasticsearch. Much easier than messing around with Elasticsearch transform scripts
@@ -224,7 +227,9 @@ function extract_companies(nlp_object, url) {
     log_type: log.types.entities.COMPANIES,
   });
 
-  metrics.histogram(metrics.types.entities.COMPANIES, 1);
+  metrics.meter(metrics.types.entities.COMPANIES, {
+    url_host: urls.parse(url).hostname,
+  });
 
   publish_message(topics.ENTITIES_COMPANIES, nlp_object);
 }//extract_companies
@@ -235,7 +240,9 @@ function extract_things(nlp_object, url) {
     log_type: log.types.entities.THINGS,
   });
 
-  metrics.histogram(metrics.types.entities.THINGS, 1);
+  metrics.meter(metrics.types.entities.THINGS, {
+    url_host: urls.parse(url).hostname,
+  });
 
   publish_message(topics.ENTITIES_THINGS, nlp_object);
 }//extract_things
@@ -246,7 +253,9 @@ function extract_events(nlp_object, url) {
     log_type: log.types.entities.EVENTS,
   });
 
-  metrics.histogram(metrics.types.entities.EVENTS, 1);
+  metrics.meter(metrics.types.entities.EVENTS, {
+    url_host: urls.parse(url).hostname,
+  });
 
   publish_message(topics.ENTITIES_EVENTS, nlp_object);
 }//extract_events
@@ -257,7 +266,9 @@ function extract_relations(nlp_object, url) {
     log_type: log.types.entities.RELATIONS,
   });
 
-  metrics.histogram(metrics.types.entities.RELATIONS, 1);
+  metrics.meter(metrics.types.entities.RELATIONS, {
+    url_host: urls.parse(url).hostname,
+  });
 
   publish_message(topics.ENTITIES_RELATIONS, nlp_object);
 }//extract_relations
@@ -268,7 +279,9 @@ function extract_topics(nlp_object, url) {
     log_type: log.types.entities.TOPICS,
   });
 
-  metrics.histogram(metrics.types.entities.TOPICS, 1);
+  metrics.meter(metrics.types.entities.TOPICS, {
+    url_host: urls.parse(url).hostname,
+  });
 
   publish_message(topics.ENTITIES_TOPICS, nlp_object);
 }//extract_topics()
@@ -279,7 +292,9 @@ function extract_tags(nlp_object, url) {
     log_type: log.types.entities.TAGS,
   });
 
-  metrics.histogram(metrics.types.entities.TAGS, 1);
+  metrics.meter(metrics.types.entities.TAGS, {
+    url_host: urls.parse(url).hostname,
+  });
 
   publish_message(topics.ENTITIES_TAGS, nlp_object);
 }//extract_tags()
@@ -300,7 +315,9 @@ function extract_default(nlp_object, url) {
       log_type: log.types.entities.LANGUAGE + language,
     });
 
-    metrics.histogram(metrics.types.entities.LANGUAGE + language, 1);
+    metrics.meter(metrics.types.entities.LANGUAGE + language, {
+      url_host: urls.parse(url).hostname,
+    });
 
   } else {
 
@@ -310,7 +327,9 @@ function extract_default(nlp_object, url) {
       log_type: log.types.entities.UNDEFINED_NLP_OBJECT,
     }, 'new, undefined _type/_typeGroup encountered.');
 
-    metrics.histogram(metrics.types.entities.UNDEFINED_NLP_OBJECT, 1);
+    metrics.meter(metrics.types.entities.UNDEFINED_NLP_OBJECT, {
+      url_host: urls.parse(url).hostname,
+    });
 
   }//if-else
 }//extract_default()

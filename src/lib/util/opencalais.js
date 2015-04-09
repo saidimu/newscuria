@@ -49,6 +49,13 @@ function listen_to_readability()  {
   };//options
 
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
+
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
     if(!err) {
 
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
