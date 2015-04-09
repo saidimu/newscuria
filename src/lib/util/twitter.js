@@ -24,6 +24,7 @@ var topics = queue.topics;
 
 var config = require('config').get('twitter');
 var Twitter = require('twat');
+var metrics = require('_/util/metrics.js');
 
 var CONSUMER_KEY        = config.get('consumer_key');
 var CONSUMER_SECRET     = config.get('consumer_secret');
@@ -45,8 +46,11 @@ var client = new Twitter({
 function start()    {
   if(config.get('enabled')) { // only run if config file allows
     log.info({
-      log_type: log.types.twitter.STREAM_INFO,
+      log_type          : log.types.twitter.STREAM_INFO,
       streaming_endpoint: STREAMING_ENDPOINT,
+      filter_level      : FILTER_LEVEL,
+      language          : LANGUAGE,
+      track_terms       : TRACK_TERMS,
     }, 'Twitter Streaming is ENABLED.');
 
     stream();
@@ -54,8 +58,11 @@ function start()    {
   } else{
 
     log.info({
-      log_type: log.types.twitter.STREAM_INFO,
+      log_type          : log.types.twitter.STREAM_INFO,
       streaming_endpoint: STREAMING_ENDPOINT,
+      filter_level      : FILTER_LEVEL,
+      language          : LANGUAGE,
+      track_terms       : TRACK_TERMS,
     }, 'Twitter Streaming DISABLED.');
 
   }//if-else
@@ -71,7 +78,15 @@ function stream() {
 
   client.stream(STREAMING_ENDPOINT, options, function(stream)  {
     stream.on('tweet', function(tweet) {
+
+      metrics.meter(metrics.types.twitter.TWEET_RECEIVED, {
+        filter_level      : FILTER_LEVEL,
+        language          : LANGUAGE,
+        track_terms       : TRACK_TERMS,
+      });
+
       process_tweet(tweet);
+
     });//stream.on('data')
 
     stream.on('error', function(err) {
@@ -79,8 +94,17 @@ function stream() {
         err: err,
         log_type: log.types.twitter.STREAM_ERROR,
         streaming_endpoint: STREAMING_ENDPOINT,
-        options: options,
+        filter_level      : FILTER_LEVEL,
+        language          : LANGUAGE,
+        track_terms       : TRACK_TERMS,
       }, 'Twitter Streaming error.');
+
+      metrics.meter(metrics.types.twitter.STREAM_ERROR, {
+        filter_level      : FILTER_LEVEL,
+        language          : LANGUAGE,
+        track_terms       : TRACK_TERMS,
+      });
+
     });//stream.on('error')
   });//client.stream
 

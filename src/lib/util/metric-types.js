@@ -142,8 +142,9 @@ event_types.ratelimiter = {
 
 // TWITTER events
 event_types.twitter = {
-  STREAM_INFO: 'twitter.stream.info',
-  STREAM_ERROR: 'twitter.stream.error',
+  TWEET_RECEIVED: 'twitter.tweet.received',
+  STREAM_INFO   : 'twitter.stream.info',
+  STREAM_ERROR  : 'twitter.stream.error',
 };//event_types.twitter
 
 // LIMITD events
