@@ -68,9 +68,10 @@ function listen_to_opencalais()  {
         }//if-else
 
       });//ratelimiter.limit_app
-
     }//if
-  });
+
+  });//queue.read_message
+
 }//listen_to_opencalais
 
 
@@ -125,16 +126,21 @@ function extract_nlp_objects(opencalais, message, url, date_published) {
   for(var hash in opencalais) {
     if(opencalais.hasOwnProperty(hash))  {
       var nlp_object = opencalais[hash];
+
       var nlp_type = nlp_object._type;
       var nlp_typeGroup = nlp_object._typeGroup;
 
-      // associate this object with its ancestors: Opencalais --> Readability --> original url
+      // associate this object with its ancestors:
+      // 1. object.url --> Opencalais url --> Readability url --> original url
+      // 2.  object.hash --> Opencalais key corresponding to this object
       nlp_object.url = url;
+      nlp_object.opencalais_hash = hash;
 
       // append date_published of parent Opencalais object.
       // FIXME: Should be the date_published of the Readability object.
       nlp_object.date_published = date_published;
 
+      // decompose Opencalais objects into "types" for special processing
       switch(true)  {
         case PEOPLE.indexOf(nlp_type) >= 0:
           extract_people(nlp_object, url);
@@ -184,23 +190,15 @@ function extract_nlp_objects(opencalais, message, url, date_published) {
 
 
 function extract_people(nlp_object, url) {
-  log.info({
-    log_type: log.types.entities.PEOPLE,
-  });
-
   metrics.meter(metrics.types.entities.PEOPLE, {
     url_host: urls.parse(url).hostname,
   });
 
-  publish_message(topics.ENTITIES_PEOPLE, nlp_object);
+  publish_message(topics.ENTITIES, nlp_object);
 }//extract_people
 
 
 function extract_places(nlp_object, url) {
-  log.info({
-    log_type: log.types.entities.PLACES,
-  });
-
   metrics.meter(metrics.types.entities.PLACES, {
     url_host: urls.parse(url).hostname,
   });
@@ -218,85 +216,61 @@ function extract_places(nlp_object, url) {
     }//if
   });//resolutions.forEach
 
-  publish_message(topics.ENTITIES_PLACES, nlp_object);
+  publish_message(topics.ENTITIES, nlp_object);
 }//extract_places
 
 
 function extract_companies(nlp_object, url) {
-  log.info({
-    log_type: log.types.entities.COMPANIES,
-  });
-
   metrics.meter(metrics.types.entities.COMPANIES, {
     url_host: urls.parse(url).hostname,
   });
 
-  publish_message(topics.ENTITIES_COMPANIES, nlp_object);
+  publish_message(topics.ENTITIES, nlp_object);
 }//extract_companies
 
 
 function extract_things(nlp_object, url) {
-  log.info({
-    log_type: log.types.entities.THINGS,
-  });
-
   metrics.meter(metrics.types.entities.THINGS, {
     url_host: urls.parse(url).hostname,
   });
 
-  publish_message(topics.ENTITIES_THINGS, nlp_object);
+  publish_message(topics.ENTITIES, nlp_object);
 }//extract_things
 
 
 function extract_events(nlp_object, url) {
-  log.info({
-    log_type: log.types.entities.EVENTS,
-  });
-
   metrics.meter(metrics.types.entities.EVENTS, {
     url_host: urls.parse(url).hostname,
   });
 
-  publish_message(topics.ENTITIES_EVENTS, nlp_object);
+  publish_message(topics.ENTITIES, nlp_object);
 }//extract_events
 
 
 function extract_relations(nlp_object, url) {
-  log.info({
-    log_type: log.types.entities.RELATIONS,
-  });
-
   metrics.meter(metrics.types.entities.RELATIONS, {
     url_host: urls.parse(url).hostname,
   });
 
-  publish_message(topics.ENTITIES_RELATIONS, nlp_object);
+  publish_message(topics.ENTITIES, nlp_object);
 }//extract_relations
 
 
 function extract_topics(nlp_object, url) {
-  log.info({
-    log_type: log.types.entities.TOPICS,
-  });
-
   metrics.meter(metrics.types.entities.TOPICS, {
     url_host: urls.parse(url).hostname,
   });
 
-  publish_message(topics.ENTITIES_TOPICS, nlp_object);
+  publish_message(topics.ENTITIES, nlp_object);
 }//extract_topics()
 
 
 function extract_tags(nlp_object, url) {
-  log.info({
-    log_type: log.types.entities.TAGS,
-  });
-
   metrics.meter(metrics.types.entities.TAGS, {
     url_host: urls.parse(url).hostname,
   });
 
-  publish_message(topics.ENTITIES_TAGS, nlp_object);
+  publish_message(topics.ENTITIES, nlp_object);
 }//extract_tags()
 
 
@@ -311,17 +285,13 @@ function extract_default(nlp_object, url) {
 
     var language = nlp_object.meta.language || undefined;
 
-    log.info({
-      log_type: log.types.entities.LANGUAGE + language,
-    });
-
     metrics.meter(metrics.types.entities.LANGUAGE + language, {
       url_host: urls.parse(url).hostname,
     });
 
   } else {
 
-    log.error({
+    log.warn({
       url: url,
       nlp_object: nlp_object,
       log_type: log.types.entities.UNDEFINED_NLP_OBJECT,

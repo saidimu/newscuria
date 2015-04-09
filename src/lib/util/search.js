@@ -34,17 +34,6 @@ var ratelimiter = require('_/util/limitd.js');
 var metrics = require('_/util/metrics.js');
 var urls = require('_/util/urls.js');
 
-var topics_and_indices = {};
-topics_and_indices[topics.ENTITIES_PEOPLE]    = "people";
-topics_and_indices[topics.ENTITIES_PLACES]    = "places";
-topics_and_indices[topics.ENTITIES_COMPANIES] = "companies";
-topics_and_indices[topics.ENTITIES_THINGS]    = "things";
-topics_and_indices[topics.ENTITIES_EVENTS]    = "events";
-topics_and_indices[topics.ENTITIES_RELATIONS] = "relations";
-topics_and_indices[topics.ENTITIES_TOPICS]    = "topics";
-topics_and_indices[topics.ENTITIES_TAGS]      = "tags";
-
-
 function start()    {
   // connect to the message queue
   queue.connect(listen_to_entities);
@@ -52,9 +41,17 @@ function start()    {
 
 
 function listen_to_entities()  {
+  var topic = topics.ENTITIES;
   var channel = 'index-to-elasticsearch';
 
-  var onReadMessage = function (err, json, message, topic) {
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
+  };//options
+
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
       metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
@@ -63,22 +60,23 @@ function listen_to_entities()  {
         app    : appname,
       });
 
-      process_entities_message(json, message, topic);
+      ratelimiter.limit_app(limit_options, function(expected_wait_time) {
+        if(expected_wait_time)  {
+          // now backing-off to prevent other messages from being pushed from the server
+          // initially wasn't backing-off to prevent "punishment" by the server
+          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+          message.requeue(expected_wait_time, true);
+
+        } else {
+
+          process_entities_message(json, message);
+
+        }//if-else
+      });//ratelimiter.limit_app
     }//if
-  };//onReadMessage
 
-  // dynamically listen to a bunch of topics
-  // FIXME: listen to wildcard topics when NSQD supports that.
-  for(var topic in topics_and_indices)  {
-    if(topics_and_indices.hasOwnProperty(topic)) {
-
-      queue.read_message(topic, channel, function (err, json, message) {
-        onReadMessage(err, json, message, topic);
-      });//queue.read_message
-
-    }//if
-  }//for
-
+  });//queue.read_message
+  
 }//listen_to_entities
 
 
