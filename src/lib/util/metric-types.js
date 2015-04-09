@@ -34,18 +34,18 @@ event_types.queue.writer = {
 // QUEUE reader events
 event_types.queue.reader = {
   ERROR                : 'queue.reader.error',
-  MESSAGE_RECEIVED     : 'queue.reader.message_received',
+  MESSAGE_RECEIVED     : 'queue.reader.message.received',
   NSQD_CLOSED          : 'queue.reader.nsqd.closed',
   NSQD_CONNECTED       : 'queue.reader.nsqd.connected',
-  MESSAGE_ERROR        : 'queue.reader.error.message',
-  INVALID_CHANNEL_NAME : 'queue.reader.channel.error.invalid_name'
+  MESSAGE_ERROR        : 'queue.reader.message.error',
+  INVALID_CHANNEL_NAME : 'queue.reader.channel.name.invalid'
 };//event_types.queue.reader
 
 // QUEUE message events
 event_types.queue.message = {
   PUBLISHED          : 'queue.message.published',
-  FINISH_ERROR       : 'queue.message.error.finish',
-  PROCESSING_ATTEMPTS: 'queue.message.processing_attempts'
+  FINISH_ERROR       : 'queue.message.finish.error',
+  PROCESSING_ATTEMPTS: 'queue.message.processing.num_attempts'
 };//event_types.queue.message
 
 // WEBSOCKET events
@@ -62,59 +62,59 @@ event_types.websockets.client = {
   CONNECTED    : 'websockets.client.connection',
   DISCONNECTED : 'websockets.client.disconnection',
   MESSAGE      : 'websockets.client.message',
-  URL_ERROR    : 'websockets.client.error.url_processing'
+  URL_ERROR    : 'websockets.client.url.processing.error'
 };//event_types.websockets.client
 
 // webhook events
 event_types.webhook = {
-  URL_ERROR   : 'webhook.error.url_processing',
+  URL_ERROR   : 'webhook.url.processing.error',
   GOOGLE_NEWS : 'webhook.googlenews',
 };//event_types.kimono
 
 // READABILITY events
 event_types.readability = {
   FETCHED_URL          : 'readability.url.fetched',
-  JSON_PARSE_ERROR     : 'readability.error.json_parse',
-  EMPTY_PLAINTEXT      : 'readability.error.empty_plaintext',
-  EMPTY_OBJECT         : 'readability.error.empty_object',
-  URL_NOT_IN_DB        : 'readability.error.not_in_datastore',
+  JSON_PARSE_ERROR     : 'readability.json.parse.error',
+  EMPTY_PLAINTEXT      : 'readability.plaintext.empty',
+  EMPTY_OBJECT         : 'readability.object.empty',
+  URL_NOT_IN_DB        : 'readability.url.datastore.not_found',
   FETCHED_API          : 'readability.api.fetch',
   API_ERROR            : 'readability.api.error',
-  EMPTY_DATE_PUBLISHED : 'readability.error.empty_date_published',
-  EMPTY_AUTHOR         : 'readability.error.empty_author',
-  EMPTY_DOMAIN         : 'readability.error.empty_domain',
+  EMPTY_DATE_PUBLISHED : 'readability.date.published.empty',
+  EMPTY_AUTHOR         : 'readability.author.empty',
+  EMPTY_DOMAIN         : 'readability.domain.empty',
 };//event_types.readability
 
 // OPENCALAIS events
 event_types.opencalais = {
-  JSON_PARSE_ERROR        : 'opencalais.error.json_parse',
-  EMPTY_OBJECT            : 'opencalais.error.empty_object',
-  URL_NOT_IN_READABILITY  : 'opencalais.error.url_not_in_readability',
-  TEXT_NOT_IN_READABILITY : 'opencalais.error.text_not_in_readability',
-  URL_NOT_IN_DB           : 'opencalais.error.not_in_datastore',
+  JSON_PARSE_ERROR        : 'opencalais.json.parse.error',
+  EMPTY_OBJECT            : 'opencalais.object.empty',
+  URL_NOT_IN_READABILITY  : 'opencalais.url.readability.not_found',
+  TEXT_NOT_IN_READABILITY : 'opencalais.text.readability.not_found',
+  URL_NOT_IN_DB           : 'opencalais.url.datastore.not_found',
   FETCHED_API             : 'opencalais.api.fetch',
   API_ERROR               : 'opencalais.api.error',
-  EMPTY_DATE_PUBLISHED    : 'opencalais.error.empty_date_published',
-  EMPTY_URL               : 'opencalais.error.empty_url',
+  EMPTY_DATE_PUBLISHED    : 'opencalais.date.published.empty',
+  EMPTY_URL               : 'opencalais.url.empty',
 };//event_types.opencalais
 
 // DATASTORE events
 event_types.datastore = {
   FETCHED_URL           : 'datastore.url.fetched',
-  INSERT_ERROR          : 'datastore.error.insert',
-  EMPTY_DOMAIN          : 'datastore.error.empty_domain',
-  EMPTY_AUTHOR          : 'datastore.error.empty_author',
-  EMPTY_OBJECT          : 'datastore.error.empty_object',
-  DATE_CONVERSION_ERROR : 'datastore.error.date_conversion',
-  JSON_PARSE_ERROR      : 'datastore.error.json_parse',
-  GENERIC_ERROR         : 'datastore.error.generic',
+  INSERT_ERROR          : 'datastore.insert.error',
+  EMPTY_DOMAIN          : 'datastore.domain.empty',
+  EMPTY_AUTHOR          : 'datastore.author.empty',
+  EMPTY_OBJECT          : 'datastore.object.empty',
+  DATE_CONVERSION_ERROR : 'datastore.date.conversion.error',
+  JSON_PARSE_ERROR      : 'datastore.json.parse.error',
+  GENERIC_ERROR         : 'datastore.generic.error',
 };//event_types.datastore
 
 // ELASTICSEARCH events
 event_types.elasticsearch = {
   INDEXED_URL : 'elasticsearch.url.indexed',
   INDEX_ERROR : 'elasticsearch.index.error',
-  EMPTY_URL   : 'elasticsearch.error.empty_url',
+  EMPTY_URL   : 'elasticsearch.url.empty',
 };//log_typpes.elasticsearch
 
 // ENTITIES events
@@ -127,17 +127,17 @@ event_types.entities = {
   RELATIONS             : 'entities.relations',
   TOPICS                : 'entities.topics',
   TAGS                  : 'entities.tags',
-  LANGUAGE              : 'entities.lang_',
-  UNDEFINED_NLP_OBJECT  : 'entities.error.undefined_nlp_object',
-  EMPTY_DATE_PUBLISHED  : 'entities.error.empty_date_published',
-  URL_NOT_IN_OPENCALAIS : 'entities.error.url_not_in_opencalais',
+  LANGUAGE              : 'entities.lang.',
+  UNDEFINED_NLP_OBJECT  : 'entities.nlp_object.undefined',
+  EMPTY_DATE_PUBLISHED  : 'entities.date.published.empty',
+  URL_NOT_IN_OPENCALAIS : 'entities.url.opencalais.not_found',
 };//event_types.entities
 
 // RATELIMITER events
 event_types.ratelimiter = {
-  RATE_LIMITING_APP  : 'ratelimiter.app_being_ratelimited',
-  CONFIG_NOT_FOUND   : 'ratelimiter.error.config_not_found',
-  FALLBACK_NOT_FOUND : 'ratelimiter.error.fallback_not_found',
+  RATE_LIMITING_APP  : 'ratelimiter.app.rate_limited',
+  CONFIG_NOT_FOUND   : 'ratelimiter.config.not_found.error',
+  FALLBACK_NOT_FOUND : 'ratelimiter.fallback.not_found.error',
 };//event_types.ratelimiter
 
 // TWITTER events
@@ -149,15 +149,15 @@ event_types.twitter = {
 
 // LIMITD events
 event_types.limitd = {
-  TOKEN_GET_ERROR       : 'limitd.token.error.get',
-  TOKEN_REQUEST_TOO_BIG : 'limitd.token.error.request_too_big',
-  EXPECTED_WAIT_TIME    : 'limitd.expected_wait_time',
-  CONFORMANT_REQUEST    : 'limitd.conformant_request',
+  TOKEN_GET_ERROR       : 'limitd.request.token.get.error',
+  TOKEN_REQUEST_TOO_BIG : 'limitd.request.token.too_big',
+  EXPECTED_WAIT_TIME    : 'limitd.request.wait_time.expected',
+  CONFORMANT_REQUEST    : 'limitd.request.conformant',
 };//event_types.limitd
 
 // METRIC events
 event_types.metrics = {
-  AVAILABLE_HOSTS: 'metrics.available_hosts',
-  STORE_ERROR    : 'metrics.error.store',
-  METRICS_ERROR  : 'metrics.error.invalid',
+  AVAILABLE_HOSTS: 'metrics.hosts.available',
+  STORE_ERROR    : 'metrics.store.error',
+  METRICS_ERROR  : 'metrics.generic.error',
 };//event_types.metrics
