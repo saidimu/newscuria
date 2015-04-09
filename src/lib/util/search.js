@@ -32,6 +32,7 @@ var hash = require('string-hash');
 
 var ratelimiter = require('_/util/limitd.js');
 var metrics = require('_/util/metrics.js');
+var urls = require('_/util/urls.js');
 
 var topics_and_indices = {};
 topics_and_indices[topics.ENTITIES_PEOPLE]    = "people";
@@ -55,6 +56,13 @@ function listen_to_entities()  {
 
   var onReadMessage = function (err, json, message, topic) {
     if(!err) {
+
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
       process_entities_message(json, message, topic);
     }//if
   };//onReadMessage
@@ -89,7 +97,10 @@ function process_entities_message(json, message, topic)  {
         log_type: log.types.elasticsearch.EMPTY_URL,
       }, 'Empty URL in NLP entity object');
 
-      metrics.histogram(metrics.types.elasticsearch.EMPTY_URL, 1);
+      metrics.meter(metrics.types.elasticsearch.EMPTY_URL, {
+        url_host: urls.parse(url).hostname,
+        doc_type: doc_type,
+      });
 
       message.finish();
 
@@ -109,16 +120,6 @@ function index_entity(doc_type, url, body, message) {
 
   var rateLimitCallback = function(expected_wait_time) {
     if(expected_wait_time)  {
-      log.info({
-        bucket: limit_options.bucket,
-        key: limit_options.key,
-        num_tokens: limit_options.num_tokens,
-        expected_wait_time: expected_wait_time,
-        log_type: log.types.limitd.EXPECTED_WAIT_TIME,
-      }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
-
-      
-
       // now backing-off to prevent other messages from being pushed from the server
       // initially wasn't backing-off to prevent "punishment" by the server
       // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
@@ -147,7 +148,10 @@ function index_entity(doc_type, url, body, message) {
             response: response,
           }, 'Elasticsearch index error.');
 
-          metrics.histogram(metrics.types.elasticsearch.INDEX_ERROR, 1);
+          metrics.meter(metrics.types.elasticsearch.INDEX_ERROR, {
+            url_host: urls.parse(url).hostname,
+            doc_type: doc_type,
+          });
 
           message.requeue();
 
@@ -158,8 +162,11 @@ function index_entity(doc_type, url, body, message) {
             log_type: log.types.elasticsearch.INDEXED_URL,
           }, 'Indexed url to Elasticsearch.');
 
-          metrics.histogram(metrics.types.elasticsearch.INDEXED_URL, 1);
-          
+          metrics.meter(metrics.types.elasticsearch.INDEXED_URL, {
+            url_host: urls.parse(url).hostname,
+            doc_type: doc_type,
+          });
+
           message.finish();
 
         }//if-else
