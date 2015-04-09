@@ -21,9 +21,14 @@ var log = require('_/util/logging.js')(appname);
 
 var format = require('util').format;
 
-var hostname = process.env.HOSTNAME || require('os').hostname();
+var influx = require('influx');
+var config = require('config').get("metrics");
 
-var metric_template = format("host.%s.app.%.event.%.%", hostname);
+var types = require('_/util/metric-types.js');
+
+var client; // InfluxDB client
+
+// var hostname = process.env.HOSTNAME || require('os').hostname();
 
 // https://github.com/felixge/node-measured#usage
 var stats = require('measured').createCollection();
@@ -97,6 +102,75 @@ function dump() {
 }//dump
 
 
+// only run if config file allows
+if(config.get('enabled')) {
+  log.info('metrics collection is ENABLED.');
+
+  client = influx({
+    // or single-host configuration
+    host     : config.get('host'),
+    port     : config.get('port'),
+    username : config.get('username'),
+    password : config.get('password'),
+    database : config.get('database'),
+    requestTimeout: config.get('requestTimeout')
+  });
+
+  log.info({
+    metrics_hosts: client.getHostsAvailable(),
+    log_type: log.types.metrics.AVAILABLE_HOSTS,
+  }, "Metrics-server available hosts.");
+
+} else{
+
+  log.info('metrics collection is DISABLED.');
+
+}//if-else
+
+
+function writePoint(series, values)  {
+  // only run if config file allows
+  if(!config.get('enabled')) {
+    return;
+  }//if-else
+
+  values.time = new Date(); // TODO: allow timestamp override?
+
+  // check for non-empty series-name and value
+  if(!series || !values) {
+    log.error({
+      series: series,
+      metrics_hosts: client.getHostsAvailable(),
+      log_type: log.types.metrics.METRICS_ERROR,
+    }, "Invalid metrics.");
+
+    meter(types.metrics.METRICS_ERROR, {
+      series: series,
+    });
+
+    return;
+  }//if
+
+  // store the metrics
+  client.writePoint(series, values, function(err)  {
+    if(err) {
+      log.error({
+        err: err,
+        series: series,
+        metrics_hosts: client.getHostsAvailable(),
+        log_type: log.types.metrics.STORE_ERROR,
+      }, "Error storing metrics.");
+    }//if
+
+    meter(types.metrics.STORE_ERROR, {
+      series: series,
+    });
+
+  });//client.write
+
+}//writePoint
+
+
 module.exports = {
   count     : count,
   meter     : meter,
@@ -104,5 +178,5 @@ module.exports = {
   histogram : histogram,
   dump      : dump,
   collection: stats,
-  types     : require('_/util/metric-types.js'),
+  types     : types,
 };//module.exports
