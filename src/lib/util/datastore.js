@@ -29,6 +29,7 @@ var topics = queue.topics;
 
 var ratelimiter = require('_/util/limitd.js');
 var metrics = require('_/util/metrics.js');
+var urls = require('_/util/urls.js');
 
 function start()    {
   // connect to the message queue
@@ -56,16 +57,6 @@ function listen_to_urls_received()  {
 
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
         if(expected_wait_time)  {
-          log.info({
-            bucket: limit_options.bucket,
-            key: limit_options.key,
-            num_tokens: limit_options.num_tokens,
-            expected_wait_time: expected_wait_time,
-            log_type: log.types.limitd.EXPECTED_WAIT_TIME,
-          }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
-
-          
-
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
           // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
@@ -100,16 +91,6 @@ function listen_to_readability()  {
 
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
         if(expected_wait_time)  {
-          log.info({
-            bucket: limit_options.bucket,
-            key: limit_options.key,
-            num_tokens: limit_options.num_tokens,
-            expected_wait_time: expected_wait_time,
-            log_type: log.types.limitd.EXPECTED_WAIT_TIME,
-          }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
-
-          
-
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
           // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
@@ -144,16 +125,6 @@ function listen_to_opencalais()  {
 
       ratelimiter.limit_app(limit_options, function(expected_wait_time) {
         if(expected_wait_time)  {
-          log.info({
-            bucket: limit_options.bucket,
-            key: limit_options.key,
-            num_tokens: limit_options.num_tokens,
-            expected_wait_time: expected_wait_time,
-            log_type: log.types.limitd.EXPECTED_WAIT_TIME,
-          }, "Rate-limited! Re-queueing message for %s seconds.", expected_wait_time);
-
-          
-
           // now backing-off to prevent other messages from being pushed from the server
           // initially wasn't backing-off to prevent "punishment" by the server
           // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
@@ -174,8 +145,8 @@ function listen_to_opencalais()  {
 
 function process_url_received_message(json, message) {
   var url = json.url || '';
-
-  var insert_stmt = "INSERT INTO nuzli.received_urls (url, latest_received_date) VALUES (?, ?)";
+  var table = 'nuzli.received_urls';
+  var insert_stmt = util.format("INSERT INTO %s (url, latest_received_date) VALUES (?, ?)", table);
   var received_date = new Date().toISOString();
   var params = [url, received_date];
 
@@ -188,7 +159,10 @@ function process_url_received_message(json, message) {
         log_type: log.types.datastore.INSERT_ERROR,
       });
 
-      metrics.histogram(metrics.types.datastore.INSERT_ERROR, 1);
+      metrics.meter(metrics.types.datastore.INSERT_ERROR, {
+        table: table,
+        url_host: urls.parse(url).hostname,
+      });
 
     }//if
   });
@@ -214,7 +188,10 @@ function process_readability_message(json, message) {
       log_type: log.types.readability.EMPTY_DATE_PUBLISHED,
     }, "Empty 'date_published' in Readability object.");
 
-    metrics.histogram(metrics.types.readability.EMPTY_DATE_PUBLISHED, 1);
+    metrics.meter(metrics.types.readability.EMPTY_DATE_PUBLISHED, {
+      url_domain: domain,
+      url_host  : urls.parse(url).hostname,
+    });
 
   }//if
 
@@ -224,7 +201,10 @@ function process_readability_message(json, message) {
       log_type: log.types.readability.EMPTY_AUTHOR,
     }, "Empty 'author' in Readability object.");
 
-    metrics.histogram(metrics.types.readability.EMPTY_AUTHOR, 1);
+    metrics.meter(metrics.types.readability.EMPTY_AUTHOR, {
+      url_domain: domain,
+      url_host  : urls.parse(url).hostname,
+    });
 
   }//if
 
@@ -234,7 +214,9 @@ function process_readability_message(json, message) {
       log_type: log.types.readability.EMPTY_DOMAIN,
     }, "Empty 'domain' in Readability object.");
 
-    metrics.histogram(metrics.types.readability.EMPTY_DOMAIN, 1);
+    metrics.meter(metrics.types.readability.EMPTY_DOMAIN, {
+      url_host  : urls.parse(url).hostname,
+    });
 
   }//if
 
@@ -280,7 +262,9 @@ function process_opencalais_message(json, message) {
       log_type: log.types.opencalais.EMPTY_DATE_PUBLISHED,
     }, "Empty 'date_published' in Opencalais object.");
 
-    metrics.histogram(metrics.types.opencalais.EMPTY_DATE_PUBLISHED, 1);
+    metrics.meter(metrics.types.opencalais.EMPTY_DATE_PUBLISHED, {
+      url_host: urls.parse(url).hostname,
+    });
 
   }//if
 
@@ -290,7 +274,7 @@ function process_opencalais_message(json, message) {
       log_type: log.types.opencalais.EMPTY_URL,
     }, "EMPTY url in Opencalais object. Cannot persist to datastore.");
 
-    metrics.histogram(metrics.types.opencalais.EMPTY_URL, 1);
+    metrics.meter(metrics.types.opencalais.EMPTY_URL, {});
 
     return;
   }//if
@@ -319,7 +303,11 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
           log_type: log.types.datastore.INSERT_ERROR,
         }, 'Error persisting domain metadata to datastore');
 
-        metrics.histogram(metrics.types.datastore.INSERT_ERROR, 1);
+        metrics.meter(metrics.types.datastore.INSERT_ERROR, {
+          table: table,
+          url_domain: domain,
+          url_host: urls.parse(url).hostname,
+        });
 
       }//if
 
@@ -333,7 +321,10 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
       log_type: log.types.datastore.EMPTY_DOMAIN,
     }, "EMPTY domain name for url");
 
-    metrics.histogram(metrics.types.datastore.EMPTY_DOMAIN, 1);
+    metrics.meter(metrics.types.datastore.EMPTY_DOMAIN, {
+      table: table,
+      url_host: urls.parse(url).hostname,
+    });
 
   }//if
 
@@ -365,7 +356,10 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
           log_type: log.types.datastore.INSERT_ERROR,
         }, 'Error persisting author metadata to datastore');
 
-        metrics.histogram(metrics.types.datastore.INSERT_ERROR, 1);
+        metrics.meter(metrics.types.datastore.INSERT_ERROR, {
+          table: table,
+          url_host: urls.parse(url).hostname,
+        });
 
       }//if
     };//callback
@@ -378,7 +372,10 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
       log_type: log.types.datastore.EMPTY_AUTHOR,
     }, "EMPTY author name for url");
 
-    metrics.histogram(metrics.types.datastore.EMPTY_AUTHOR, 1);
+    metrics.meter(metrics.types.datastore.EMPTY_AUTHOR, {
+      table: table,
+      url_host: urls.parse(url).hostname,
+    });
 
   }//if
 
@@ -409,7 +406,10 @@ function save_document(object, url, date_published, table, callback)    {
           log_type: log.types.datastore.INSERT_ERROR,
         }, 'Error persisting document to datastore');
 
-        metrics.histogram(metrics.types.datastore.INSERT_ERROR, 1);
+        metrics.meter(metrics.types.datastore.INSERT_ERROR, {
+          table: table,
+          url_host: urls.parse(url).hostname,
+        });
       }//if
 
     };//callback
@@ -422,7 +422,10 @@ function save_document(object, url, date_published, table, callback)    {
       log_type: log.types.datastore.EMPTY_OBJECT,
     }, "EMPTY object cannot be saved to table.");
 
-    metrics.histogram(metrics.types.datastore.EMPTY_OBJECT, 1);
+    metrics.meter(metrics.types.datastore.EMPTY_OBJECT, {
+      table: table,
+      url_host: urls.parse(url).hostname,
+    });
 
     return;
   }//if
@@ -442,7 +445,10 @@ function save_document(object, url, date_published, table, callback)    {
       log_type: log.types.datastore.JSON_PARSE_ERROR,
     }, "Error converting JSON object to a Buffer object;");
 
-    metrics.histogram(metrics.types.datastore.JSON_PARSE_ERROR, 1);
+    metrics.meter(metrics.types.datastore.JSON_PARSE_ERROR, {
+      table: table,
+      url_host: urls.parse(url).hostname,
+    });
 
     return;
   }//try-catch
@@ -475,7 +481,9 @@ function date_string_to_iso_object(date_string, url)  {
       log_type: log.types.datastore.DATE_CONVERSION_ERROR,
     }, "Cannot convert date string to Date object.");
 
-    metrics.histogram(metrics.types.datastore.DATE_CONVERSION_ERROR, 1);
+    metrics.meter(metrics.types.datastore.DATE_CONVERSION_ERROR, {
+      url_host: urls.parse(url).hostname,
+    });
 
     iso_object = new Date('1970-01-01 00:00:00 +0000').toISOString();
   }//try-catch
