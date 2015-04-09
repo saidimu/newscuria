@@ -35,7 +35,7 @@ var stats = require('measured').createCollection();
 
 // display stats on console every X seconds.
 setInterval(function() {
-  dump();
+  writeSeries();
 }, 10000);
 
 
@@ -97,11 +97,6 @@ function toIntOrFloat(candidate)  {
 }//toIntOrFloat
 
 
-function dump() {
-  console.log(stats.toJSON());
-}//dump
-
-
 // only run if config file allows
 if(config.get('enabled')) {
   log.info('metrics collection is ENABLED.');
@@ -128,47 +123,38 @@ if(config.get('enabled')) {
 }//if-else
 
 
-function writePoint(series, values)  {
+function writeSeries()  {
   // only run if config file allows
   if(!config.get('enabled')) {
     return;
   }//if-else
 
-  values.time = new Date(); // TODO: allow timestamp override?
+  var stats_json = stats.toJSON();
 
-  // check for non-empty series-name and value
-  if(!series || !values) {
-    log.error({
-      series: series,
-      metrics_hosts: client.getHostsAvailable(),
-      log_type: log.types.metrics.METRICS_ERROR,
-    }, "Invalid metrics.");
-
-    meter(types.metrics.METRICS_ERROR, {
-      series: series,
-    });
-
-    return;
-  }//if
+  // convert each series points object into an array
+  // (required by influxdb library)
+  for(var key in stats_json)  {
+    stats_json[key] = [ stats_json[key] ];
+  }//for
 
   // store the metrics
-  client.writePoint(series, values, function(err)  {
+  client.writeSeries(stats_json, function(err)  {
     if(err) {
       log.error({
         err: err,
-        series: series,
+        series: Object.keys(stats_json),
         metrics_hosts: client.getHostsAvailable(),
         log_type: log.types.metrics.STORE_ERROR,
       }, "Error storing metrics.");
     }//if
 
     meter(types.metrics.STORE_ERROR, {
-      series: series,
+      series: Object.keys(stats_json),
     });
 
   });//client.write
 
-}//writePoint
+}//writeSeries
 
 
 module.exports = {

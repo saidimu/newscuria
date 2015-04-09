@@ -103,7 +103,7 @@ function take(bucket_obj, callback) {
 
         }//if-else
 
-        metrics.timer(log.types.limitd.EXPECTED_WAIT_TIME, {
+        metrics.histogram(log.types.limitd.EXPECTED_WAIT_TIME, {
           bucket    : bucket,
           key       : key,
           num_tokens: num_tokens,
