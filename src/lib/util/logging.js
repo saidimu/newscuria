@@ -14,16 +14,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 'use strict';
 
 var bunyan = require('bunyan');
-// var bsyslog = require('bunyan-syslog');
 var loggly = require('bunyan-loggly').Bunyan2Loggly;
-var logentries = require('bunyan-logentries');
 var hostname = require('os').hostname();
 
-// var config = require('config').get("logging").papertrail;
-var config_loggly = require('config').get("logging").loggly;
-var config_logentries = require('config').get("logging").logentries;
+var config_loggly = require('config').get("logging").get('loggly');
 
-var log_types = require('_/util/logging-types.js');
+var metric_types = require('_/util/metric-types.js');
 
 // catch uncaught exceptions and print error message and stack before exiting cleanly
 // process restart is handled externally
@@ -45,6 +41,24 @@ function get_logger(name) {
     throw new Error("Invalid logger name '%s'. Cannot create a logger", name);
   }//if
 
+  var loggly_stream = {};
+
+  // only run if config file allows
+  if(config_loggly.get('enabled')) {
+    loggly_stream = {
+      level: config_loggly.get('level'),
+      type: 'raw',
+      stream: new loggly({
+        token: config_loggly.get('token'),
+        subdomain: config_loggly.get('subdomain')
+      }, config_loggly.get('buffer_size') || 1000)
+    };//loggly_stream
+
+  } else {
+    console.log('Loggly logging is DISABLED.');
+  }//if
+
+
   var logger = bunyan.createLogger({
     name: hostname,
     hostname: name,
@@ -58,26 +72,12 @@ function get_logger(name) {
         level: config_loggly.get('level'),
         stream: process.stdout
       },
-      {
-        level: config_loggly.get('level'),
-        type: 'raw',
-        stream: new loggly({
-          token: config_loggly.get('token'),
-          subdomain: config_loggly.get('subdomain')
-        })
-      },
-      {
-        level: config_logentries.get('level'),
-        type: 'raw',
-        stream: logentries.createStream({
-          token: config_logentries.get('token'),
-        })
-      },
+      loggly_stream,
     ],
   });//bunyan.createLogger()
 
   // FIXME: better way to augment logger with custom log message "types"?
-  logger.types = log_types;
+  logger.types = metric_types;
 
   return logger;
 }//get_logger()

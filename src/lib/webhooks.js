@@ -24,6 +24,8 @@ var topics = queue.topics;
 
 var restify = require('restify');
 
+var request = require('superagent');
+
 //==BEGIN here
 // connect to the message queue
 queue.connect(start);
@@ -33,11 +35,96 @@ var server;
 
 function start()    {
   server = start_rest_server();
-  handle_googlenews_webhooks();
+  kimono_googlenews_handler();
+  ducksboard_loggly_handler();
 }//start()
 
 
-function handle_googlenews_webhooks() {
+function ducksboard_loggly_handler() {
+  var config_loggly = require('config').get("logging").get('loggly');
+  var loggly_user = config_loggly.get('user');
+  var loggly_password = config_loggly.get('password');
+
+  var api_endpoint = config_loggly.get('search').get('api_endpoint');
+  var from_period  = config_loggly.get('search').get('from') || '-1h';
+  var until_period  = config_loggly.get('search').get('until') || 'now';
+
+  // server.get('/ducksboard/:metric/:from/:until/', function onDucksboard(req, res, next)  {
+  server.get('/ducksboard/:metric/', function onDucksboard(req, res, next)  {
+    var metric = req.params.metric;
+
+    var facet_size = 200;   // https://www.loggly.com/docs/api-retrieving-data/
+
+    req.log.info({
+      req_params: req.params
+    });
+
+    if(metric)  {
+      request
+        .get(api_endpoint)
+        .query({
+          from: from_period,
+          until: until_period,
+          facet_size: facet_size,
+        })
+        .auth(loggly_user, loggly_password)
+        .end(function(loggly_err, loggly_res){
+
+          if(loggly_err || loggly_res.error) {
+
+            req.log.error({
+              err: loggly_err
+            }, 'Error in Loggly search/events API call.');
+
+            return next(
+              new restify.InternalError('Error in Loggly search/events API call')
+            );
+
+          } else {
+            var log_events = loggly_res.body;
+
+            req.log.info({
+              log_events: log_events
+            });
+
+            var metric_count = -1; // default 'not found' value
+
+            log_events['json.log_type'].forEach(function(log_event) {
+              if(log_event.term === metric) {
+                metric_count = log_event.count;
+              }//if
+            });//forEach
+
+            if(metric_count > -1)  {
+
+              res.send(200, metric_count);
+
+            } else {
+
+              return next(
+                new restify.ResourceNotFound('Metric "%s" not found.', metric)
+              );
+
+            }//if
+          }//if-else
+
+        });//request
+
+    } else {
+
+      // res.send(400);  //400 Bad Request
+      return next(
+        new restify.InvalidArgument('Metric name must be supplied.')
+      );
+
+    }//if-else
+
+  });//server.get
+
+}//ducksboard_loggly_handler
+
+
+function kimono_googlenews_handler() {
   server.post('/googlenews', function onGoogleNews(req, res, next) {
     var webhook = req.body;
 
@@ -52,18 +139,15 @@ function handle_googlenews_webhooks() {
       count: webhook.count
     };
 
+    webhook_header.log_type = log.types.webhook.GOOGLE_NEWS;
     req.log.info(webhook_header);
-
-    log.info({
-      log_type: log.types.webhook.GOOGLE_NEWS,
-    });
 
     process_googlenews_webhook(webhook);
 
     res.send(204);
   });//server.post
 
-}//handle_googlenews_webhooks
+}//kimono_googlenews_handler
 
 
 function process_googlenews_webhook(webhook)  {
@@ -73,13 +157,15 @@ function process_googlenews_webhook(webhook)  {
   var metadata = results.metadata || [];
   var related = results.related || [];
 
+  // FIXME: beware of duplicate URLs in 'content' and 'related' arrays.
+
   content.forEach(function(article)  {
     // TODO: also process Google News article headlines
     var headline = article.headline || {};
     var url = headline.href || undefined;
 
     if(url) {
-      
+
       publish_url_message(url);
 
     } else {
@@ -125,6 +211,7 @@ function start_rest_server()  {
     log: log
   });
 
+  server.pre(restify.pre.sanitizePath());
   server.use(restify.acceptParser(server.acceptable));
   server.use(restify.authorizationParser());
   server.use(restify.dateParser());

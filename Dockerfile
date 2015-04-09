@@ -1,7 +1,7 @@
 ############################################################
 # main Dockerfile for newscuria services
 ############################################################
-FROM saidimu/newscuria-base:latest
+FROM node:0.10
 
 # Dockerfile author/maintainer
 MAINTAINER Saidimu Apale (saidimu@gmail.com)

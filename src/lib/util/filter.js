@@ -22,6 +22,9 @@ var log = require('_/util/logging.js')(appname);
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
+var ratelimiter = require('_/util/limitd.js');
+var metrics = require('_/util/metrics.js');
+
 function start()    {
   // connect to the message queue
   queue.connect(listen_to_urls_received);
@@ -32,15 +35,44 @@ function listen_to_urls_received()  {
   var topic = topics.URLS_RECEIVED;
   var channel = "filter-unwanted-urls";
 
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
+  };//options
+
   queue.read_message(topic, channel, function onReadMessage(err, json, message) {
+
     if(!err) {
+
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
       var url = json.url || '';
 
       if(url) {
 
-        queue.publish_message(topics.URLS_APPROVED, {
-          url: url
-        });
+        var rateLimitCallback = function(expected_wait_time) {
+          if(expected_wait_time)  {
+            // now backing-off to prevent other messages from being pushed from the server
+            // initially wasn't backing-off to prevent "punishment" by the server
+            // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+            message.requeue(expected_wait_time, true);
+
+          } else {
+
+            queue.publish_message(topics.URLS_APPROVED, {
+              url: url
+            });//queue.publish_message
+
+          }//if-else
+        };//rateLimitCallback
+
+        ratelimiter.limit_app(limit_options, rateLimitCallback);
 
       } else {
         // FIXME: Save url-less messages for later analysis
@@ -53,6 +85,13 @@ function listen_to_urls_received()  {
           err: err,
           log_type: log.types.url.ERROR,
         }, "URL not found in queue message JSON.");
+
+        metrics.meter(log.types.url.ERROR, {
+          topic        : topic,
+          channel      : channel,
+          proc_attempts: message.attempts || undefined,
+        });
+
       }//if-else
 
       message.finish();
