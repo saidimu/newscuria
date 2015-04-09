@@ -71,9 +71,11 @@ function listen_to_entities()  {
   // FIXME: listen to wildcard topics when NSQD supports that.
   for(var topic in topics_and_indices)  {
     if(topics_and_indices.hasOwnProperty(topic)) {
+
       queue.read_message(topic, channel, function (err, json, message) {
         onReadMessage(err, json, message, topic);
-      });
+      });//queue.read_message
+
     }//if
   }//for
 
@@ -81,7 +83,8 @@ function listen_to_entities()  {
 
 
 function process_entities_message(json, message, topic)  {
-    var doc_type = topics_and_indices[topic];
+    // var doc_type = topics_and_indices[topic];
+    var doc_type = 'opencalais';
 
     var url = json.url || '';
     if(url) {
