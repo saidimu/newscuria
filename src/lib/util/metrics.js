@@ -162,7 +162,6 @@ module.exports = {
   meter     : meter,
   timer     : timer,
   histogram : histogram,
-  dump      : dump,
   collection: stats,
   types     : types,
 };//module.exports
