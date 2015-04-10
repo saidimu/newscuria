@@ -412,7 +412,14 @@
                 "type": "double"
               },
               "name": {
-                "type": "string"
+                "type": "string",
+                "index": "analyzed",
+                "fields": {
+                  "raw": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                  },
+                },
               },
               "score": {
                 "type": "long"
