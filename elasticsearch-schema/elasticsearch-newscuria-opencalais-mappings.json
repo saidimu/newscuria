@@ -68,7 +68,13 @@
           },
           "commonname": {
             "type": "string",
-            "index": "not_analyzed"
+            "index": "analyzed",
+            "fields": {
+              "raw": {
+                "type": "string",
+                "index": "not_analyzed"
+              },
+            },
           },
           "company": {
             "type": "string"
@@ -196,11 +202,23 @@
           },
           "location": {
             "type": "string",
-            "index": "not_analyzed"
+            "index": "analyzed",
+            "fields": {
+              "raw": {
+                "type": "string",
+                "index": "not_analyzed"
+              },
+            },
           },
           "locationdestination": {
             "type": "string",
-            "index": "not_analyzed"
+            "index": "analyzed",
+            "fields": {
+              "raw": {
+                "type": "string",
+                "index": "not_analyzed"
+              },
+            },
           },
           "locationstring": {
             "type": "string"
@@ -222,7 +240,13 @@
           },
           "name": {
             "type": "string",
-            "index": "not_analyzed"
+            "index": "analyzed",
+            "fields": {
+              "raw": {
+                "type": "string",
+                "index": "not_analyzed"
+              },
+            },
           },
           "nationality": {
             "type": "string"
@@ -235,7 +259,13 @@
           },
           "organization": {
             "type": "string",
-            "index": "not_analyzed"
+            "index": "analyzed",
+            "fields": {
+              "raw": {
+                "type": "string",
+                "index": "not_analyzed"
+              },
+            },
           },
           "organizationtype": {
             "type": "string"
@@ -257,7 +287,13 @@
           },
           "person": {
             "type": "string",
-            "index": "not_analyzed"
+            "index": "analyzed",
+            "fields": {
+              "raw": {
+                "type": "string",
+                "index": "not_analyzed"
+              },
+            },
           },
           "person_employee": {
             "type": "string"
@@ -300,7 +336,13 @@
           },
           "position": {
             "type": "string",
-            "index": "not_analyzed"
+            "index": "analyzed",
+            "fields": {
+              "raw": {
+                "type": "string",
+                "index": "not_analyzed"
+              },
+            },
           },
           "positionaspirational": {
             "type": "string"
@@ -377,7 +419,13 @@
               },
               "shortname": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "analyzed",
+                "fields": {
+                  "raw": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                  },
+                },
               },
               "symbol": {
                 "type": "string"
@@ -486,7 +534,13 @@
           },
           "locationorigin": {
             "type": "string",
-            "index": "not_analyzed"
+            "index": "analyzed",
+            "fields": {
+              "raw": {
+                "type": "string",
+                "index": "not_analyzed"
+              },
+            },
           },
           "marketindex": {
             "type": "string"
