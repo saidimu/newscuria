@@ -76,7 +76,7 @@ function listen_to_entities()  {
     }//if
 
   });//queue.read_message
-  
+
 }//listen_to_entities
 
 
@@ -112,6 +112,8 @@ function process_entities_message(json, message, topic)  {
 function index_entity(doc_type, url, body, message) {
   var id = hash(url);
 
+  var index = 'newscuria';
+
   // https://github.com/auth0/limitd
   var limit_options = {
     bucket: appname,
@@ -131,7 +133,7 @@ function index_entity(doc_type, url, body, message) {
       // TODO: Perform multiple index operations in a single API call.
       // http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/api-reference-1-3.html#api-bulk-1-3
       client.create({
-        index: 'nuzli',
+        index: index,
         type: doc_type,
         id: id,
         body: body,
@@ -142,6 +144,7 @@ function index_entity(doc_type, url, body, message) {
 
           log.error({
             id: id,
+            index: index,
             doc_type: doc_type,
             body: body,
             err: err,
@@ -151,6 +154,7 @@ function index_entity(doc_type, url, body, message) {
 
           metrics.meter(metrics.types.elasticsearch.INDEX_ERROR, {
             url_host: urls.parse(url).hostname,
+            index: index,
             doc_type: doc_type,
           });
 
@@ -159,12 +163,14 @@ function index_entity(doc_type, url, body, message) {
         } else {
 
           log.info({
+            index: index,
             doc_type: doc_type,
             log_type: log.types.elasticsearch.INDEXED_URL,
           }, 'Indexed url to Elasticsearch.');
 
           metrics.meter(metrics.types.elasticsearch.INDEXED_URL, {
             url_host: urls.parse(url).hostname,
+            index: index,
             doc_type: doc_type,
           });
 

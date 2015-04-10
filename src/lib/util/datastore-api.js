@@ -21,11 +21,13 @@ var cql = require('node-cassandra-cql');
 var config = require('config').get("cassandra");
 var hosts = config.get('hosts');
 var keyspace = config.get('keyspace');
+var poolSize = config.get('poolSize');
 
 // FIXME: wait for connection success before proceeding
 var client = new cql.Client({
     hosts: hosts,
-    keyspace: keyspace
+    keyspace: keyspace,
+    poolSize: poolSize
 });
 
 
