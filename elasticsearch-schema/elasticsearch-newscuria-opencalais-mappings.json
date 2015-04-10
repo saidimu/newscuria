@@ -1,7 +1,5 @@
 {
-  "newscuria": {
-    "mappings": {
-      "opencalais": {
+  "opencalais": {
         "properties": {
           "_type": {
             "type": "string",
@@ -73,8 +71,8 @@
               "raw": {
                 "type": "string",
                 "index": "not_analyzed"
-              },
-            },
+              }
+            }
           },
           "company": {
             "type": "string"
@@ -117,6 +115,7 @@
           },
           "date": {
             "type": "date",
+            "format": "dateOptionalTime",
             "ignore_malformed": true
           },
           "datestring": {
@@ -207,8 +206,8 @@
               "raw": {
                 "type": "string",
                 "index": "not_analyzed"
-              },
-            },
+              }
+            }
           },
           "locationdestination": {
             "type": "string",
@@ -217,8 +216,8 @@
               "raw": {
                 "type": "string",
                 "index": "not_analyzed"
-              },
-            },
+              }
+            }
           },
           "locationstring": {
             "type": "string"
@@ -245,8 +244,8 @@
               "raw": {
                 "type": "string",
                 "index": "not_analyzed"
-              },
-            },
+              }
+            }
           },
           "nationality": {
             "type": "string"
@@ -264,8 +263,8 @@
               "raw": {
                 "type": "string",
                 "index": "not_analyzed"
-              },
-            },
+              }
+            }
           },
           "organizationtype": {
             "type": "string"
@@ -292,8 +291,8 @@
               "raw": {
                 "type": "string",
                 "index": "not_analyzed"
-              },
-            },
+              }
+            }
           },
           "person_employee": {
             "type": "string"
@@ -341,8 +340,8 @@
               "raw": {
                 "type": "string",
                 "index": "not_analyzed"
-              },
-            },
+              }
+            }
           },
           "positionaspirational": {
             "type": "string"
@@ -418,8 +417,8 @@
                   "raw": {
                     "type": "string",
                     "index": "not_analyzed"
-                  },
-                },
+                  }
+                }
               },
               "score": {
                 "type": "long"
@@ -431,8 +430,8 @@
                   "raw": {
                     "type": "string",
                     "index": "not_analyzed"
-                  },
-                },
+                  }
+                }
               },
               "symbol": {
                 "type": "string"
@@ -546,8 +545,8 @@
               "raw": {
                 "type": "string",
                 "index": "not_analyzed"
-              },
-            },
+              }
+            }
           },
           "marketindex": {
             "type": "string"
@@ -602,6 +601,4 @@
           }
         }
       }
-    }
-  }
 }
