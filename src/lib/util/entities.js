@@ -134,7 +134,7 @@ function extract_nlp_objects(opencalais, message, url, date_published) {
       // 1. object.url --> Opencalais url --> Readability url --> original url
       // 2.  object.hash --> Opencalais key corresponding to this object
       nlp_object.url = url;
-      nlp_object.opencalais_hash = hash;
+      nlp_object.opencalais_hash = hash;  // unique within this object cuz it's an object key of the Opencalais object
 
       // append date_published of parent Opencalais object.
       // FIXME: Should be the date_published of the Readability object.

@@ -19,6 +19,8 @@
 var appname = "search";
 var log = require('_/util/logging.js')(appname);
 
+var util = require('util');
+
 // FIXME: hook-up bunyan logger: http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/logging.html
 var search_api = require('_/util/search-api.js');
 var client = search_api.client;
@@ -84,10 +86,15 @@ function process_entities_message(json, message, topic)  {
     // var doc_type = topics_and_indices[topic];
     var doc_type = 'opencalais';
 
-    var url = json.url || '';
-    if(url) {
+    var opencalais_hash = json.opencalais_hash || ''; // unique for every url
 
-      index_entity(doc_type, url, json, message);
+    var url = json.url || '';
+
+    if(url) {
+      // generate a unique hash used in indexing this document
+      var doc_hash = hash(util.format("%s__%s", url, opencalais_hash));
+
+      index_entity(doc_type, url, doc_hash, json, message);
 
     } else {
 
@@ -109,9 +116,7 @@ function process_entities_message(json, message, topic)  {
 }//process_entities_message
 
 
-function index_entity(doc_type, url, body, message) {
-  var id = hash(url);
-
+function index_entity(doc_type, url, doc_hash, body, message) {
   var index = 'newscuria';
 
   // https://github.com/auth0/limitd
@@ -135,7 +140,7 @@ function index_entity(doc_type, url, body, message) {
       client.create({
         index: index,
         type: doc_type,
-        id: id,
+        id: doc_hash,
         body: body,
         ignore: [409],  // ignore 'error' if document already exists
       }, function(err, response)  {
@@ -143,7 +148,7 @@ function index_entity(doc_type, url, body, message) {
         if(err) {
 
           log.error({
-            id: id,
+            id: doc_hash,
             index: index,
             doc_type: doc_type,
             body: body,
