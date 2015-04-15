@@ -17,7 +17,8 @@
 'use strict';
 
 var util = require('util');
-var pg = require('pg').native;
+// var pg = require('pg').native;
+var pg = require('pg');
 
 var config = require('config').get("postgres");
 var host = config.get('host');
