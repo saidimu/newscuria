@@ -163,18 +163,20 @@ function listen_to_opencalais()  {
 
 function process_url_received_message(json, message) {
   var url = json.url || '';
-  var table = 'nuzli.received_urls';
-  var insert_stmt = util.format("INSERT INTO %s (url, latest_received_date) VALUES (?, ?)", table);
+  var table = 'received_urls';
+  var insert_stmt = util.format("INSERT INTO %s (url, latest_received_date) VALUES ($1, $2)", table);
   var received_date = new Date().toISOString();
   var params = [url, received_date];
 
-  client.execute(insert_stmt, params, function onDatastoreClientExecute(err, response) {
+  client.query({
+    text: insert_stmt,
+    values: params,
+  }, function onDatastoreClientExecute(err, response) {
     if(err) {
       log.error({
         err: err,
         insert_stmt: insert_stmt,
-        table: 'nuzli.received_urls',
-        log_type: log.types.datastore.INSERT_ERROR,
+        table: 'received_urls',
       });
 
       metrics.meter(metrics.types.datastore.INSERT_ERROR, {
@@ -203,7 +205,6 @@ function process_readability_message(json, message) {
   if(date_published === null) {
 		log.error({
       url: url,
-      log_type: log.types.readability.EMPTY_DATE_PUBLISHED,
     }, "Empty 'date_published' in Readability object.");
 
     metrics.meter(metrics.types.readability.EMPTY_DATE_PUBLISHED, {
@@ -216,7 +217,6 @@ function process_readability_message(json, message) {
   if(author === '') {
 		log.error({
       url: url,
-      log_type: log.types.readability.EMPTY_AUTHOR,
     }, "Empty 'author' in Readability object.");
 
     metrics.meter(metrics.types.readability.EMPTY_AUTHOR, {
@@ -229,7 +229,6 @@ function process_readability_message(json, message) {
   if(domain === '') {
 		log.error({
       url: url,
-      log_type: log.types.readability.EMPTY_DOMAIN,
     }, "Empty 'domain' in Readability object.");
 
     metrics.meter(metrics.types.readability.EMPTY_DOMAIN, {
@@ -247,22 +246,22 @@ function process_readability_message(json, message) {
   );//save_document
 
   // save author metadata to datastore
-  save_author_metadata(
-    author,
-    url,
-    word_count,
-    date_published,
-    "author_urls"
-  );//save_author_metadata
+  // save_author_metadata(
+  //   author,
+  //   url,
+  //   word_count,
+  //   date_published,
+  //   "author_urls"
+  // );//save_author_metadata
 
   // save domain metadata to datastore
-  save_domain_metadata(
-    domain,
-    url,
-    word_count,
-    date_published,
-    "domain_urls"
-  );//save_domain_metadata
+  // save_domain_metadata(
+  //   domain,
+  //   url,
+  //   word_count,
+  //   date_published,
+  //   "domain_urls"
+  // );//save_domain_metadata
 
   message.finish();
 
@@ -277,7 +276,6 @@ function process_opencalais_message(json, message) {
   if(date_published === null) {
 		log.error({
       url: url,
-      log_type: log.types.opencalais.EMPTY_DATE_PUBLISHED,
     }, "Empty 'date_published' in Opencalais object.");
 
     metrics.meter(metrics.types.opencalais.EMPTY_DATE_PUBLISHED, {
@@ -289,7 +287,6 @@ function process_opencalais_message(json, message) {
   if(!url)  {
     log.error({
       url: url,
-      log_type: log.types.opencalais.EMPTY_URL,
     }, "EMPTY url in Opencalais object. Cannot persist to datastore.");
 
     metrics.meter(metrics.types.opencalais.EMPTY_URL, {});
@@ -318,7 +315,6 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
           url: url,
           err: err,
           table: table,
-          log_type: log.types.datastore.INSERT_ERROR,
         }, 'Error persisting domain metadata to datastore');
 
         metrics.meter(metrics.types.datastore.INSERT_ERROR, {
@@ -336,7 +332,6 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
     // FIXME: publish these to a topic for further analysis
     log.error({
       url: url,
-      log_type: log.types.datastore.EMPTY_DOMAIN,
     }, "EMPTY domain name for url");
 
     metrics.meter(metrics.types.datastore.EMPTY_DOMAIN, {
@@ -358,7 +353,10 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
       datastore_api.types.timeuuid()
   ];
 
-  client.execute(statement, params, callback);
+  client.query({
+    text: statement,
+    values: params
+  }, callback);
 
 }//save_domain_metadata
 
@@ -371,7 +369,6 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
           url: url,
           err: err,
           table: table,
-          log_type: log.types.datastore.INSERT_ERROR,
         }, 'Error persisting author metadata to datastore');
 
         metrics.meter(metrics.types.datastore.INSERT_ERROR, {
@@ -387,7 +384,6 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
     // FIXME: publish these to a topic for further analysis
     log.error({
       url: url,
-      log_type: log.types.datastore.EMPTY_AUTHOR,
     }, "EMPTY author name for url");
 
     metrics.meter(metrics.types.datastore.EMPTY_AUTHOR, {
@@ -409,7 +405,10 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
       datastore_api.types.timeuuid()
   ];
 
-  client.execute(statement, params, callback);
+  client.query({
+    text: statement,
+    values: params
+  }, callback);
 }//save_author_metadata
 
 
@@ -421,7 +420,6 @@ function save_document(object, url, date_published, table, callback)    {
           url: url,
           err: err,
           table: table,
-          log_type: log.types.datastore.INSERT_ERROR,
         }, 'Error persisting document to datastore');
 
         metrics.meter(metrics.types.datastore.INSERT_ERROR, {
@@ -437,7 +435,6 @@ function save_document(object, url, date_published, table, callback)    {
     log.error({
       url: url,
       table: table,
-      log_type: log.types.datastore.EMPTY_OBJECT,
     }, "EMPTY object cannot be saved to table.");
 
     metrics.meter(metrics.types.datastore.EMPTY_OBJECT, {
@@ -448,39 +445,21 @@ function save_document(object, url, date_published, table, callback)    {
     return;
   }//if
 
-  var statement = util.format('INSERT INTO %s (url, api_result, date_published, created_date) VALUES (?, ?, ?, ?)', table);
-
-  var buf;
-
-  try {
-
-    buf = new Buffer(JSON.stringify(object), 'utf8');
-
-  } catch(error)  {
-    log.error({
-      err: error,
-      json: object,
-      log_type: log.types.datastore.JSON_PARSE_ERROR,
-    }, "Error converting JSON object to a Buffer object;");
-
-    metrics.meter(metrics.types.datastore.JSON_PARSE_ERROR, {
-      table: table,
-      url_host: urls.parse(url).hostname,
-    });
-
-    return;
-  }//try-catch
+  var statement = util.format('INSERT INTO %s (url, api_result, date_published, created_date) VALUES ($1, $2, $3, $4)', table);
 
   var date_published_iso = date_string_to_iso_object(date_published, url);
 
   var params = [
       url,
-      buf,
+      object,
       date_published_iso,
-      datastore_api.types.timeuuid()
+      new Date().toISOString()
   ];
 
-  client.execute(statement, params, callback);
+  client.query({
+    text: statement,
+    values: params
+  }, callback);
 }//save_document
 
 
@@ -496,7 +475,6 @@ function date_string_to_iso_object(date_string, url)  {
       url: url,
       err: err,
       date_string: date_string,
-      log_type: log.types.datastore.DATE_CONVERSION_ERROR,
     }, "Cannot convert date string to Date object.");
 
     metrics.meter(metrics.types.datastore.DATE_CONVERSION_ERROR, {

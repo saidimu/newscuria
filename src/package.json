@@ -1,6 +1,6 @@
 {
   "name": "newscuria",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "newscuria",
   "main": "main.js",
   "apidoc": {
@@ -16,6 +16,8 @@
     "calais": "^0.1.6",
     "socket.io": "^1.2.1",
     "nsqjs": "^0.7.0",
+    "pg": "^4.3.0",
+    "pg-native": "^1.8.0",
     "bunyan": "^1.0.0",
     "js-yaml": "^3.2.5",
     "config": "^1.10.0",

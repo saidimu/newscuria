@@ -250,17 +250,18 @@ function read_message(topic, channel, callback)	{
 
 function publish_message(topic, message)	{
 	writer.publish(topic, message, function(err) {
-    log.error({
-      topic: topic,
-      err: err,
-      log_type: log.types.queue.writer.ERROR,
-    }, "nsq Writer error: message not published.");
+    if(err) {
+      log.error({
+        topic: topic,
+        err: err,
+        log_type: log.types.queue.writer.ERROR,
+      }, "nsq Writer error: message not published.");
 
-    metrics.meter(log.types.queue.writer.ERROR, {
-      topic: topic,
-    });
-
-  });
+      metrics.meter(log.types.queue.writer.ERROR, {
+        topic: topic,
+      });
+    }//if
+  });//writer.publish
 }//publish_message
 
 

@@ -19,6 +19,8 @@
 var appname = "search";
 var log = require('_/util/logging.js')(appname);
 
+var util = require('util');
+
 // FIXME: hook-up bunyan logger: http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/logging.html
 var search_api = require('_/util/search-api.js');
 var client = search_api.client;
@@ -34,17 +36,6 @@ var ratelimiter = require('_/util/limitd.js');
 var metrics = require('_/util/metrics.js');
 var urls = require('_/util/urls.js');
 
-var topics_and_indices = {};
-topics_and_indices[topics.ENTITIES_PEOPLE]    = "people";
-topics_and_indices[topics.ENTITIES_PLACES]    = "places";
-topics_and_indices[topics.ENTITIES_COMPANIES] = "companies";
-topics_and_indices[topics.ENTITIES_THINGS]    = "things";
-topics_and_indices[topics.ENTITIES_EVENTS]    = "events";
-topics_and_indices[topics.ENTITIES_RELATIONS] = "relations";
-topics_and_indices[topics.ENTITIES_TOPICS]    = "topics";
-topics_and_indices[topics.ENTITIES_TAGS]      = "tags";
-
-
 function start()    {
   // connect to the message queue
   queue.connect(listen_to_entities);
@@ -52,9 +43,17 @@ function start()    {
 
 
 function listen_to_entities()  {
+  var topic = topics.ENTITIES;
   var channel = 'index-to-elasticsearch';
 
-  var onReadMessage = function (err, json, message, topic) {
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
+  };//options
+
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
     if(!err) {
 
       metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
@@ -63,30 +62,39 @@ function listen_to_entities()  {
         app    : appname,
       });
 
-      process_entities_message(json, message, topic);
-    }//if
-  };//onReadMessage
+      ratelimiter.limit_app(limit_options, function(expected_wait_time) {
+        if(expected_wait_time)  {
+          // now backing-off to prevent other messages from being pushed from the server
+          // initially wasn't backing-off to prevent "punishment" by the server
+          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+          message.requeue(expected_wait_time, true);
 
-  // dynamically listen to a bunch of topics
-  // FIXME: listen to wildcard topics when NSQD supports that.
-  for(var topic in topics_and_indices)  {
-    if(topics_and_indices.hasOwnProperty(topic)) {
-      queue.read_message(topic, channel, function (err, json, message) {
-        onReadMessage(err, json, message, topic);
-      });
+        } else {
+
+          process_entities_message(json, message);
+
+        }//if-else
+      });//ratelimiter.limit_app
     }//if
-  }//for
+
+  });//queue.read_message
 
 }//listen_to_entities
 
 
 function process_entities_message(json, message, topic)  {
-    var doc_type = topics_and_indices[topic];
+    // var doc_type = topics_and_indices[topic];
+    var doc_type = 'opencalais';
+
+    var opencalais_hash = json.opencalais_hash || ''; // unique for every url
 
     var url = json.url || '';
-    if(url) {
 
-      index_entity(doc_type, url, json, message);
+    if(url) {
+      // generate a unique hash used in indexing this document
+      var doc_hash = hash(util.format("%s__%s", url, opencalais_hash));
+
+      index_entity(doc_type, url, doc_hash, json, message);
 
     } else {
 
@@ -108,8 +116,8 @@ function process_entities_message(json, message, topic)  {
 }//process_entities_message
 
 
-function index_entity(doc_type, url, body, message) {
-  var id = hash(url);
+function index_entity(doc_type, url, doc_hash, body, message) {
+  var index = 'newscuria';
 
   // https://github.com/auth0/limitd
   var limit_options = {
@@ -130,9 +138,9 @@ function index_entity(doc_type, url, body, message) {
       // TODO: Perform multiple index operations in a single API call.
       // http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/api-reference-1-3.html#api-bulk-1-3
       client.create({
-        index: 'nuzli',
+        index: index,
         type: doc_type,
-        id: id,
+        id: doc_hash,
         body: body,
         ignore: [409],  // ignore 'error' if document already exists
       }, function(err, response)  {
@@ -140,7 +148,8 @@ function index_entity(doc_type, url, body, message) {
         if(err) {
 
           log.error({
-            id: id,
+            id: doc_hash,
+            index: index,
             doc_type: doc_type,
             body: body,
             err: err,
@@ -150,6 +159,7 @@ function index_entity(doc_type, url, body, message) {
 
           metrics.meter(metrics.types.elasticsearch.INDEX_ERROR, {
             url_host: urls.parse(url).hostname,
+            index: index,
             doc_type: doc_type,
           });
 
@@ -158,12 +168,14 @@ function index_entity(doc_type, url, body, message) {
         } else {
 
           log.info({
+            index: index,
             doc_type: doc_type,
             log_type: log.types.elasticsearch.INDEXED_URL,
           }, 'Indexed url to Elasticsearch.');
 
           metrics.meter(metrics.types.elasticsearch.INDEXED_URL, {
             url_host: urls.parse(url).hostname,
+            index: index,
             doc_type: doc_type,
           });
 

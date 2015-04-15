@@ -87,8 +87,8 @@ function process_url_approved_message(json, message)	{
 
 
 function get_readability(url)	{
-  var table = 'nuzli.readability';
-	var query_stmt = util.format("SELECT * FROM %s WHERE url=?", table);
+  var table = 'readability';
+	var query_stmt = util.format("SELECT * FROM %s WHERE url=$1", table);
   var params = [url];
 
   // CALLBACK
@@ -97,7 +97,6 @@ function get_readability(url)	{
       log.error({
         url: url,
         err: err,
-        log_type: log.types.datastore.GENERIC_ERROR,
       }, "Error fetching Readability from the datastore. Fetching from remote Readability API.");
 
       metrics.meter(metrics.types.datastore.GENERIC_ERROR, {
@@ -109,23 +108,7 @@ function get_readability(url)	{
 
     } else if(response.rows.length > 0) {
       // FIXME: TODO: what to do if > 1 rows?
-      var buf = response.rows[0].api_result;
-      var readability;
-
-      try {
-        readability = JSON.parse(buf.toString('utf8'));
-      } catch(err)  {
-        log.error({
-          err: err,
-          log_type: log.types.readability.JSON_PARSE_ERROR,
-        }, 'Error JSON.parse()ing Readability oject');
-
-        metrics.meter(metrics.types.readability.JSON_PARSE_ERROR, {
-          table: table,
-          url_host: urls.parse(url).hostname,
-        });
-
-      }//try-catch
+      var readability = response.rows[0].api_result;
 
       // publish text if it isn't empty
       if((readability) && (readability.plaintext))  {
@@ -136,7 +119,6 @@ function get_readability(url)	{
         // FIXME: What to do about this empty Readability plaintext?
         log.error({
           url: url,
-          log_type: log.types.readability.EMPTY_PLAINTEXT,
         }, "EMPTY Readability PLAINTEXT.");
 
         metrics.meter(metrics.types.readability.PLAINTEXT, {
@@ -147,7 +129,6 @@ function get_readability(url)	{
       } else if(!readability) {
         log.error({
           url: url,
-          log_type: log.types.readability.EMPTY_OBJECT,
         }, "EMPTY Readability object... re-fetching from remote Readability API");
 
         metrics.meter(metrics.types.readability.EMPTY_OBJECT, {
@@ -161,7 +142,6 @@ function get_readability(url)	{
     } else {
       log.info({
         url: url,
-        log_type: log.types.readability.URL_NOT_IN_DB,
       }, "URL not in datastore... fetching from remote Readability API");
 
       metrics.meter(metrics.types.readability.URL_NOT_IN_DB, {
@@ -181,7 +161,6 @@ function get_readability(url)	{
       log.error({
         url: url,
         err: err,
-        log_type: log.types.readability.API_ERROR,
       }, "Error fetching from the Readability API.");
 
       metrics.meter(metrics.types.readability.API_ERROR, {
@@ -200,7 +179,6 @@ function get_readability(url)	{
     log.info({
       url: url,
       table: table,
-      log_type: log.types.datastore.FETCHED_URL,
     }, "Fetching url from the datastore.");
 
     metrics.meter(metrics.types.datastore.FETCHED_URL, {
@@ -208,13 +186,15 @@ function get_readability(url)	{
       table: table,
     });
 
-    datastore_api.client.execute(query_stmt, params, datastore_fetch_callback);
+    datastore_api.client.query({
+      text: query_stmt,
+      values: params
+    }, datastore_fetch_callback);
 
   } catch(err)  {
     log.error({
       url: url,
       err: err,
-      log_type: log.type.datastore.GENERIC_ERROR,
     }, "Error fetching URL from the datastore... fetching from remote Readability API");
 
     metrics.meter(metrics.types.datastore.GENERIC_ERROR, {
@@ -232,7 +212,6 @@ function fetch_readability_content(url, callback)	{
   try {
     log.info({
       url: url,
-      log_type: log.types.readability.FETCHED_API,
     }, "Fetching url from the Readability API.");
 
     metrics.meter(metrics.types.readability.FETCHED_API, {
@@ -245,7 +224,6 @@ function fetch_readability_content(url, callback)	{
     log.error({
       url: url,
       err: err,
-      log_type: log.types.readability.API_ERROR,
     }, "Error fetching URL content from Readability API");
 
     metrics.meter(metrics.types.readability.API_ERROR, {

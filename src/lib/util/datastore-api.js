@@ -16,20 +16,40 @@
  */
 'use strict';
 
-var cql = require('node-cassandra-cql');
+var util = require('util');
+// var pg = require('pg').native;
+var pg = require('pg');
 
-var config = require('config').get("cassandra");
-var hosts = config.get('hosts');
-var keyspace = config.get('keyspace');
+var config = require('config').get("postgres");
+var host = config.get('host');
+var port = config.get('port');
+var database = config.get('database');
+var user = config.get('user');
+var password = config.get('password');
 
-// FIXME: wait for connection success before proceeding
-var client = new cql.Client({
-    hosts: hosts,
-    keyspace: keyspace
-});
+var connection_string = util.format("postgres://%s:%s@%s:%s/%s", user, password, host, port, database);
+var connection_options = {
+  host    : host,
+  port    : port,
+  user    : user,
+  password: password,
+  database: database
+};
+
+// FIXME: not using a connection pool
+// https://github.com/brianc/node-postgres#client-instance
+// var client = new pg.Client(connection_string);
+var client = new pg.Client(connection_options);
+
+// FIXME: wait for connection success before proceeding?
+client.connect(function(err) {
+  if(err) {
+    console.error(err);
+    throw new Error(err);
+  }//if
+});//client.connect()
 
 
 module.exports = {
   client: client,
-  types: cql.types
 };//module.exports
