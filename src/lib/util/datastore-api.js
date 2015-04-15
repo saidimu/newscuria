@@ -37,10 +37,7 @@ pg.connect(connection_string, function(err, pg_client, done) {
     throw new Error(err);
   }//if
 
-  client = pg_client;
+  module.exports = {
+    client: pg_client,
+  };//module.exports
 });//pg.connect()
-
-
-module.exports = {
-  client: client,
-};//module.exports
