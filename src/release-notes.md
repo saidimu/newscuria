@@ -2,7 +2,38 @@
 
 ## Development
 
-[Commits](https://github.com/saidimu/newscuria/compare/v0.3.0...master)
+[Commits](https://github.com/saidimu/newscuria/compare/v0.4.0...master)
+
+## v0.4.0 - April 15th, 2015
+- [#41](https://github.com/saidimu/newscuria/issues/41) - Migrate datastore from Cassandra to Postgres
+- [#38](https://github.com/saidimu/newscuria/issues/38) - Refactor Elasticsearch indexes ([@saidimu](https://api.github.com/users/saidimu))
+- [#39](https://github.com/saidimu/newscuria/issues/39) - Refactor Elasticsearch Docker image to allow plugin installs
+- [#37](https://github.com/saidimu/newscuria/issues/37) - Enable Elasticsearch metrics reporting to InfluxDB/Grafana
+- Fixed incorrect query statement parameter format (? instead of $) - d18a6cd
+- Took out extraneous console.logs - 980eb89
+- Fixed table names still referring to Cassandra tables. - b2c8f59
+- Switched to Postgres pure javascript client (from native client) to troubleshoot issue with client connection. - 00fb1fd
+- . - 84bc44c
+- Fixed bug on use of Cassandra API instead of Postgres API - 8410e41
+- Fixed Postgres client being undefined on module.exports - d830f8b
+- Attempting to fix Postgres client being undefined on module.exports - c21a877
+- Fixed bug with improper checking of err condition before logging err message - e4abb6d
+- Removed logging metric messages (supersed by InfluxDB metrics) - 8a0e258
+- Refactored-out code dealing with Cassandra's lack of native JSON support (since Postgres natvely supports JSON) - 576cdd1
+- Refactored datastore insertions to use Postgres API. - e0e94de
+- Added postgres drivers; modified datastore-api module to postgres api - cd5d47b
+- Modified not_analyzed fields to be accessed by the default field name and indexed version to be accesed as fieldname.indexed - 3d6bcd2
+- Modified index/type mappings to exact format required by elasticsearch PUT request (as opposed to 'extended' format returned by GET request) - 30d661f
+- Updated additional 'name' field to a multi-field mapping. - 6048b20
+- Re-indexing some strings as multi-fields http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-core-types.html#_multi_fields_3 - 6b5c3b9
+- Updated opencalais-index mappings to allow malformed dates (don't error) but not to index them. - bebd416
+- Refactored unique id generation for elasticsearch indexing due to change from index/multiple_types to index/single_type. - 7a8eb3f
+- Fixed old index name in search.js. Added more config options to Cassandra client. - f90a381
+- Renamed 'hash' key to a more meaningful 'opencalais_hash' - 4a215f2
+- Consolidated Opencalais-related NSQ topics into a single one since all the messages now go into a single Elasticsearch index. Still decomposing Opencalais object into 'types' to do specialized processing on some of them. - 8039aa2
+- Fixed unchecked metric-event name (undefined caused a crash) - 1aba281
+
+[Commits](https://github.com/saidimu/newscuria/compare/v0.3.0...v0.4.0)
 
 ## v0.3.0 - April 9th, 2015
 - [#36](https://github.com/saidimu/newscuria/issues/36) - Enable Cassandra metrics reporting to InfluxDB/Grafana ([@saidimu](https://api.github.com/users/saidimu))
