@@ -97,7 +97,6 @@ function get_readability(url)	{
       log.error({
         url: url,
         err: err,
-        log_type: log.types.datastore.GENERIC_ERROR,
       }, "Error fetching Readability from the datastore. Fetching from remote Readability API.");
 
       metrics.meter(metrics.types.datastore.GENERIC_ERROR, {
@@ -120,7 +119,6 @@ function get_readability(url)	{
         // FIXME: What to do about this empty Readability plaintext?
         log.error({
           url: url,
-          log_type: log.types.readability.EMPTY_PLAINTEXT,
         }, "EMPTY Readability PLAINTEXT.");
 
         metrics.meter(metrics.types.readability.PLAINTEXT, {
@@ -131,7 +129,6 @@ function get_readability(url)	{
       } else if(!readability) {
         log.error({
           url: url,
-          log_type: log.types.readability.EMPTY_OBJECT,
         }, "EMPTY Readability object... re-fetching from remote Readability API");
 
         metrics.meter(metrics.types.readability.EMPTY_OBJECT, {
@@ -145,7 +142,6 @@ function get_readability(url)	{
     } else {
       log.info({
         url: url,
-        log_type: log.types.readability.URL_NOT_IN_DB,
       }, "URL not in datastore... fetching from remote Readability API");
 
       metrics.meter(metrics.types.readability.URL_NOT_IN_DB, {
@@ -165,7 +161,6 @@ function get_readability(url)	{
       log.error({
         url: url,
         err: err,
-        log_type: log.types.readability.API_ERROR,
       }, "Error fetching from the Readability API.");
 
       metrics.meter(metrics.types.readability.API_ERROR, {
@@ -184,7 +179,6 @@ function get_readability(url)	{
     log.info({
       url: url,
       table: table,
-      log_type: log.types.datastore.FETCHED_URL,
     }, "Fetching url from the datastore.");
 
     metrics.meter(metrics.types.datastore.FETCHED_URL, {
@@ -198,7 +192,6 @@ function get_readability(url)	{
     log.error({
       url: url,
       err: err,
-      log_type: log.type.datastore.GENERIC_ERROR,
     }, "Error fetching URL from the datastore... fetching from remote Readability API");
 
     metrics.meter(metrics.types.datastore.GENERIC_ERROR, {
@@ -216,7 +209,6 @@ function fetch_readability_content(url, callback)	{
   try {
     log.info({
       url: url,
-      log_type: log.types.readability.FETCHED_API,
     }, "Fetching url from the Readability API.");
 
     metrics.meter(metrics.types.readability.FETCHED_API, {
@@ -229,7 +221,6 @@ function fetch_readability_content(url, callback)	{
     log.error({
       url: url,
       err: err,
-      log_type: log.types.readability.API_ERROR,
     }, "Error fetching URL content from Readability API");
 
     metrics.meter(metrics.types.readability.API_ERROR, {
