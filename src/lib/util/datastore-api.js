@@ -28,16 +28,19 @@ var password = config.get('password');
 
 var connection_string = util.format("postgres://%s:%s@%s:%s/%s", user, password, host, port, database);
 
-var client;
+// FIXME: not using a connection pool
+// https://github.com/brianc/node-postgres#client-instance
+var client = new pg.Client(connection_string);
 
-// FIXME: wait for connection success before proceeding
-pg.connect(connection_string, function(err, pg_client, done) {
+// FIXME: wait for connection success before proceeding?
+client.connect(function(err) {
   if(err) {
     console.error(err);
     throw new Error(err);
   }//if
+});//client.connect()
 
-  module.exports = {
-    client: pg_client,
-  };//module.exports
-});//pg.connect()
+
+module.exports = {
+  client: client,
+};//module.exports
