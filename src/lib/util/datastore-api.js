@@ -41,10 +41,6 @@ var connection_options = {
 // var client = new pg.Client(connection_string);
 var client = new pg.Client(connection_options);
 
-console.log();
-console.log(client);
-console.log();
-
 // FIXME: wait for connection success before proceeding?
 client.connect(function(err) {
   if(err) {
