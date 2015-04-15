@@ -87,7 +87,7 @@ function process_url_approved_message(json, message)	{
 
 
 function get_readability(url)	{
-  var table = 'nuzli.readability';
+  var table = 'readability';
 	var query_stmt = util.format("SELECT * FROM %s WHERE url=?", table);
   var params = [url];
 

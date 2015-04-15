@@ -89,7 +89,7 @@ function get_opencalais(json)	{
   var readability = json;
 
   var url = readability.url || '';
-  var table = 'nuzli.opencalais';
+  var table = 'opencalais';
 	var query = util.format("SELECT * FROM %s WHERE url=?", table);
   var params = [url];
 
