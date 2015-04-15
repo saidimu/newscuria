@@ -28,7 +28,8 @@
     "twat": "^0.8.5",
     "influx": "^3.3.0",
     "limitd": "^4.1.2",
-    "measured": "^1.0.0"
+    "measured": "^1.0.0",
+    "oh-crap": "^1.0.1"
   },
   "devDependencies": {},
   "scripts": {

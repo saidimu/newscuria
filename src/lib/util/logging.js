@@ -21,9 +21,13 @@ var config_loggly = require('config').get("logging").get('loggly');
 
 var metric_types = require('_/util/metric-types.js');
 
+// https://github.com/segmentio/oh-crap
+var crap = require('oh-crap')(__dirname, onUncaughtError);
+
 // catch uncaught exceptions and print error message and stack before exiting cleanly
 // process restart is handled externally
-process.on('uncaughtException', function (err) {
+// process.on('uncaughtException', function (err) {
+function onUncaughtError(err) {
   var now = new Date().toUTCString();
 
   console.error(now + ': uncaughtException:', err.message);
@@ -34,7 +38,7 @@ process.on('uncaughtException', function (err) {
   }, 'uncaughtException. Exiting process.');
 
   process.exit(1);
-});
+}//onUncaughtError
 
 function get_logger(name) {
   if(!name) {
