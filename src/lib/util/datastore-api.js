@@ -16,22 +16,31 @@
  */
 'use strict';
 
-var cql = require('node-cassandra-cql');
+var util = require('util');
+var pg = require('pg').native;
 
-var config = require('config').get("cassandra");
-var hosts = config.get('hosts');
-var keyspace = config.get('keyspace');
-var poolSize = config.get('poolSize');
+var config = require('config').get("postgres");
+var host = config.get('host');
+var port = config.get('port');
+var database = config.get('database');
+var user = config.get('user');
+var password = config.get('password');
+
+var connection_string = util.format("postgres://%s:%s@%s:%s/%s", user, password, host, port, database);
+
+var client;
 
 // FIXME: wait for connection success before proceeding
-var client = new cql.Client({
-    hosts: hosts,
-    keyspace: keyspace,
-    poolSize: poolSize
-});
+pg.connect(connection_string, function(err, pg_client, done) {
+  if(err) {
+    console.error(err);
+    throw new Error(err);
+  }//if
+
+  client = pg_client;
+});//pg.connect()
 
 
 module.exports = {
   client: client,
-  types: cql.types
 };//module.exports
