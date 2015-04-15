@@ -88,7 +88,7 @@ function process_url_approved_message(json, message)	{
 
 function get_readability(url)	{
   var table = 'readability';
-	var query_stmt = util.format("SELECT * FROM %s WHERE url=?", table);
+	var query_stmt = util.format("SELECT * FROM %s WHERE url=$1", table);
   var params = [url];
 
   // CALLBACK

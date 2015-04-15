@@ -90,7 +90,7 @@ function get_opencalais(json)	{
 
   var url = readability.url || '';
   var table = 'opencalais';
-	var query = util.format("SELECT * FROM %s WHERE url=?", table);
+	var query = util.format("SELECT * FROM %s WHERE url=$1", table);
   var params = [url];
 
 	// CALLBACK
