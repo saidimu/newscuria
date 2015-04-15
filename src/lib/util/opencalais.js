@@ -109,23 +109,7 @@ function get_opencalais(json)	{
 			fetch_opencalais_content(readability, api_fetch_callback);
 
 		} else if(response.rows.length > 0){  // FIXME: What if > 1 rows?
-			var buf = response.rows[0].api_result;
-			var opencalais;
-
-      try {
-        opencalais = JSON.parse(buf.toString('utf8'));
-      } catch(err)  {
-        log.error({
-          err: err,
-          log_type: log.type.opencalais.JSON_PARSE_ERROR,
-        }, 'Error JSON.parse()ing Readability oject');
-
-        metrics.meter(metrics.types.opencalais.JSON_PARSE_ERROR, {
-          table: table,
-          url_host: urls.parse(url).hostname,
-        });
-
-      }//try-catch
+			var opencalais = response.rows[0].api_result;
 
 			if(opencalais)	{
 
