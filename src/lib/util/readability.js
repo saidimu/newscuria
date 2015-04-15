@@ -186,7 +186,10 @@ function get_readability(url)	{
       table: table,
     });
 
-    datastore_api.client.execute(query_stmt, params, datastore_fetch_callback);
+    datastore_api.client.query({
+      text: query_stmt,
+      values: params
+    }, datastore_fetch_callback);
 
   } catch(err)  {
     log.error({

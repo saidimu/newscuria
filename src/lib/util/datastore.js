@@ -353,7 +353,10 @@ function save_domain_metadata(domain, url, word_count, date_published, table, ca
       datastore_api.types.timeuuid()
   ];
 
-  client.execute(statement, params, callback);
+  client.query({
+    text: statement,
+    values: params
+  }, callback);
 
 }//save_domain_metadata
 
@@ -402,7 +405,10 @@ function save_author_metadata(author, url, word_count, date_published, table, ca
       datastore_api.types.timeuuid()
   ];
 
-  client.execute(statement, params, callback);
+  client.query({
+    text: statement,
+    values: params
+  }, callback);
 }//save_author_metadata
 
 

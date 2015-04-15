@@ -178,7 +178,10 @@ function get_opencalais(json)	{
       url_host: urls.parse(url).hostname,
     });
 
-    datastore_api.client.execute(query, params, datastore_fetch_callback);
+    datastore_api.client.query({
+      text: query,
+      values: params
+    }, datastore_fetch_callback);
 
   } catch(err)  {
     log.error({
