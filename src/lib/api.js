@@ -19,45 +19,13 @@
 var appname = "api";
 var log = require('_/util/logging.js')(appname);
 
-var queue = require('_/util/queue.js');
-var topics = queue.topics;
-
-var get_url_metadata = require('_/util/search.js').get_url_metadata;
-
-
 var Hapi = require('hapi');
+var routes = require('_/util/api-routes.js');
 
 var server = new Hapi.Server();
 server.connection({ port: 3000 });
 
-server.route({
-  method: ['POST'],
-    path: '/v1/url/',
-    handler: function (request, reply) {
-      var url = request.payload.url;
-
-      console.log(request.payload);
-
-      get_url_metadata(url, function(response) {
-        reply(response);
-      });//get_url_metadata
-    }//handler
-});
-
-server.route({
-  method: ['GET'],
-    path: '/v1/url/{url}',
-    handler: function (request, reply) {
-      var url = request.params.url;
-
-      console.log(request.params);
-
-      get_url_metadata(url, function(response) {
-        reply(response);
-      });//get_url_metadata
-    }//handler
-});
-
+server.addRoutes(routes);
 
 server.start(function () {
     log.info({
