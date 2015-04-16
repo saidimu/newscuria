@@ -194,8 +194,6 @@ function index_entity(doc_type, url, doc_hash, body, message) {
 
 
 function get_url_metadata(url, callback)  {
-  console.log(url);
-
   // FIXME: validate url. On failure, return appropriate error message
   if(!url)  {
     return {};
@@ -263,11 +261,11 @@ function get_url_metadata(url, callback)  {
 
       if (results.hits.total === 0)  {
         response.message = "URL could not be found.";
-        response.results = results.hits;
+        response.results = {};
 
       } else {
         response.message = "Ok";
-        response.results = results;
+        response.results = results.hits;
 
       }//if-else
 

@@ -31,8 +31,8 @@ var server = new Hapi.Server();
 server.connection({ port: 3000 });
 
 server.route({
-  method: ['GET', 'POST'],
-    path: '/{url}',
+  method: ['POST'],
+    path: '/v1/{url}',
     handler: function (request, reply) {
       var url = request.params.url;
 
