@@ -44,6 +44,20 @@ server.route({
     }//handler
 });
 
+server.route({
+  method: ['GET'],
+    path: '/v1/url/{url}',
+    handler: function (request, reply) {
+      var url = request.params.url;
+
+      console.log(request.params);
+
+      get_url_metadata(url, function(response) {
+        reply(response);
+      });//get_url_metadata
+    }//handler
+});
+
 
 server.start(function () {
     log.info({
