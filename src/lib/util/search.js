@@ -273,6 +273,8 @@ function search(query, callback)  {
   var index = 'newscuria';
   var doc_type = 'opencalais';
 
+  console.log(query);
+
   client.search({
     index: index,
     type: doc_type,
@@ -298,7 +300,7 @@ function search(query, callback)  {
 
     } else {
 
-      callback(undefined, err);
+      callback(undefined, response);
 
     }//if-else
   });//client.search
