@@ -32,9 +32,9 @@ server.connection({ port: 3000 });
 
 server.route({
   method: ['GET', 'POST'],
-    path: '/{blah}',
+    path: '/{url}',
     handler: function (request, reply) {
-      var url = encodeURIComponent(request.params.blah);
+      var url = request.params.url;
 
       console.log(request.params);
 

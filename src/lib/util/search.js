@@ -195,8 +195,6 @@ function index_entity(doc_type, url, doc_hash, body, message) {
 
 function get_url_metadata(url, callback)  {
   console.log(url);
-  url = decodeURIComponent(url);  
-  console.log(url);
 
   // FIXME: validate url. On failure, return appropriate error message
   if(!url)  {
@@ -251,10 +249,6 @@ function get_url_metadata(url, callback)  {
 
   search(query, function(err, results) {
     if(err) {
-      // response = {
-      //   url: url,
-      //   message: "A server error encountered!"
-      // };//response
       response.statusCode = 500;
       response.error = "Internal Server Error";
       response.message = "A server error encountered!";
@@ -269,7 +263,7 @@ function get_url_metadata(url, callback)  {
 
       if (results.hits.total === 0)  {
         response.message = "URL could not be found.";
-        response.results = {};
+        response.results = results.hits;
 
       } else {
         response.message = "Ok";
