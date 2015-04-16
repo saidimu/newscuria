@@ -20,12 +20,12 @@ var get_url_metadata = require('_/util/search.js').get_url_metadata;
 
 module.exports = [
   {
-    method: ['POST'],
+    method: ['GET'],
       path: '/v1/url/',
       handler: function (request, reply) {
-        var url = request.payload.url;
+        var url = request.params.url;
 
-        console.log(request.payload);
+        console.log(request.params);
 
         get_url_metadata(url, function(response) {
           reply(response);
