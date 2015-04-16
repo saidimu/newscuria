@@ -35,6 +35,8 @@ server.route({
     path: '/{url}',
     handler: function (request, reply) {
       var url = encodeURIComponent(request.params.url);
+      
+      console.log(request.params);
 
       get_url_metadata(url, function(response) {
         reply(response);
