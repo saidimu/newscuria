@@ -20,12 +20,12 @@ var appname = "api";
 var log = require('_/util/logging.js')(appname);
 
 var Hapi = require('hapi');
-var routes = require('_/util/api-routes.js');
+var routes = require('_/util/api-routes.js')(appname);
 
 var server = new Hapi.Server();
 server.connection({ port: 3000 });
 
-server.addRoutes(routes);
+server.route(routes);
 
 server.start(function () {
     log.info({
