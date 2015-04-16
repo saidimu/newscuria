@@ -194,6 +194,10 @@ function index_entity(doc_type, url, doc_hash, body, message) {
 
 
 function get_url_metadata(url, callback)  {
+  console.log(url);
+  url = decodeURIComponent(url);  
+  console.log(url);
+
   // FIXME: validate url. On failure, return appropriate error message
   if(!url)  {
     return {};
@@ -254,12 +258,24 @@ function get_url_metadata(url, callback)  {
       response.statusCode = 500;
       response.error = "Internal Server Error";
       response.message = "A server error encountered!";
+      response.results = {};
 
       callback(response);
 
     } else {
+      // always 200 because the API request succeeded
       response.statusCode = 200;
-      response.message = results;
+      response.error = undefined;
+
+      if (results.hits.total === 0)  {
+        response.message = "URL could not be found.";
+        response.results = {};
+
+      } else {
+        response.message = "Ok";
+        response.results = results;
+
+      }//if-else
 
       callback(response);
 
@@ -273,7 +289,7 @@ function search(query, callback)  {
   var index = 'newscuria';
   var doc_type = 'opencalais';
 
-  console.log(query);
+  log.info({query: query});
 
   client.search({
     index: index,
