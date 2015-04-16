@@ -32,7 +32,7 @@ server.connection({ port: 3000 });
 
 server.route({
   method: ['POST'],
-    path: '/v1/{url}',
+    path: '/v1/url',
     handler: function (request, reply) {
       var url = request.params.url;
 
