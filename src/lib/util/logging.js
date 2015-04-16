@@ -17,7 +17,7 @@ var bunyan = require('bunyan');
 var loggly = require('bunyan-loggly').Bunyan2Loggly;
 var hostname = require('os').hostname();
 
-var config_loggly = require('config').get("logging").get('loggly');
+var config = require('config').get("logging");
 
 var metric_types = require('_/util/metric-types.js');
 
@@ -45,21 +45,31 @@ function get_logger(name) {
     throw new Error("Invalid logger name '%s'. Cannot create a logger", name);
   }//if
 
-  var loggly_stream = {};
+  // default stdout stream
+  var streams = [{
+    level: config.get('stdout').get('level'),
+    stream: process.stdout
+  }];
+
+  var loggly_stream;
 
   // only run if config file allows
-  if(config_loggly.get('enabled')) {
+  if(config.get('loggly').get('enabled')) {
     loggly_stream = {
-      level: config_loggly.get('level'),
+      level: config.get('loggly').get('level'),
       type: 'raw',
       stream: new loggly({
-        token: config_loggly.get('token'),
-        subdomain: config_loggly.get('subdomain')
-      }, config_loggly.get('buffer_size') || 1000)
+        token: config.get('loggly').get('token'),
+        subdomain: config.get('loggly').get('subdomain')
+      }, config.get('loggly').get('buffer_size') || 1000)
     };//loggly_stream
 
+    streams.push(loggly_stream);
+
   } else {
+
     console.log('Loggly logging is DISABLED.');
+
   }//if
 
 
@@ -71,13 +81,7 @@ function get_logger(name) {
       req: bunyan.stdSerializers.req,
       res: bunyan.stdSerializers.res
     },
-    streams: [
-      {
-        level: config_loggly.get('level'),
-        stream: process.stdout
-      },
-      loggly_stream,
-    ],
+    streams: streams
   });//bunyan.createLogger()
 
   // FIXME: better way to augment logger with custom log message "types"?
