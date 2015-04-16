@@ -153,7 +153,6 @@ function index_entity(doc_type, url, doc_hash, body, message) {
             doc_type: doc_type,
             body: body,
             err: err,
-            log_type: log.types.elasticsearch.INDEX_ERROR,
             response: response,
           }, 'Elasticsearch index error.');
 
@@ -170,7 +169,6 @@ function index_entity(doc_type, url, doc_hash, body, message) {
           log.info({
             index: index,
             doc_type: doc_type,
-            log_type: log.types.elasticsearch.INDEXED_URL,
           }, 'Indexed url to Elasticsearch.');
 
           metrics.meter(metrics.types.elasticsearch.INDEXED_URL, {
@@ -195,6 +193,119 @@ function index_entity(doc_type, url, doc_hash, body, message) {
 }//index_entity
 
 
+function get_url_metadata(url, callback)  {
+  // FIXME: validate url. On failure, return appropriate error message
+  if(!url)  {
+    return {};
+  }//if
+
+  var query = {
+  	"from": 0,
+  	"size": 200,
+  	"query": {
+  		"filtered": {
+  			"filter": {
+  				"bool": {
+  					"must": {
+  						"query": {
+  							"match": {
+  								"url": {
+  									"query": url,
+  									"type": "phrase"
+  								}
+  							}
+  						}
+  					}
+  				}
+  			}
+  		}
+  	},
+  	"_source": {
+  		"includes": [
+  			"name",
+  			"relevance",
+  			"_type",
+  			"_typeGroup"
+  		],
+  		"excludes": []
+  	},
+  	"sort": [
+  		{
+  			"relevance": {
+  				"order": "desc"
+  			}
+  		}
+  	]
+  };//query
+
+  var response = {
+    url: url,
+    statusCode: undefined,
+    message: undefined,
+    error: undefined,
+  };//response
+
+  search(query, function(err, results) {
+    if(err) {
+      // response = {
+      //   url: url,
+      //   message: "A server error encountered!"
+      // };//response
+      response.statusCode = 500;
+      response.error = "Internal Server Error";
+      response.message = "A server error encountered!";
+
+      callback(response);
+
+    } else {
+      response.statusCode = 200;
+      response.message = results;
+
+      callback(response);
+
+    }//if-else
+  });
+
+}//get_url_metadata
+
+
+function search(query, callback)  {
+  var index = 'newscuria';
+  var doc_type = 'opencalais';
+
+  client.search({
+    index: index,
+    type: doc_type,
+    body: query
+  }, function (err, response) {
+
+    if(err) {
+      log.error({
+        index: index,
+        doc_type: doc_type,
+        query: query,
+        err: err,
+        log_type: log.types.elasticsearch.SEARCH_ERROR,
+        response: response,
+      }, 'Elasticsearch search error.');
+
+      metrics.meter(metrics.types.elasticsearch.SEARCH_ERROR, {
+        index: index,
+        doc_type: doc_type,
+      });
+
+      callback(err, undefined);
+
+    } else {
+
+      callback(undefined, err);
+
+    }//if-else
+  });//client.search
+}//search
+
+
 module.exports = {
   start: start,
+  get_url_metadata: get_url_metadata,
 };//module.exports
