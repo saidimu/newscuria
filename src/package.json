@@ -17,7 +17,6 @@
     "socket.io": "^1.2.1",
     "nsqjs": "^0.7.0",
     "pg": "^4.3.0",
-    "pg-native": "^1.8.0",
     "bunyan": "^1.0.0",
     "js-yaml": "^3.2.5",
     "config": "^1.10.0",
@@ -29,7 +28,8 @@
     "influx": "^3.3.0",
     "limitd": "^4.1.2",
     "measured": "^1.0.0",
-    "oh-crap": "^1.0.1"
+    "oh-crap": "^1.0.1",
+    "hapi": "^8.4.0"
   },
   "devDependencies": {},
   "scripts": {
