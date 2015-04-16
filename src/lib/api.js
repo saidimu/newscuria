@@ -32,10 +32,10 @@ server.connection({ port: 3000 });
 
 server.route({
   method: ['GET', 'POST'],
-    path: '/{url}',
+    path: '/{blah}',
     handler: function (request, reply) {
-      var url = encodeURIComponent(request.params.url);
-      
+      var url = encodeURIComponent(request.params.blah);
+
       console.log(request.params);
 
       get_url_metadata(url, function(response) {
