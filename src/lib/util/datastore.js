@@ -34,7 +34,7 @@ var urls = require('_/util/urls.js');
 function start()    {
   // connect to the message queue
   queue.connect(function onQueueConnect()  {
-    listen_to_urls_received();
+    // listen_to_urls_received();
     listen_to_readability();
     listen_to_opencalais();
   });//queue.connect
