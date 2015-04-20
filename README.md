@@ -1,5 +1,6 @@
 # newscuria
 
+[![Circle CI](https://circleci.com/gh/saidimu/newscuria/tree/dev.svg?style=svg)](https://circleci.com/gh/saidimu/newscuria/tree/dev)
 
 ## Discuss
 
