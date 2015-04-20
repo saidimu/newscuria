@@ -1,2 +1,12 @@
 general:
   build_dir: src
+
+machine:
+  node:
+    version: 0.10.34
+
+deployment:
+  dockerhub:
+    branch: [dev, master]
+    commands:
+      - $DOCKERHUB_BUILD_TRIGGER
