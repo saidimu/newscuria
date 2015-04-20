@@ -194,9 +194,20 @@ function index_entity(doc_type, url, doc_hash, body, message) {
 
 
 function get_url_metadata(url, callback)  {
+  var response = {
+    url: url,
+    statusCode: undefined,
+    message: undefined,
+    error: undefined,
+  };//response
+
   // FIXME: validate url. On failure, return appropriate error message
   if(!url)  {
-    return {};
+    response.statusCode = 400;  // http://httpstatus.es/400
+    response.message = "The request cannot be fulfilled due to bad syntax.";
+    response.error = "'url' parameter is required.";
+
+    return response;
   }//if
 
   var query = {
@@ -239,13 +250,6 @@ function get_url_metadata(url, callback)  {
   		}
   	]
   };//query
-
-  var response = {
-    url: url,
-    statusCode: undefined,
-    message: undefined,
-    error: undefined,
-  };//response
 
   search(query, function(err, results) {
     if(err) {

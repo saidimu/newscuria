@@ -23,9 +23,9 @@ module.exports = [
     method: ['GET'],
       path: '/v1/url/',
       handler: function (request, reply) {
-        var url = request.params.url;
+        var url = request.params.url || undefined;
 
-        console.log(request.params);
+        // console.log(request.params);
 
         get_url_metadata(url, function(response) {
           reply(response);
@@ -36,7 +36,7 @@ module.exports = [
     method: ['POST'],
       path: '/v1/url/',
       handler: function (request, reply) {
-        var url = request.payload.url;
+        var url = request.payload.url || undefined;
 
         // console.log(request.payload);
 
