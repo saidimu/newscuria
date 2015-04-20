@@ -38,7 +38,7 @@ module.exports = [
       handler: function (request, reply) {
         var url = request.payload.url;
 
-        console.log(request.payload);
+        // console.log(request.payload);
 
         get_url_metadata(url, function(response) {
           reply(response);

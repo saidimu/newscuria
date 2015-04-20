@@ -225,7 +225,9 @@ function get_url_metadata(url, callback)  {
   			"name",
   			"relevance",
   			"_type",
-  			"_typeGroup"
+  			"_typeGroup",
+  			"instances",
+  			"resolutions"
   		],
   		"excludes": []
   	},
