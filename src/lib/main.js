@@ -57,6 +57,6 @@ function start()    {
   readability.start();
   opencalais.start();
   datastore.start();
-  entities.start();
+  // entities.start();
   search.start();
 }//start()
