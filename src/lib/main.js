@@ -41,7 +41,7 @@ var filter = require('_/util/filter.js');
 var readability = require('_/util/readability.js');
 var opencalais = require('_/util/opencalais.js');
 var datastore = require('_/util/datastore.js');
-var entities = require('_/util/entities.js');
+// var entities = require('_/util/entities.js');
 var search = require('_/util/search.js');
 var twitter = require('_/util/twitter.js');
 

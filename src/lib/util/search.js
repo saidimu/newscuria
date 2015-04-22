@@ -38,13 +38,13 @@ var urls = require('_/util/urls.js');
 
 function start()    {
   // connect to the message queue
-  queue.connect(listen_to_entities);
+  queue.connect(listen_to_opencalais);
 }//start()
 
 
-function listen_to_entities()  {
-  var topic = topics.ENTITIES;
-  var channel = 'index-to-elasticsearch';
+function listen_to_opencalais()  {
+  var topic = topics.OPENCALAIS;
+  var channel = "index-opencalais";
 
   // https://github.com/auth0/limitd
   var limit_options = {
@@ -71,54 +71,80 @@ function listen_to_entities()  {
 
         } else {
 
-          process_entities_message(json, message);
+          process_opencalais_message(json, message);
 
         }//if-else
+
       });//ratelimiter.limit_app
     }//if
 
   });//queue.read_message
 
-}//listen_to_entities
+}//listen_to_opencalais
 
 
-function process_entities_message(json, message, topic)  {
-    // var doc_type = topics_and_indices[topic];
-    var doc_type = 'opencalais';
+function process_opencalais_message(json, message) {
+  var opencalais = json;
+  var url = opencalais.url || '';
+  var date_published = opencalais.date_published || null;
 
-    var opencalais_hash = json.opencalais_hash || ''; // unique for every url
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  var doc_type = 'opencalais';
 
-    var url = json.url || '';
+  // FIXME: What to do about empty date_published?
+  if(date_published === null) {
+    log.error({
+      url: url,
+      log_type: log.types.entities.EMPTY_DATE_PUBLISHED,
+    }, "Empty 'date_published'.");
 
-    if(url) {
-      // generate a unique hash used in indexing this document
-      var doc_hash = hash(util.format("%s__%s", url, opencalais_hash));
+    metrics.meter(metrics.types.entities.EMPTY_DATE_PUBLISHED, {
+      url_host: urls.parse(url).hostname,
+    });
 
-      index_entity(doc_type, url, doc_hash, json, message);
+  }//if
 
-    } else {
+  if(!url)  {
+    log.error({
+      url: url,
+      log_type: log.types.entities.URL_NOT_IN_OPENCALAIS,
+    }, "EMPTY url! Cannot persist Opencalais object to datastore.");
 
-      // FIXME: publish to a special queue for further analysis?
-      log.error({
-        doc_type: doc_type,
-        msg_body: json,
-        log_type: log.types.elasticsearch.EMPTY_URL,
-      }, 'Empty URL in NLP entity object');
+    metrics.meter(metrics.types.entities.URL_NOT_IN_OPENCALAIS, {});
 
-      metrics.meter(metrics.types.elasticsearch.EMPTY_URL, {
-        url_host: urls.parse(url).hostname,
-        doc_type: doc_type,
-      });
+    // FIXME: Really? Just bail b/c of non-existing URL?
+    message.finish();
+    return;
+  }//if
 
-      message.finish();
+  if(url) {
+    // generate a unique hash used in indexing this document
+    var doc_hash = hash(url);
 
-    }//if-else
-}//process_entities_message
+    index_opencalais(doc_index, doc_type, url, doc_hash, json, message);
+
+  } else {
+
+    // FIXME: publish to a special queue for further analysis?
+    log.error({
+      doc_type: doc_type,
+      msg_body: json,
+      log_type: log.types.elasticsearch.EMPTY_URL,
+    }, 'Empty URL in NLP entity object');
+
+    metrics.meter(metrics.types.elasticsearch.EMPTY_URL, {
+      url_host: urls.parse(url).hostname,
+      doc_type: doc_type,
+    });
+
+    message.finish();
+
+  }//if-else
+}//process_opencalais_message
 
 
-function index_entity(doc_type, url, doc_hash, body, message) {
-  var index = 'newscuria';
-
+function index_opencalais(doc_index, doc_type, url, doc_hash, body, message) {
   // https://github.com/auth0/limitd
   var limit_options = {
     bucket: appname,
@@ -138,7 +164,7 @@ function index_entity(doc_type, url, doc_hash, body, message) {
       // TODO: Perform multiple index operations in a single API call.
       // http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/api-reference-1-3.html#api-bulk-1-3
       client.create({
-        index: index,
+        index: doc_index,
         type: doc_type,
         id: doc_hash,
         body: body,
@@ -149,7 +175,7 @@ function index_entity(doc_type, url, doc_hash, body, message) {
 
           log.error({
             id: doc_hash,
-            index: index,
+            index: doc_index,
             doc_type: doc_type,
             body: body,
             err: err,
@@ -158,7 +184,7 @@ function index_entity(doc_type, url, doc_hash, body, message) {
 
           metrics.meter(metrics.types.elasticsearch.INDEX_ERROR, {
             url_host: urls.parse(url).hostname,
-            index: index,
+            index: doc_index,
             doc_type: doc_type,
           });
 
@@ -167,13 +193,13 @@ function index_entity(doc_type, url, doc_hash, body, message) {
         } else {
 
           log.info({
-            index: index,
+            index: doc_index,
             doc_type: doc_type,
           }, 'Indexed url to Elasticsearch.');
 
           metrics.meter(metrics.types.elasticsearch.INDEXED_URL, {
             url_host: urls.parse(url).hostname,
-            index: index,
+            index: doc_index,
             doc_type: doc_type,
           });
 
@@ -194,6 +220,10 @@ function index_entity(doc_type, url, doc_hash, body, message) {
 
 
 function get_url_metadata(url, callback)  {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  var doc_type = 'opencalais';
+
   var response = {
     url: url,
     statusCode: undefined,
@@ -251,7 +281,7 @@ function get_url_metadata(url, callback)  {
   	]
   };//query
 
-  search(query, function(err, results) {
+  search(doc_index, doc_type, query, function(err, results) {
     if(err) {
       response.statusCode = 500;
       response.error = "Internal Server Error";
@@ -283,21 +313,18 @@ function get_url_metadata(url, callback)  {
 }//get_url_metadata
 
 
-function search(query, callback)  {
-  var index = 'newscuria';
-  var doc_type = 'opencalais';
-
-  log.info({query: query});
+function search(doc_index, doc_type, query, callback)  {
+  // log.info({query: query});
 
   client.search({
-    index: index,
+    index: doc_index,
     type: doc_type,
     body: query
   }, function (err, response) {
 
     if(err) {
       log.error({
-        index: index,
+        index: doc_index,
         doc_type: doc_type,
         query: query,
         err: err,
@@ -306,7 +333,7 @@ function search(query, callback)  {
       }, 'Elasticsearch search error.');
 
       metrics.meter(metrics.types.elasticsearch.SEARCH_ERROR, {
-        index: index,
+        index: doc_index,
         doc_type: doc_type,
       });
 
