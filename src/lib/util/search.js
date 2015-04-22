@@ -177,7 +177,6 @@ function index_opencalais(doc_index, doc_type, url, doc_hash, body, message) {
             id: doc_hash,
             index: doc_index,
             doc_type: doc_type,
-            body: body,
             err: err,
             response: response,
           }, 'Elasticsearch index error.');
