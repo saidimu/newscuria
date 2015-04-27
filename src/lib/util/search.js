@@ -88,11 +88,6 @@ function process_opencalais_message(json, message) {
   var url = opencalais.url || '';
   var date_published = opencalais.date_published || null;
 
-  // elasticsearch index and type settings
-  var doc_index = 'newscuria';
-  var doc_type = 'opencalais';
-
-  // FIXME: What to do about empty date_published?
   if(date_published === null) {
     log.error({
       url: url,
@@ -119,23 +114,21 @@ function process_opencalais_message(json, message) {
   }//if
 
   if(url) {
-    // generate a unique hash used in indexing this document
-    var doc_hash = hash(url);
-
-    index_opencalais(doc_index, doc_type, url, doc_hash, json, message);
+    // index individual fragments of the Opencalais message
+    // easier to search this way
+    split_up_opencalais(url, opencalais, message);
 
   } else {
 
     // FIXME: publish to a special queue for further analysis?
     log.error({
-      doc_type: doc_type,
-      msg_body: json,
+      url: url,
       log_type: log.types.elasticsearch.EMPTY_URL,
     }, 'Empty URL in NLP entity object');
 
     metrics.meter(metrics.types.elasticsearch.EMPTY_URL, {
-      url_host: urls.parse(url).hostname,
-      doc_type: doc_type,
+      url: url,
+      url_host: urls.parse(url).hostname
     });
 
     message.finish();
@@ -144,7 +137,36 @@ function process_opencalais_message(json, message) {
 }//process_opencalais_message
 
 
-function index_opencalais(doc_index, doc_type, url, doc_hash, body, message) {
+function split_up_opencalais(url, opencalais, message)  {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  var doc_type = 'opencalais';
+
+  var children = [];
+
+  // index(doc_index, doc_type, url, doc_hash, json, message);
+  for(var key in opencalais) {
+    if (key !== "url")  {
+      var child = opencalais[key];
+
+      child.child_hash = key;
+      child.parent_url = url;
+
+      // generate a unique hash used in indexing this child
+      var doc_hash = hash(util.format("%s___%s", url, key));
+
+      children.push({ "index": { "_id": doc_hash } });  // action
+      children.push(child);   // body
+
+    }//if-else
+  }//for
+
+  bulk_index(doc_index, doc_type, children, message);
+
+}//split_up_opencalais()
+
+
+function bulk_index(doc_index, doc_type, body, message) {
   // https://github.com/auth0/limitd
   var limit_options = {
     bucket: appname,
@@ -161,7 +183,77 @@ function index_opencalais(doc_index, doc_type, url, doc_hash, body, message) {
 
     } else {
 
-      // TODO: Perform multiple index operations in a single API call.
+      // http://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference-1-4.html#api-bulk-1-4
+      client.bulk({
+        index: doc_index,
+        type: doc_type,
+        body: body,
+        ignore: [409],  // ignore 'error' if document already exists
+      }, function(err, response)  {
+
+        if( (err) || (response.errors) ) {
+
+          log.error({
+            index: doc_index,
+            doc_type: doc_type,
+            err: err || response,
+            response: response,
+          }, 'Elasticsearch bulk index error.');
+
+          metrics.meter(metrics.types.elasticsearch.BULK_INDEX_ERROR, {
+            index: doc_index,
+            doc_type: doc_type,
+          });
+
+          message.requeue();
+
+        } else {
+
+          log.info({
+            index: doc_index,
+            doc_type: doc_type,
+            num_urls: response.items.length,
+          }, util.format('Indexed bulk urls (%s) to Elasticsearch.', response.items.length));
+
+          metrics.meter(metrics.types.elasticsearch.BULK_INDEX_OK, {
+            index: doc_index,
+            doc_type: doc_type,
+            num_urls: response.items.length,
+          });
+
+          message.finish();
+
+        }//if-else
+      });//client.create
+
+    }//if-else (expected_wait_time)
+
+  };//rateLimitCallback
+
+
+  // rate-limit this app
+  ratelimiter.limit_app(limit_options, rateLimitCallback);
+
+}//bulk_index
+
+
+function index(doc_index, doc_type, doc_hash, body, message) {
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
+  };//options
+
+  var rateLimitCallback = function(expected_wait_time) {
+    if(expected_wait_time)  {
+      // now backing-off to prevent other messages from being pushed from the server
+      // initially wasn't backing-off to prevent "punishment" by the server
+      // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+      message.requeue(expected_wait_time, true);
+
+    } else {
+
       // http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/api-reference-1-3.html#api-bulk-1-3
       client.create({
         index: doc_index,
@@ -182,7 +274,6 @@ function index_opencalais(doc_index, doc_type, url, doc_hash, body, message) {
           }, 'Elasticsearch index error.');
 
           metrics.meter(metrics.types.elasticsearch.INDEX_ERROR, {
-            url_host: urls.parse(url).hostname,
             index: doc_index,
             doc_type: doc_type,
           });
@@ -196,8 +287,7 @@ function index_opencalais(doc_index, doc_type, url, doc_hash, body, message) {
             doc_type: doc_type,
           }, 'Indexed url to Elasticsearch.');
 
-          metrics.meter(metrics.types.elasticsearch.INDEXED_URL, {
-            url_host: urls.parse(url).hostname,
+          metrics.meter(metrics.types.elasticsearch.INDEX_OK, {
             index: doc_index,
             doc_type: doc_type,
           });
@@ -215,7 +305,7 @@ function index_opencalais(doc_index, doc_type, url, doc_hash, body, message) {
   // rate-limit this app
   ratelimiter.limit_app(limit_options, rateLimitCallback);
 
-}//index_entity
+}//index
 
 
 function get_url_metadata(url, callback)  {
@@ -349,5 +439,6 @@ function search(doc_index, doc_type, query, callback)  {
 
 module.exports = {
   start: start,
+  search: search,
   get_url_metadata: get_url_metadata,
 };//module.exports

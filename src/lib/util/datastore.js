@@ -481,7 +481,8 @@ function date_string_to_iso_object(date_string, url)  {
       url_host: urls.parse(url).hostname,
     });
 
-    iso_object = new Date('1970-01-01 00:00:00 +0000').toISOString();
+    // iso_object = new Date('1970-01-01 00:00:00 +0000').toISOString();
+    iso_object = null;
   }//try-catch
 
   return iso_object;
