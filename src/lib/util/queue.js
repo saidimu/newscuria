@@ -125,13 +125,13 @@ function read_message(topic, channel, callback)	{
 	var reader = new nsq.Reader(topic, channel, options);
 
   reader.on('message', function onMessage(message) {
-    var proc_attempts = message.attempts || undefined;
+    var message_attempts = message.attempts || undefined;
 
     metrics.histogram(metrics.types.queue.message.PROCESSING_ATTEMPTS, {
       topic: topic,
       channel: channel,
       options: options,
-    }, proc_attempts);
+    }, message_attempts);
 
     // get JSON message payload
     try {
@@ -146,7 +146,7 @@ function read_message(topic, channel, callback)	{
         topic: topic,
         channel: channel,
         options: options,
-        proc_attempts: proc_attempts,
+        message_attempts: message_attempts,
         err: err,
         log_type: log.types.queue.reader.MESSAGE_ERROR,
       }, "Error getting message from queue!");
@@ -154,7 +154,7 @@ function read_message(topic, channel, callback)	{
       metrics.meter(log.types.queue.reader.MESSAGE_ERROR, {
         topic        : topic,
         channel      : channel,
-        proc_attempts: proc_attempts,
+        message_attempts: message_attempts,
         options      : options,
       });
 

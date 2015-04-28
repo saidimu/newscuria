@@ -89,7 +89,7 @@ function listen_to_urls_received()  {
         metrics.meter(log.types.url.ERROR, {
           topic        : topic,
           channel      : channel,
-          proc_attempts: message.attempts || undefined,
+          message_attempts: message.attempts || undefined,
         });
 
       }//if-else
