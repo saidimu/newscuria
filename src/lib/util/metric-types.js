@@ -112,21 +112,12 @@ event_types.datastore = {
 
 // ELASTICSEARCH events
 event_types.elasticsearch = {
-<<<<<<< HEAD
-  INDEX_OK       : 'elasticsearch.url.index.ok',
-  BULK_INDEX_OK : 'elasticsearch.url.index.bulk.ok',
-  INDEX_ERROR       : 'elasticsearch.index.error',
-  BULK_INDEX_ERROR  : 'elasticsearch.index.bulk.error',
-  SEARCH_ERROR      : 'elasticsearch.search.error',
-  EMPTY_URL         : 'elasticsearch.url.empty',
-=======
   INDEX_OK         : 'elasticsearch.url.index.ok',
   BULK_INDEX_OK    : 'elasticsearch.url.index.bulk.ok',
   INDEX_ERROR      : 'elasticsearch.index.error',
   BULK_INDEX_ERROR : 'elasticsearch.index.bulk.error',
   SEARCH_ERROR     : 'elasticsearch.search.error',
   EMPTY_URL        : 'elasticsearch.url.empty',
->>>>>>> opencalais-reindex
 };//log_typpes.elasticsearch
 
 // ENTITIES events
