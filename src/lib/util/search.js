@@ -147,7 +147,7 @@ function split_up_opencalais(url, opencalais, message)  {
   // index(doc_index, doc_type, url, doc_hash, json, message);
   for(var key in opencalais) {
     // IMPORTANT: skip 'url' and 'doc' keys
-    if ( (key !== "url") ||  (key !== "doc") )  {
+    if ( (key !== "url") && (key !== "doc") )  {
       var child = opencalais[key];
 
       if(child) {
