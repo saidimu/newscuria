@@ -149,14 +149,25 @@ function split_up_opencalais(url, opencalais, message)  {
     if (key !== "url")  {
       var child = opencalais[key];
 
-      child.child_hash = key;
-      child.parent_url = url;
+      if(child) {
+        child.child_hash = key;
+        child.parent_url = url;
 
-      // generate a unique hash used in indexing this child
-      var doc_hash = hash(util.format("%s___%s", url, key));
+        // generate a unique hash used in indexing this child
+        var doc_hash = hash(util.format("%s___%s", url, key));
 
-      children.push({ "index": { "_id": doc_hash } });  // action
-      children.push(child);   // body
+        // elasticsearch action
+        children.push({ "index": { "_id": doc_hash } });
+
+        // request body
+        children.push(child);
+
+      } else {
+        // FIXME: TODO:
+        log.error({
+          url: url,
+        }, 'WEIRD Opencalais split-up error.');
+      }
 
     }//if-else
   }//for
