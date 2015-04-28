@@ -208,7 +208,8 @@ function bulk_index(doc_index, doc_type, body, message) {
           log.error({
             index: doc_index,
             doc_type: doc_type,
-            err: err || response,
+            body: body,
+            err: err || filter_bulk_index_errors(response),
             response: response,
           }, 'Elasticsearch bulk index error.');
 
@@ -318,6 +319,25 @@ function index(doc_index, doc_type, doc_hash, body, message) {
   ratelimiter.limit_app(limit_options, rateLimitCallback);
 
 }//index
+
+
+// filter bulk index errors which are mixed in with successfull requests from the bulk index request
+function filter_bulk_index_errors(response) {
+  var errors = [];
+
+  if(response.errors) {
+    var items = response.items || [];
+
+    items.forEach(function(item)  {
+      if(item.status !== 201)  {
+        errors.push(item);
+      }//if
+    });//items.forEach
+  }//if-else
+
+  return errors;
+
+}//filter_bulk_index_errors
 
 
 function get_url_metadata(url, callback)  {
