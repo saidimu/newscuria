@@ -357,6 +357,7 @@ function get_url_metadata(url, callback)  {
     response.statusCode = 400;  // http://httpstatus.es/400
     response.message = "The request cannot be fulfilled due to bad syntax.";
     response.error = "'url' parameter is required.";
+    response.results = [];
 
     return response;
   }//if
@@ -407,7 +408,7 @@ function get_url_metadata(url, callback)  {
       response.statusCode = 500;
       response.error = "Internal Server Error";
       response.message = "A server error encountered!";
-      response.results = {};
+      response.results = [];
 
       callback(response);
 
@@ -418,7 +419,7 @@ function get_url_metadata(url, callback)  {
 
       if (results.hits.total === 0)  {
         response.message = "URL could not be found.";
-        response.results = {};
+        response.results = [];
 
       } else {
         response.message = "Ok";
