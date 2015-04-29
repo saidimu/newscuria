@@ -83,6 +83,7 @@ event_types.readability = {
   EMPTY_DATE_PUBLISHED : 'readability.date.published.empty',
   EMPTY_AUTHOR         : 'readability.author.empty',
   EMPTY_DOMAIN         : 'readability.domain.empty',
+  EMPTY_URL            : 'readability.url.empty',
 };//event_types.readability
 
 // OPENCALAIS events

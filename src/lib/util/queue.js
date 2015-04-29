@@ -109,7 +109,9 @@ function read_message(topic, channel, callback)	{
       channel: channel,
     });
 
-		throw new Error("Must provide a channel name to listen on.");
+		var err = new Error("Must provide a channel name to listen on.");
+    callback(err);
+		// throw new Error("Must provide a channel name to listen on.");
 	}//if
 
   // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
