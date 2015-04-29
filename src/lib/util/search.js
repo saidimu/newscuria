@@ -413,15 +413,16 @@ function get_url_metadata(url, callback)  {
       callback(response);
 
     } else {
-      // always 200 because the API request succeeded
-      response.statusCode = 200;
-      response.error = undefined;
 
       if (results.hits.total === 0)  {
+        response.statusCode = 404;
         response.message = "URL could not be found.";
+        response.error = response.message;
         response.results = [];
 
       } else {
+        response.statusCode = 200;
+        response.error = undefined;
         response.message = "Ok";
         response.results = results.hits;
 
