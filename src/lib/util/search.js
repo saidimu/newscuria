@@ -371,7 +371,7 @@ function get_url_metadata(url, callback)  {
   					"must": {
   						"query": {
   							"match": {
-  								"url": {
+  								"parent_url": {
   									"query": url,
   									"type": "phrase"
   								}
