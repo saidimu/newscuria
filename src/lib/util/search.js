@@ -35,10 +35,14 @@ var hash = require('string-hash');
 var ratelimiter = require('_/util/limitd.js');
 var metrics = require('_/util/metrics.js');
 var urls = require('_/util/urls.js');
+var queries = require('_/util/search-queries.js');
 
 function start()    {
   // connect to the message queue
-  queue.connect(listen_to_opencalais);
+  queue.connect(function onQueueConnect()  {
+    listen_to_opencalais();
+    listen_to_readability();
+  });//queue.connect
 }//start()
 
 
@@ -81,6 +85,47 @@ function listen_to_opencalais()  {
   });//queue.read_message
 
 }//listen_to_opencalais
+
+
+function listen_to_readability()  {
+  var topic = topics.READABILITY;
+  var channel = "index-to-elasticsearch";
+
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
+  };//options
+
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
+    if(!err) {
+
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
+      ratelimiter.limit_app(limit_options, function(expected_wait_time) {
+        if(expected_wait_time)  {
+          // now backing-off to prevent other messages from being pushed from the server
+          // initially wasn't backing-off to prevent "punishment" by the server
+          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+          message.requeue(expected_wait_time, true);
+
+        } else {
+
+          index_readability(json, message);
+
+        }//if-else
+
+      });//ratelimiter.limit_app
+    }//if
+
+  });//queue.read_message
+
+}//listen_to_readability
 
 
 function process_opencalais_message(json, message) {
@@ -178,6 +223,49 @@ function split_up_opencalais(url, opencalais, message)  {
 }//split_up_opencalais()
 
 
+function index_readability(json, message) {
+  var readability = json;
+  var url = readability.url || '';
+  var date_published = readability.date_published || null;
+
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  var doc_type = 'readability';
+  var doc_id = url;
+
+  if(date_published === null) {
+    log.error({
+      url: url,
+      log_type: log.types.readability.EMPTY_DATE_PUBLISHED,
+    }, "Empty 'date_published'.");
+
+    metrics.meter(metrics.types.readability.EMPTY_DATE_PUBLISHED, {
+      url_host: urls.parse(url).hostname,
+    });
+
+  }//if
+
+  if(!url)  {
+    log.error({
+      url: url,
+      log_type: log.types.readability.EMPTY_URL,
+    }, "EMPTY url! Cannot index Readability object to elasticsearch.");
+
+    metrics.meter(metrics.types.readability.EMPTY_URL, {});
+
+    // FIXME: Really? Just bail b/c of non-existing URL?
+    message.finish();
+
+  } else {
+
+    // index individual fragments of the Opencalais message
+    // easier to search this way
+    index(doc_index, doc_type, doc_id, readability, message);
+
+  }//if-else
+}//index_readability
+
+
 function bulk_index(doc_index, doc_type, body, message) {
   // https://github.com/auth0/limitd
   var limit_options = {
@@ -250,7 +338,7 @@ function bulk_index(doc_index, doc_type, body, message) {
 }//bulk_index
 
 
-function index(doc_index, doc_type, doc_hash, body, message) {
+function index(doc_index, doc_type, doc_id, body, message) {
   // https://github.com/auth0/limitd
   var limit_options = {
     bucket: appname,
@@ -271,7 +359,7 @@ function index(doc_index, doc_type, doc_hash, body, message) {
       client.create({
         index: doc_index,
         type: doc_type,
-        id: doc_hash,
+        id: doc_id,
         body: body,
         ignore: [409],  // ignore 'error' if document already exists
       }, function(err, response)  {
@@ -279,7 +367,7 @@ function index(doc_index, doc_type, doc_hash, body, message) {
         if(err) {
 
           log.error({
-            id: doc_hash,
+            id: doc_id,
             index: doc_index,
             doc_type: doc_type,
             err: err,
@@ -362,46 +450,7 @@ function get_url_metadata(url, callback)  {
     return response;
   }//if
 
-  var query = {
-  	"from": 0,
-  	"size": 200,
-  	"query": {
-  		"filtered": {
-  			"filter": {
-  				"bool": {
-  					"must": {
-  						"query": {
-  							"match": {
-  								"parent_url": {
-  									"query": url,
-  									"type": "phrase"
-  								}
-  							}
-  						}
-  					}
-  				}
-  			}
-  		}
-  	},
-  	"_source": {
-  		"includes": [
-  			"name",
-  			"relevance",
-  			"_type",
-  			"_typeGroup",
-  			"instances",
-  			"resolutions"
-  		],
-  		"excludes": []
-  	},
-  	"sort": [
-  		{
-  			"relevance": {
-  				"order": "desc"
-  			}
-  		}
-  	]
-  };//query
+  var query = queries.url_query(url);
 
   search(doc_index, doc_type, query, function(err, results) {
     if(err) {
