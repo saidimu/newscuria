@@ -258,8 +258,10 @@ function index_readability(json, message) {
 
   } else {
 
-    // index individual fragments of the Opencalais message
-    // easier to search this way
+    // remove some fields not needed in the index
+    delete readability["content"];
+
+    // index the cleaned-up Readability
     index(doc_index, doc_type, doc_id, readability, message);
 
   }//if-else
