@@ -196,8 +196,11 @@ function process_readability_message(json, message) {
   var readability = json;
 
   var url = readability.url;
-//  var date_published = readability.date_published || "1970-01-01 00:00:00 +0000";
+
+    // convert Readability date string into an ISO date object
   var date_published = readability.date_published || null;
+  readability.date_published = date_string_to_iso_object(date_published);
+  
   var author = readability.author || '';
   var domain = readability.domain || '';
   var word_count = readability.word_count || 0;
