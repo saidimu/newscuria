@@ -88,7 +88,8 @@ function listen_to_opencalais()  {
 
 
 function listen_to_readability()  {
-  var topic = topics.READABILITY;
+  // var topic = topics.READABILITY;
+  var topic = "newscuria.readability.BULK_INDEX";
   var channel = "index-to-elasticsearch";
 
   // https://github.com/auth0/limitd
@@ -231,7 +232,7 @@ function index_readability(json, message) {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
   var doc_type = 'readability';
-  var doc_id = url;
+  var doc_id = hash(url);
 
   if(date_published === null) {
     log.error({
@@ -259,7 +260,7 @@ function index_readability(json, message) {
   } else {
 
     // remove some fields not needed in the index
-    delete readability["content"];
+    readability["content"] = null;
 
     // index the cleaned-up Readability
     index(doc_index, doc_type, doc_id, readability, message);
