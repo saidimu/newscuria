@@ -260,6 +260,7 @@ function index_readability(json, message) {
 
     // remove some fields not needed in the index
     readability["content"] = null;
+    delete readability["content"];
 
     // index the cleaned-up Readability
     index(doc_index, doc_type, doc_id, readability, message);
