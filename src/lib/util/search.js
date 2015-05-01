@@ -88,8 +88,7 @@ function listen_to_opencalais()  {
 
 
 function listen_to_readability()  {
-  // var topic = topics.READABILITY;
-  var topic = "newscuria.readability.BULK_INDEX";
+  var topic = topics.READABILITY;
   var channel = "index-to-elasticsearch";
 
   // https://github.com/auth0/limitd
