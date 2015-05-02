@@ -431,16 +431,35 @@ function filter_bulk_index_errors(response) {
 }//filter_bulk_index_errors
 
 
-function get_url_metadata(url, callback)  {
+function opencalais_search_by_url(url, callback)  {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
   var doc_type = 'opencalais';
 
+  var query = queries.opencalais_search_by_url(url);
+
+  generate_api_response(url, query, doc_index, doc_type, callback);
+}//opencalais_search_by_url
+
+
+function opencalais_tags_by_url(url, callback)  {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  var doc_type = 'opencalais';
+
+  var query = queries.opencalais_tags_by_url(url);
+
+  generate_api_response(url, query, doc_index, doc_type, callback);
+}//opencalais_tags_by_url
+
+
+function generate_api_response(url, query, doc_index, doc_type, callback)  {
   var response = {
     url: url,
     statusCode: undefined,
     message: undefined,
     error: undefined,
+    results: [],
   };//response
 
   // FIXME: validate url. On failure, return appropriate error message
@@ -452,8 +471,6 @@ function get_url_metadata(url, callback)  {
 
     return response;
   }//if
-
-  var query = queries.url_query(url);
 
   search(doc_index, doc_type, query, function(err, results) {
     if(err) {
@@ -485,7 +502,7 @@ function get_url_metadata(url, callback)  {
     }//if-else
   });
 
-}//get_url_metadata
+}//generate_api_response
 
 
 function search(doc_index, doc_type, query, callback)  {
@@ -526,5 +543,5 @@ function search(doc_index, doc_type, query, callback)  {
 module.exports = {
   start: start,
   search: search,
-  get_url_metadata: get_url_metadata,
+  opencalais_search_by_url: opencalais_search_by_url,
 };//module.exports

@@ -16,7 +16,89 @@
  */
 'use strict';
 
-function url_query(url) {
+
+function opencalais_tags_by_url(url) {
+  var query = {
+  	"from": 0,
+  	"size": 200,
+  	"query": {
+  		"filtered": {
+  			"filter": {
+  				"bool": {
+  					"must": {
+  						"bool": {
+  							"must": [
+  								{
+  									"query": {
+  										"match": {
+  											"parent_url": {
+  												"query": url,
+  												"type": "phrase"
+  											}
+  										}
+  									}
+  								},
+  								{
+  									"bool": {
+  										"should": [
+  											{
+  												"range": {
+  													"importance": {
+  														"from": 1,
+  														"to": null,
+  														"include_lower": false,
+  														"include_upper": true
+  													}
+  												}
+  											},
+  											{
+  												"range": {
+  													"relevance": {
+  														"from": "0.5",
+  														"to": null,
+  														"include_lower": true,
+  														"include_upper": true
+  													}
+  												}
+  											}
+  										]
+  									}
+  								}
+  							]
+  						}
+  					}
+  				}
+  			}
+  		}
+  	},
+  	"_source": {
+  		"includes": [
+  			"name",
+  			"commonname",
+  			"importance",
+  			"relevance"
+  		],
+  		"excludes": []
+  	},
+  	"sort": [
+  		{
+  			"importance": {
+  				"order": "desc"
+  			}
+  		},
+  		{
+  			"relevance": {
+  				"order": "desc"
+  			}
+  		}
+  	]
+  };
+
+  return query;
+}//opencalais_tags_by_url
+
+
+function opencalais_search_by_url(url) {
   var query = {
   	"from": 0,
   	"size": 200,
@@ -59,9 +141,10 @@ function url_query(url) {
   };//query
 
   return query;
-}//url_query
+}//opencalais_search_by_url
 
 
 module.exports  = {
-  url_query: url_query,
+  opencalais_search_by_url: opencalais_search_by_url,
+  opencalais_tags_by_url: opencalais_tags_by_url,
 };//module.exports
