@@ -31,7 +31,7 @@ function opencalais_instances_by_url(url) {
   									"query": {
   										"match": {
   											"parent_url": {
-  												"query": "http://news.xinhuanet.com/english/2015-04/25/c_134182792.htm",
+  												"query": url,
   												"type": "phrase"
   											}
   										}
