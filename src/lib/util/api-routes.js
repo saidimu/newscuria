@@ -16,7 +16,8 @@
  */
 'use strict';
 
-var get_url_metadata = require('_/util/search.js').get_url_metadata;
+var opencalais_search_by_url = require('_/util/search.js').opencalais_search_by_url;
+var opencalais_tags_by_url = require('_/util/search.js').opencalais_tags_by_url;
 
 module.exports = [
   {
@@ -25,11 +26,15 @@ module.exports = [
       handler: function (request, reply) {
         var url = request.params.url || undefined;
 
-        // console.log(request.params);
+        console.log();
+        console.log(request.params);
+        console.log();
+        console.log(request);
+        console.log();
 
-        get_url_metadata(url, function(response) {
+        opencalais_search_by_url(url, function(response) {
           reply(response);
-        });//get_url_metadata
+        });//opencalais_tags_by_url
       }//handler
   },
   {
@@ -40,9 +45,22 @@ module.exports = [
 
         // console.log(request.payload);
 
-        get_url_metadata(url, function(response) {
+        opencalais_tags_by_url(url, function(response) {
           reply(response);
-        });//get_url_metadata
+        });//opencalais_tags_by_url
+      }//handler
+  },
+  {
+    method: ['POST'],
+      path: '/v1/url/tags/',
+      handler: function (request, reply) {
+        var url = request.payload.url || undefined;
+
+        // console.log(request.payload);
+
+        opencalais_tags_by_url(url, function(response) {
+          reply(response);
+        });//opencalais_tags_by_url
       }//handler
   }
 ];//module.exports
