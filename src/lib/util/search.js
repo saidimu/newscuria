@@ -431,6 +431,17 @@ function filter_bulk_index_errors(response) {
 }//filter_bulk_index_errors
 
 
+function opencalais_instances_by_url(url, callback) {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  var doc_type = 'opencalais';
+
+  var query = queries.opencalais_instances_by_url(url);
+
+  generate_api_response(url, query, doc_index, doc_type, callback);
+}//opencalais_instances_by_url
+
+
 function opencalais_search_by_url(url, callback)  {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
@@ -544,4 +555,6 @@ module.exports = {
   start: start,
   search: search,
   opencalais_search_by_url: opencalais_search_by_url,
+  opencalais_tags_by_url: opencalais_tags_by_url,
+  opencalais_instances_by_url: opencalais_instances_by_url,
 };//module.exports
