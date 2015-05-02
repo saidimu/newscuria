@@ -16,6 +16,64 @@
  */
 'use strict';
 
+function opencalais_instances_by_url(url) {
+  var query = {
+  	"from": 0,
+  	"size": 200,
+  	"query": {
+  		"filtered": {
+  			"filter": {
+  				"bool": {
+  					"must": {
+  						"bool": {
+  							"must": [
+  								{
+  									"query": {
+  										"match": {
+  											"parent_url": {
+  												"query": "http://news.xinhuanet.com/english/2015-04/25/c_134182792.htm",
+  												"type": "phrase"
+  											}
+  										}
+  									}
+  								},
+  								{
+  									"range": {
+  										"relevance": {
+  											"from": "0.3",
+  											"to": null,
+  											"include_lower": false,
+  											"include_upper": true
+  										}
+  									}
+  								}
+  							]
+  						}
+  					}
+  				}
+  			}
+  		}
+  	},
+  	"_source": {
+  		"includes": [
+  			"name",
+  			"relevance",
+  			"instances"
+  		],
+  		"excludes": []
+  	},
+  	"sort": [
+  		{
+  			"relevance": {
+  				"order": "desc"
+  			}
+  		}
+  	]
+  };
+
+  return query;
+}//opencalais_instances_by_url
+
 
 function opencalais_tags_by_url(url) {
   var query = {
@@ -147,4 +205,5 @@ function opencalais_search_by_url(url) {
 module.exports  = {
   opencalais_search_by_url: opencalais_search_by_url,
   opencalais_tags_by_url: opencalais_tags_by_url,
+  opencalais_instances_by_url: opencalais_instances_by_url,
 };//module.exports
