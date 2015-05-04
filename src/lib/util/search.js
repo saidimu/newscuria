@@ -462,7 +462,12 @@ function opencalais_tags_by_url(url, callback)  {
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
     if(api_response.statusCode === 200) {
-      var hits = api_response.results.hits;
+      var hits = api_response.results.hits.hits;
+
+      api_response.results.meta = {
+        total: api_response.results.hits.total,
+      };
+      
       api_response.results.hits = [];
 
       // only return the field 'name' as the results
@@ -474,8 +479,6 @@ function opencalais_tags_by_url(url, callback)  {
       // delete api_response.results.hits._id;
       // delete api_response.results.hits._score;
       // delete api_response.results.hits.sort;
-
-      api_response.results.meta.total = api_response.results.hits.length;
     }//if
 
     callback(api_response);
@@ -528,7 +531,9 @@ function generate_api_response(url, query, doc_index, doc_type, callback)  {
         response.statusCode = 200;
         response.error = undefined;
         response.message = "Ok";
-        response.results.hits = results.hits;  // successfull API response will be modified by parent
+
+        // successfull API response will be modified by parent
+        response.results.hits = results.hits;
 
       }//if-else
 
