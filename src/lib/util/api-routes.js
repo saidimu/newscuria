@@ -27,12 +27,6 @@ module.exports = [
       handler: function (request, reply) {
         var url = request.query.url || undefined;
 
-        console.log();
-        console.log(request.query);
-        console.log();
-        // console.log(request);
-        // console.log();
-
         opencalais_search_by_url(url, function(response) {
           reply(response);
         });//opencalais_search_by_url
@@ -44,20 +38,16 @@ module.exports = [
       handler: function (request, reply) {
         var url = request.payload.url || undefined;
 
-        // console.log(request.payload);
-
         opencalais_search_by_url(url, function(response) {
           reply(response);
         });//opencalais_search_by_url
       }//handler
   },
   {
-    method: ['POST'],
+    method: ['GET'],
       path: '/v1/url/tags/',
       handler: function (request, reply) {
-        var url = request.payload.url || undefined;
-
-        // console.log(request.payload);
+        var url = request.query.url || undefined;
 
         opencalais_tags_by_url(url, function(response) {
           reply(response);
@@ -66,11 +56,31 @@ module.exports = [
   },
   {
     method: ['POST'],
-      path: '/v1/url/instances/',
+      path: '/v1/url/tags/',
       handler: function (request, reply) {
         var url = request.payload.url || undefined;
 
-        // console.log(request.payload);
+        opencalais_tags_by_url(url, function(response) {
+          reply(response);
+        });//opencalais_tags_by_url
+      }//handler
+  },
+  {
+    method: ['GET'],
+      path: '/v1/url/instances/',
+      handler: function (request, reply) {
+        var url = request.query.url || undefined;
+
+        opencalais_instances_by_url(url, function(response) {
+          reply(response);
+        });//opencalais_instances_by_url
+      }//handler
+  },
+  {
+    method: ['POST'],
+      path: '/v1/url/instances/',
+      handler: function (request, reply) {
+        var url = request.payload.url || undefined;
 
         opencalais_instances_by_url(url, function(response) {
           reply(response);
