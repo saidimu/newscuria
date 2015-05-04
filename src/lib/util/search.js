@@ -467,18 +467,18 @@ function opencalais_tags_by_url(url, callback)  {
       api_response.results.meta = {
         total: api_response.results.hits.total,
       };
-      
+
       api_response.results.hits = [];
 
       // only return the field 'name' as the results
       hits.forEach(function(hit)  {
         api_response.results.hits.push(hit._source.name);
+        // delete hit._index;
+        // delete hit._type;
+        // delete hit._id;
+        // delete hit._score;
+        // delete hit.sort;
       });//hits.forEach
-      // delete api_response.results.hits._index;
-      // delete api_response.results.hits._type;
-      // delete api_response.results.hits._id;
-      // delete api_response.results.hits._score;
-      // delete api_response.results.hits.sort;
     }//if
 
     callback(api_response);
