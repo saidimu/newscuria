@@ -437,7 +437,32 @@ function opencalais_instances_by_url(url, callback) {
 
   var query = queries.opencalais_instances_by_url(url);
 
-  generate_api_response(url, query, doc_index, doc_type, callback);
+  generate_api_response(url, query, doc_index, doc_type, function(api_response) {
+    // only modify/trim API responses which returned results
+    if(api_response.statusCode === 200) {
+      var hits = api_response.results.hits.hits;
+
+      api_response.results.meta = {
+        total: api_response.results.hits.total,
+      };
+
+      api_response.results.hits = [];
+
+      // only return the _source field as the results
+      hits.forEach(function(hit)  {
+        api_response.results.hits.push(hit._source);
+        // delete hit._index;
+        // delete hit._type;
+        // delete hit._id;
+        // delete hit._score;
+        // delete hit.sort;
+      });//hits.forEach
+    }//if
+
+    callback(api_response);
+
+  });//generate_api_response
+
 }//opencalais_instances_by_url
 
 
