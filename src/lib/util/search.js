@@ -299,7 +299,6 @@ function bulk_index(doc_index, doc_type, body, message) {
           log.error({
             index: doc_index,
             doc_type: doc_type,
-            body: body,
             err: err || filter_bulk_index_errors(response),
             response: response,
           }, 'Elasticsearch bulk index error.');
@@ -460,7 +459,29 @@ function opencalais_tags_by_url(url, callback)  {
 
   var query = queries.opencalais_tags_by_url(url);
 
-  generate_api_response(url, query, doc_index, doc_type, callback);
+  generate_api_response(url, query, doc_index, doc_type, function(api_response) {
+    // only modify/trim API responses which returned results
+    if(api_response.statusCode === 200) {
+      var hits = api_response.results.hits;
+      api_response.results.hits = [];
+
+      // only return the field 'name' as the results
+      hits.forEach(function(hit)  {
+        api_response.results.hits.push(hit._source.name);
+      });//hits.forEach
+      // delete api_response.results.hits._index;
+      // delete api_response.results.hits._type;
+      // delete api_response.results.hits._id;
+      // delete api_response.results.hits._score;
+      // delete api_response.results.hits.sort;
+
+      api_response.results.meta.total = api_response.results.hits.length;
+    }//if
+
+    callback(api_response);
+
+  });//generate_api_response
+
 }//opencalais_tags_by_url
 
 
@@ -470,7 +491,10 @@ function generate_api_response(url, query, doc_index, doc_type, callback)  {
     statusCode: undefined,
     message: undefined,
     error: undefined,
-    results: [],
+    results: {
+      hits: [],
+      meta: {},
+    },
   };//response
 
   // FIXME: validate url. On failure, return appropriate error message
@@ -478,7 +502,7 @@ function generate_api_response(url, query, doc_index, doc_type, callback)  {
     response.statusCode = 400;  // http://httpstatus.es/400
     response.message = "The request cannot be fulfilled due to bad syntax.";
     response.error = "'url' parameter is required.";
-    response.results = [];
+    response.results.hits = [];
 
     return response;
   }//if
@@ -488,7 +512,7 @@ function generate_api_response(url, query, doc_index, doc_type, callback)  {
       response.statusCode = 500;
       response.error = "Internal Server Error";
       response.message = "A server error encountered!";
-      response.results = [];
+      response.results.hits = [];
 
       callback(response);
 
@@ -498,13 +522,13 @@ function generate_api_response(url, query, doc_index, doc_type, callback)  {
         response.statusCode = 404;
         response.message = "URL could not be found.";
         response.error = response.message;
-        response.results = [];
+        response.results.hits = [];
 
       } else {
         response.statusCode = 200;
         response.error = undefined;
         response.message = "Ok";
-        response.results = results.hits;
+        response.results.hits = results.hits;  // successfull API response will be modified by parent
 
       }//if-else
 
