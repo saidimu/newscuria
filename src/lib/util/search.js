@@ -299,7 +299,6 @@ function bulk_index(doc_index, doc_type, body, message) {
           log.error({
             index: doc_index,
             doc_type: doc_type,
-            body: body,
             err: err || filter_bulk_index_errors(response),
             response: response,
           }, 'Elasticsearch bulk index error.');
