@@ -25,13 +25,13 @@ module.exports = [
     method: ['GET'],
       path: '/v1/url/',
       handler: function (request, reply) {
-        var url = request.params.url || undefined;
+        var url = request.query.url || undefined;
 
         console.log();
-        console.log(request.params);
+        console.log(request.query);
         console.log();
-        console.log(request);
-        console.log();
+        // console.log(request);
+        // console.log();
 
         opencalais_search_by_url(url, function(response) {
           reply(response);
