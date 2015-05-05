@@ -28,7 +28,7 @@ server.connection({
   port: 3000
 });//server.connection
 
-var io = require('socket.io')(server.listener(handlers.http_handler));
+var io = require('socket.io')(server.listener, { path: handlers.http_handler });
 
 // websockets 'routes'
 io.on('connection', function (socket) {
