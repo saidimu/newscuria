@@ -28,11 +28,13 @@ server.connection({
   port: 3000
 });//server.connection
 
-var io = require('socket.io')(server.listener, { path: handlers.http_handler });
+var io = require('socket.io')(server.listener);
 
 // websockets 'routes'
 io.on('connection', function (socket) {
-  socket.emit('Oh hii!');
+  socket.emit('status', {
+    message: 'Oh hii!'
+  });
 
   socket.on('/url/', handlers.search_by_url);
   socket.on('/url/tags', handlers.tags_by_url);

@@ -32,26 +32,21 @@ function search_by_url(message)  {
 
 
 function tags_by_url(message) {
-    return {};
+  var url = message.url || undefined;
+
+  opencalais_tags_by_url(url, function(response) {
+    this.emit(response);
+  });//opencalais_tags_by_url
 }//tags_by_url
 
 
 function instances_by_url(message) {
-    return {};
+  var url = message.url || undefined;
+
+  opencalais_instances_by_url(url, function(response) {
+    this.emit(response);
+  });//opencalais_instances_by_url
 }//instances_by_url
-
-
-function http_handler (req, res) {
-	fs.readFile(__dirname + '/util/client_sockets.html', function (err, data) {
-		if (err) {
-		  res.writeHead(500);
-		  return res.end('Error loading realtime.html');
-		}//if
-
-		res.writeHead(200);
-		res.end(data);
-	});
-}//http_handler
 
 
 module.exports = {
