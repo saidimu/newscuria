@@ -20,11 +20,27 @@ var appname = "api";
 var log = require('_/util/logging.js')(appname);
 
 var Hapi = require('hapi');
-var routes = require('_/util/api-routes.js');
+var routes = require('_/util/api-hapi-routes.js');
+var handlers = require('_/util/api-websockets-handlers.js');
 
 var server = new Hapi.Server();
-server.connection({ port: 3000 });
+server.connection({
+  port: 3000
+});//server.connection
 
+var io = require('socket.io')(server.listener);
+
+// websockets 'routes'
+io.on('connection', function (socket) {
+  socket.emit('Oh hii!');
+
+  socket.on('/url/', handlers.search_by_url);
+  socket.on('/url/tags', handlers.tags_by_url);
+  socket.on('/url/instances', handlers.instances_by_url);
+
+});//io.on
+
+// set up API routes
 server.route(routes);
 
 server.start(function () {
