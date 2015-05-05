@@ -16,6 +16,8 @@
  */
 'use strict';
 
+var fs = require('fs');
+
 var opencalais_search_by_url    = require('_/util/search.js').opencalais_search_by_url;
 var opencalais_tags_by_url      = require('_/util/search.js').opencalais_tags_by_url;
 var opencalais_instances_by_url = require('_/util/search.js').opencalais_instances_by_url;
@@ -37,6 +39,19 @@ function tags_by_url(message) {
 function instances_by_url(message) {
     return {};
 }//instances_by_url
+
+
+function http_handler (req, res) {
+	fs.readFile(__dirname + '/util/client_sockets.html', function (err, data) {
+		if (err) {
+		  res.writeHead(500);
+		  return res.end('Error loading realtime.html');
+		}//if
+
+		res.writeHead(200);
+		res.end(data);
+	});
+}//http_handler
 
 
 module.exports = {
