@@ -33,6 +33,8 @@ var routes = {
 function search_by_url(socket, message, route)  {
   var url = message.url || undefined;
 
+  console.log(message);
+
   opencalais_search_by_url(url, function(response) {
     socket.emit(route, response);
   });//opencalais_search_by_url
@@ -42,6 +44,8 @@ function search_by_url(socket, message, route)  {
 function tags_by_url(socket, message, route) {
   var url = message.url || undefined;
 
+  console.log(message);
+
   opencalais_tags_by_url(url, function(response) {
     socket.emit(route, response);
   });//opencalais_tags_by_url
@@ -50,6 +54,8 @@ function tags_by_url(socket, message, route) {
 
 function instances_by_url(socket, message, route) {
   var url = message.url || undefined;
+
+  console.log(message);
 
   opencalais_instances_by_url(url, function(response, socket_path) {
     socket.emit(route, response);
