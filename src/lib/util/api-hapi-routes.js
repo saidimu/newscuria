@@ -16,6 +16,8 @@
  */
 'use strict';
 
+var path = require('path');
+
 var opencalais_search_by_url    = require('_/util/search.js').opencalais_search_by_url;
 var opencalais_tags_by_url      = require('_/util/search.js').opencalais_tags_by_url;
 var opencalais_instances_by_url = require('_/util/search.js').opencalais_instances_by_url;
@@ -23,9 +25,11 @@ var opencalais_instances_by_url = require('_/util/search.js').opencalais_instanc
 module.exports = [
   {
     method: ['GET'],
-    path: '/realtime',  // default websockets html serving
+    path: '/realtime/',  // default websockets html serving
     handler: function (request, reply) {
-      reply.file('./websockets.html');
+      console.log("HTTP request for websockets html file.");
+
+      reply.file(path.resolve('./util/websockets.html'));
     }//handler
   },
 
