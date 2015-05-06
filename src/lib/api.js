@@ -43,13 +43,21 @@ io.on('connection', function (socket) {
     handshake: socket.handshake,
   }, "Client connected to SocketIO server.");
 
-  socket.emit('status', {
+  socket.emit(handlers.routes.STATUS, {
     message: 'Oh hii!'
-  });
+  });//socket.emit
 
-  socket.on('/url/', handlers.search_by_url);
-  // socket.on('/url/tags', handlers.tags_by_url);
-  // socket.on('/url/instances', handlers.instances_by_url);
+  socket.on(handlers.routes.URL, function(data) {
+    handlers.search_by_url(socket, data, handlers.routes.URL);
+  });//socket.on
+
+  socket.on(handlers.routes.TAGS, function(data) {
+    handlers.tags_by_url(socket, data, handlers.routes.TAGS);
+  });//socket.on
+
+  socket.on(handlers.routes.INSTANCES, function(data) {
+    handlers.instances_by_url(socket, data, handlers.routes.INSTANCES);
+  });//socket.on
 
 });//io.on
 
