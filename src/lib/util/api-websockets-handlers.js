@@ -16,19 +16,17 @@
  */
 'use strict';
 
-var fs = require('fs');
-
 var opencalais_search_by_url    = require('_/util/search.js').opencalais_search_by_url;
 var opencalais_tags_by_url      = require('_/util/search.js').opencalais_tags_by_url;
 var opencalais_instances_by_url = require('_/util/search.js').opencalais_instances_by_url;
 
-function search_by_url(message)  {
+exports.search_by_url = function (message)  {
   var url = message.url || undefined;
 
   opencalais_search_by_url(url, function(response) {
     this.emit(response);
   });//opencalais_search_by_url
-}//search_by_url
+};//search_by_url
 
 
 function tags_by_url(message) {
@@ -49,8 +47,8 @@ function instances_by_url(message) {
 }//instances_by_url
 
 
-module.exports = {
-  search_by_url: search_by_url,
-  tags_by_url: tags_by_url,
-  instances_by_url: instances_by_url,
-};//module.exports
+// module.exports = {
+//   search_by_url: search_by_url,
+//   tags_by_url: tags_by_url,
+//   instances_by_url: instances_by_url,
+// };//module.exports
