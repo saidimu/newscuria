@@ -29,9 +29,10 @@ module.exports = [
     method: ['GET'],
     path: '/realtime/',  // default websockets html serving
     handler: function (request, reply) {
-      console.log("HTTP request for websockets html file.");
+      var websockets_html_path = path.resolve('./util/websockets.html');
+      console.log("HTTP request for websockets html file: '%s'", websockets_html_path);
 
-      reply.file(path.resolve('./util/websockets.html'));
+      reply.file(websockets_html_path);
     }//handler
   },
 

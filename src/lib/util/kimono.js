@@ -19,14 +19,7 @@
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
-//==BEGIN here
-// connect to the message queue
-queue.connect(function() {
-  module.exports = {
-    googlenews_handler: googlenews_handler,
-  };//module.exports
-});//queue.connect
-//==BEGIN here
+queue.connect(function() {});
 
 
 function googlenews_handler(webhook, callback)  {
@@ -85,3 +78,8 @@ function publish_url_message(url) {
     url: url
   });
 }//publish_url_message
+
+
+module.exports = {
+  googlenews_handler: googlenews_handler,
+};//module.exports
