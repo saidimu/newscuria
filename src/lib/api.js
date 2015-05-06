@@ -32,9 +32,11 @@ var io = require('socket.io')(server.listener);
 
 // websockets 'routes'
 io.on('connection', function (socket) {
-  socket.emit('status', {
-    message: 'Oh hii!'
-  });
+  log.info({
+    socketio_client: socket,
+  }, "Client connected to SocketIO server.");
+
+  socket.emit('Oh hii!');
 
   socket.on('/url/', handlers.search_by_url);
   socket.on('/url/tags', handlers.tags_by_url);
