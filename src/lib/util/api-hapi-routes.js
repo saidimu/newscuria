@@ -22,6 +22,8 @@ var opencalais_search_by_url    = require('_/util/search.js').opencalais_search_
 var opencalais_tags_by_url      = require('_/util/search.js').opencalais_tags_by_url;
 var opencalais_instances_by_url = require('_/util/search.js').opencalais_instances_by_url;
 
+var kimono_googlenews_handler = require('_/util/kimono.js').googlenews_handler;
+
 module.exports = [
   {
     method: ['GET'],
@@ -76,7 +78,8 @@ module.exports = [
       var url = request.payload.url || undefined;
 
       opencalais_tags_by_url(url, function(response) {
-        reply(response);
+        // reply(response);
+        reply("Ok");
       });//opencalais_tags_by_url
     }//handler
   },
@@ -100,6 +103,18 @@ module.exports = [
       var url = request.payload.url || undefined;
 
       opencalais_instances_by_url(url, function(response) {
+        reply(response);
+      });//opencalais_instances_by_url
+    }//handler
+  },
+
+  {
+    method: ['POST'],
+    path: '/googlenews',
+    handler: function (request, reply) {
+      var webhook = request.payload || undefined;
+
+      kimono_googlenews_handler(webhook, function(response) {
         reply(response);
       });//opencalais_instances_by_url
     }//handler
