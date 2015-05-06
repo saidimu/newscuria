@@ -10,10 +10,17 @@
 	<script type="javascript">
 		var socket = io('http://api-rien1ceeheinah2o.nuzli.com/');
 
-		socket.on('status', console.log);
-		socket.on('url', console.log);
-		socket.on('tags', console.log);
-		socket.on('instances', console.log);
+		var routes = {
+		  URL: '/url/',
+		  TAGS: '/url/tags/',
+		  INSTANCES: '/url/instances/',
+			STATUS: '/status/',
+		};//routes
+
+		socket.on(routes.STATUS, console.log);
+		socket.on(routes.URL, console.log);
+		socket.on(routes.TAGS, console.log);
+		socket.on(routes.INSTANCES, console.log);
 	</script>
 
 </body>
