@@ -10,6 +10,7 @@
 	<script type="javascript">
 		var socket = io('http://api-rien1ceeheinah2o.nuzli.com/');
 
+		// API paths
 		var routes = {
 		  URL: '/url/',
 		  TAGS: '/url/tags/',
@@ -17,10 +18,38 @@
 			STATUS: '/status/',
 		};//routes
 
-		socket.on(routes.STATUS, console.log);
-		socket.on(routes.URL, console.log);
-		socket.on(routes.TAGS, console.log);
-		socket.on(routes.INSTANCES, console.log);
+		// setup API response handlers
+		socket.on(routes.STATUS, function(data)	{
+			var status = data;
+			console.log(status);
+		});//socket.on
+
+		socket.on(routes.URL, , function(data)	{
+			var url_all = data;
+			console.log(url_all);
+		});//socket.on
+
+		socket.on(routes.TAGS, , function(data)	{
+			var url_tags = data;
+			console.log(url_tags);
+		});//socket.on
+
+		socket.on(routes.INSTANCES, , function(data)	{
+			var url_instances = data;
+			console.log(url_instances);
+		});//socket.on
+
+
+		// setup API request message
+		var message = {
+			url: "http://news.xinhuanet.com/english/2015-04/25/c_134182792.htm",
+		};//message
+
+		// submit API requests
+		socket.emit(routes.URL, message);
+		socket.emit(routes.TAGS, message);
+		socket.emit(routes.INSTANCES, message);
+
 	</script>
 
 </body>
