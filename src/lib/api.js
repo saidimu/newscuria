@@ -36,7 +36,9 @@ io.on('connection', function (socket) {
     socketio_client: socket,
   }, "Client connected to SocketIO server.");
 
-  socket.emit('Oh hii!');
+  socket.emit('status', {
+    message: 'Oh hii!'
+  });
 
   socket.on('/url/', handlers.search_by_url);
   socket.on('/url/tags', handlers.tags_by_url);
