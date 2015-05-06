@@ -30,6 +30,7 @@ module.exports = [
     path: '/realtime/',  // default websockets html serving
     handler: function (request, reply) {
       var websockets_html_path = path.resolve('./lib/util/websockets.html');
+
       console.log("HTTP request for websockets html file: '%s'", websockets_html_path);
 
       reply.file(websockets_html_path);
@@ -79,8 +80,7 @@ module.exports = [
       var url = request.payload.url || undefined;
 
       opencalais_tags_by_url(url, function(response) {
-        // reply(response);
-        reply("Ok");
+        reply(response);
       });//opencalais_tags_by_url
     }//handler
   },
@@ -116,8 +116,11 @@ module.exports = [
       var webhook = request.payload || undefined;
 
       kimono_googlenews_handler(webhook, function(response) {
-        reply(response);
-      });//opencalais_instances_by_url
+        // http://hapijs.com/tutorials/logging
+        request.log(['info', 'kimono', 'webhook'], response);
+
+        reply("Ok");
+      });//kimono_googlenews_handler
     }//handler
   },
 
