@@ -3,9 +3,6 @@
     "enabled": true,
     "index": "analyzed"
   },
-  "_type": {
-    "index": "no"
-  },
   "_all": {
     "enabled": false
   },

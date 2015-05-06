@@ -3,9 +3,6 @@
     "enabled" : true,
     "index": "analyzed"
   },
-  "_type" : {
-    "index" : "no"
-  },
   "_all" : {
     "enabled" : false
   },
@@ -487,10 +484,6 @@
     },
     "ticker": {
       "type": "string"
-    },
-    "url": {
-      "type": "string",
-      "index": "not_analyzed"
     },
     "verb": {
       "type": "string"
