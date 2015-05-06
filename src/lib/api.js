@@ -23,7 +23,13 @@ var Hapi = require('hapi');
 var routes = require('_/util/api-hapi-routes.js');
 var handlers = require('_/util/api-websockets-handlers.js');
 
-var server = new Hapi.Server();
+// http://hapijs.com/api#server
+var server = new Hapi.Server({
+  debug: {
+    request: ['info']
+  },
+});
+
 server.connection({
   port: 3000
 });//server.connection
