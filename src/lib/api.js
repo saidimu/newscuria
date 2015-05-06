@@ -48,8 +48,8 @@ io.on('connection', function (socket) {
   });
 
   socket.on('/url/', handlers.search_by_url);
-  socket.on('/url/tags', handlers.tags_by_url);
-  socket.on('/url/instances', handlers.instances_by_url);
+  // socket.on('/url/tags', handlers.tags_by_url);
+  // socket.on('/url/instances', handlers.instances_by_url);
 
 });//io.on
 
