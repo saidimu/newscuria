@@ -33,7 +33,8 @@ var io = require('socket.io')(server.listener);
 // websockets 'routes'
 io.on('connection', function (socket) {
   log.info({
-    socketio_client: socket,
+    client_id: socket.id,
+    handshake: socket.handshake,
   }, "Client connected to SocketIO server.");
 
   socket.emit('status', {
