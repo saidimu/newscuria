@@ -10,10 +10,10 @@
 	<script type="javascript">
 		var socket = io('http://api-rien1ceeheinah2o.nuzli.com/');
 
-		socket.on('status', function (data) {
-			console.log(data);
-			socket.emit('url', { url: 'http://some.url.com/' });
-		});
+		socket.on('status', console.log);
+		socket.on('url', console.log);
+		socket.on('tags', console.log);
+		socket.on('instances', console.log);
 	</script>
 
 </body>
