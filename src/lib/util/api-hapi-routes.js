@@ -16,112 +16,28 @@
  */
 'use strict';
 
-var path = require('path');
+var API_VERSION_PATH = "/v1";
 
-var opencalais_search_by_url    = require('_/util/search.js').opencalais_search_by_url;
-var opencalais_tags_by_url      = require('_/util/search.js').opencalais_tags_by_url;
-var opencalais_instances_by_url = require('_/util/search.js').opencalais_instances_by_url;
+var opencalais = require('_/util/api-opencalais-routes.js');
+var kimono = require('_/util/api-kimono-routes.js');
+var websockets = require('_/util/api-websockets-handlers.js');
 
-var kimono_googlenews_handler = require('_/util/kimono.js').googlenews_handler;
+var opencalais_root_path = API_VERSION_PATH + "/url";
+var kimono_root_path = "";
+var websockets_root_path = API_VERSION_PATH + "/realtime";
 
 module.exports = [
-  {
-    method: ['GET'],
-    path: '/realtime/',  // default websockets html serving
-    handler: function (request, reply) {
-      var websockets_html_path = path.resolve('./lib/util/websockets.html');
+  websockets.serve_websockets_html(websockets_root_path),
 
-      console.log("HTTP request for websockets html file: '%s'", websockets_html_path);
+  opencalais.get_url_summary(opencalais_root_path),
+  opencalais.get_url_tags(opencalais_root_path),
+  opencalais.get_url_instances(opencalais_root_path),
+  opencalais.get_url_people(opencalais_root_path),
+  opencalais.get_url_places(opencalais_root_path),
+  opencalais.get_url_things(opencalais_root_path),
+  opencalais.get_url_relations(opencalais_root_path),
+  opencalais.get_url_companies(opencalais_root_path),
+  opencalais.get_url_events(opencalais_root_path),
 
-      reply.file(websockets_html_path);
-    }//handler
-  },
-
-  {
-    method: ['GET'],
-    path: '/v1/url/',
-    handler: function (request, reply) {
-      var url = request.query.url || undefined;
-
-      opencalais_search_by_url(url, function(response) {
-        reply(response);
-      });//opencalais_search_by_url
-    }//handler
-  },
-
-  {
-    method: ['POST'],
-    path: '/v1/url/',
-    handler: function (request, reply) {
-      var url = request.payload.url || undefined;
-
-      opencalais_search_by_url(url, function(response) {
-        reply(response);
-      });//opencalais_search_by_url
-    }//handler
-  },
-
-  {
-    method: ['GET'],
-    path: '/v1/url/tags/',
-    handler: function (request, reply) {
-      var url = request.query.url || undefined;
-
-      opencalais_tags_by_url(url, function(response) {
-        reply(response);
-      });//opencalais_tags_by_url
-    }//handler
-  },
-
-  {
-    method: ['POST'],
-    path: '/v1/url/tags/',
-    handler: function (request, reply) {
-      var url = request.payload.url || undefined;
-
-      opencalais_tags_by_url(url, function(response) {
-        reply(response);
-      });//opencalais_tags_by_url
-    }//handler
-  },
-
-  {
-    method: ['GET'],
-    path: '/v1/url/instances/',
-    handler: function (request, reply) {
-      var url = request.query.url || undefined;
-
-      opencalais_instances_by_url(url, function(response) {
-        reply(response);
-      });//opencalais_instances_by_url
-    }//handler
-  },
-
-  {
-    method: ['POST'],
-    path: '/v1/url/instances/',
-    handler: function (request, reply) {
-      var url = request.payload.url || undefined;
-
-      opencalais_instances_by_url(url, function(response) {
-        reply(response);
-      });//opencalais_instances_by_url
-    }//handler
-  },
-
-  {
-    method: ['POST'],
-    path: '/googlenews',
-    handler: function (request, reply) {
-      var webhook = request.payload || undefined;
-
-      kimono_googlenews_handler(webhook, function(response) {
-        // http://hapijs.com/tutorials/logging
-        request.log(['info', 'kimono', 'webhook'], response);
-
-        reply("Ok");
-      });//kimono_googlenews_handler
-    }//handler
-  },
-
+  kimono.google_news(kimono_root_path),
 ];//module.exports

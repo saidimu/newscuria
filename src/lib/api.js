@@ -48,15 +48,15 @@ io.on('connection', function (socket) {
   });//socket.emit
 
   socket.on(handlers.routes.URL, function(data) {
-    handlers.search_by_url(socket, data, handlers.routes.URL);
+    handlers.get_url_summary(socket, data, handlers.routes.URL);
   });//socket.on
 
   socket.on(handlers.routes.TAGS, function(data) {
-    handlers.tags_by_url(socket, data, handlers.routes.TAGS);
+    handlers.get_url_tags(socket, data, handlers.routes.TAGS);
   });//socket.on
 
   socket.on(handlers.routes.INSTANCES, function(data) {
-    handlers.instances_by_url(socket, data, handlers.routes.INSTANCES);
+    handlers.get_url_instances(socket, data, handlers.routes.INSTANCES);
   });//socket.on
 
 });//io.on

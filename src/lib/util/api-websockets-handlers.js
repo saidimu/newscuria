@@ -16,9 +16,13 @@
  */
 'use strict';
 
-var opencalais_search_by_url    = require('_/util/search.js').opencalais_search_by_url;
-var opencalais_tags_by_url      = require('_/util/search.js').opencalais_tags_by_url;
-var opencalais_instances_by_url = require('_/util/search.js').opencalais_instances_by_url;
+var path = require('path');
+
+var search = require('_/util/search.js');
+
+// var opencalais_get_url_summary    = require('_/util/search.js').opencalais_get_url_summary;
+// var opencalais_get_url_tags      = require('_/util/search.js').opencalais_get_url_tags;
+// var opencalais_get_url_instances = require('_/util/search.js').opencalais_get_url_instances;
 
 var routes = {
   URL: '/url/',
@@ -28,36 +32,60 @@ var routes = {
 };//routes
 
 
-function search_by_url(socket, message, route)  {
+function get_url_summary(socket, message, route)  {
   var url = message.url || undefined;
 
-  opencalais_search_by_url(url, function(response) {
+  search.opencalais_get_url_summary(url, function(response) {
     socket.emit(route, response);
-  });//opencalais_search_by_url
-}//search_by_url
+  });//opencalais_get_url_summary
+}//get_url_summary
 
 
-function tags_by_url(socket, message, route) {
+function get_url_tags(socket, message, route) {
   var url = message.url || undefined;
 
-  opencalais_tags_by_url(url, function(response) {
+  search.opencalais_get_url_tags(url, function(response) {
     socket.emit(route, response);
-  });//opencalais_tags_by_url
-}//tags_by_url
+  });//opencalais_get_url_tags
+}//get_url_tags
 
 
-function instances_by_url(socket, message, route) {
+function get_url_instances(socket, message, route) {
   var url = message.url || undefined;
 
-  opencalais_instances_by_url(url, function(response, socket_path) {
+  search.opencalais_get_url_instances(url, function(response, socket_path) {
     socket.emit(route, response);
-  });//opencalais_instances_by_url
-}//instances_by_url
+  });//opencalais_get_url_instances
+}//get_url_instances
+
+
+function serve_websockets_html(root_path) {
+  var route = {
+    method: ['GET'],
+    path: root_path + '/',  // default websockets html serving
+    handler: function (request, reply) {
+      var websockets_html_path = path.resolve('./lib/util/websockets.html');
+
+      console.log("HTTP request for websockets html file: '%s'", websockets_html_path);
+
+      reply.file(websockets_html_path);
+    }//handler
+  };//route
+
+  return route;
+}//serve_websockets_html
 
 
 module.exports = {
-  routes: routes,
-  search_by_url: search_by_url,
-  tags_by_url: tags_by_url,
-  instances_by_url: instances_by_url,
+  routes               : routes,
+  get_url_summary      : get_url_summary,
+  get_url_tags         : get_url_tags,
+  get_url_instances    : get_url_instances,
+  // get_url_people       : get_url_people,
+  // get_url_places       : get_url_places,
+  // get_url_things       : get_url_things,
+  // get_url_relations    : get_url_relations,
+  // get_url_companies    : get_url_companies,
+  // get_url_events       : get_url_events,
+  serve_websockets_html: serve_websockets_html,
 };//module.exports

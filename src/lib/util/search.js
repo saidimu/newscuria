@@ -433,13 +433,13 @@ function filter_bulk_index_errors(response) {
 }//filter_bulk_index_errors
 
 
-function opencalais_instances_by_url(url, callback) {
+function opencalais_get_url_instances(url, callback) {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
   // var doc_type = 'opencalais';
   var doc_type = index_config.get(doc_index).get('opencalais');
 
-  var query = queries.opencalais_instances_by_url(url);
+  var query = queries.opencalais_get_url_instances(url);
 
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
@@ -467,16 +467,16 @@ function opencalais_instances_by_url(url, callback) {
 
   });//generate_api_response
 
-}//opencalais_instances_by_url
+}//opencalais_get_url_instances
 
 
-function opencalais_search_by_url(url, callback)  {
+function opencalais_get_url_summary(url, callback)  {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
   // var doc_type = 'opencalais';
   var doc_type = index_config.get(doc_index).get('opencalais');
 
-  var query = queries.opencalais_search_by_url(url);
+  var query = queries.opencalais_get_url_summary(url);
 
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
@@ -504,16 +504,16 @@ function opencalais_search_by_url(url, callback)  {
 
   });//generate_api_response
 
-}//opencalais_search_by_url
+}//opencalais_get_url_summary
 
 
-function opencalais_tags_by_url(url, callback)  {
+function opencalais_get_url_tags(url, callback)  {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
   // var doc_type = 'opencalais';
   var doc_type = index_config.get(doc_index).get('opencalais');
 
-  var query = queries.opencalais_tags_by_url(url);
+  var query = queries.opencalais_get_url_tags(url);
 
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
@@ -541,7 +541,229 @@ function opencalais_tags_by_url(url, callback)  {
 
   });//generate_api_response
 
-}//opencalais_tags_by_url
+}//opencalais_get_url_tags
+
+
+function opencalais_get_url_people(url, callback)  {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
+
+  var query = queries.opencalais_get_url_tags(url);
+
+  generate_api_response(url, query, doc_index, doc_type, function(api_response) {
+    // only modify/trim API responses which returned results
+    if(api_response.statusCode === 200) {
+      var hits = api_response.results.hits.hits;
+
+      api_response.results.meta = {
+        total: api_response.results.hits.total,
+      };
+
+      api_response.results.hits = [];
+
+      // only return the field 'name' as the results
+      hits.forEach(function(hit)  {
+        api_response.results.hits.push(hit._source.name);
+        // delete hit._index;
+        // delete hit._type;
+        // delete hit._id;
+        // delete hit._score;
+        // delete hit.sort;
+      });//hits.forEach
+    }//if
+
+    callback(api_response);
+
+  });//generate_api_response
+
+}//opencalais_get_url_people
+
+
+function opencalais_get_url_places(url, callback)  {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
+
+  var query = queries.opencalais_get_url_tags(url);
+
+  generate_api_response(url, query, doc_index, doc_type, function(api_response) {
+    // only modify/trim API responses which returned results
+    if(api_response.statusCode === 200) {
+      var hits = api_response.results.hits.hits;
+
+      api_response.results.meta = {
+        total: api_response.results.hits.total,
+      };
+
+      api_response.results.hits = [];
+
+      // only return the field 'name' as the results
+      hits.forEach(function(hit)  {
+        api_response.results.hits.push(hit._source.name);
+        // delete hit._index;
+        // delete hit._type;
+        // delete hit._id;
+        // delete hit._score;
+        // delete hit.sort;
+      });//hits.forEach
+    }//if
+
+    callback(api_response);
+
+  });//generate_api_response
+
+}//opencalais_get_url_places
+
+
+function opencalais_get_url_things(url, callback)  {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
+
+  var query = queries.opencalais_get_url_tags(url);
+
+  generate_api_response(url, query, doc_index, doc_type, function(api_response) {
+    // only modify/trim API responses which returned results
+    if(api_response.statusCode === 200) {
+      var hits = api_response.results.hits.hits;
+
+      api_response.results.meta = {
+        total: api_response.results.hits.total,
+      };
+
+      api_response.results.hits = [];
+
+      // only return the field 'name' as the results
+      hits.forEach(function(hit)  {
+        api_response.results.hits.push(hit._source.name);
+        // delete hit._index;
+        // delete hit._type;
+        // delete hit._id;
+        // delete hit._score;
+        // delete hit.sort;
+      });//hits.forEach
+    }//if
+
+    callback(api_response);
+
+  });//generate_api_response
+
+}//opencalais_get_url_things
+
+
+function opencalais_get_url_relations(url, callback)  {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
+
+  var query = queries.opencalais_get_url_tags(url);
+
+  generate_api_response(url, query, doc_index, doc_type, function(api_response) {
+    // only modify/trim API responses which returned results
+    if(api_response.statusCode === 200) {
+      var hits = api_response.results.hits.hits;
+
+      api_response.results.meta = {
+        total: api_response.results.hits.total,
+      };
+
+      api_response.results.hits = [];
+
+      // only return the field 'name' as the results
+      hits.forEach(function(hit)  {
+        api_response.results.hits.push(hit._source.name);
+        // delete hit._index;
+        // delete hit._type;
+        // delete hit._id;
+        // delete hit._score;
+        // delete hit.sort;
+      });//hits.forEach
+    }//if
+
+    callback(api_response);
+
+  });//generate_api_response
+
+}//opencalais_get_url_relations
+
+
+function opencalais_get_url_companies(url, callback)  {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
+
+  var query = queries.opencalais_get_url_tags(url);
+
+  generate_api_response(url, query, doc_index, doc_type, function(api_response) {
+    // only modify/trim API responses which returned results
+    if(api_response.statusCode === 200) {
+      var hits = api_response.results.hits.hits;
+
+      api_response.results.meta = {
+        total: api_response.results.hits.total,
+      };
+
+      api_response.results.hits = [];
+
+      // only return the field 'name' as the results
+      hits.forEach(function(hit)  {
+        api_response.results.hits.push(hit._source.name);
+        // delete hit._index;
+        // delete hit._type;
+        // delete hit._id;
+        // delete hit._score;
+        // delete hit.sort;
+      });//hits.forEach
+    }//if
+
+    callback(api_response);
+
+  });//generate_api_response
+
+}//opencalais_get_url_companies
+
+
+function opencalais_get_url_events(url, callback)  {
+  // elasticsearch index and type settings
+  var doc_index = 'newscuria';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
+
+  var query = queries.opencalais_get_url_tags(url);
+
+  generate_api_response(url, query, doc_index, doc_type, function(api_response) {
+    // only modify/trim API responses which returned results
+    if(api_response.statusCode === 200) {
+      var hits = api_response.results.hits.hits;
+
+      api_response.results.meta = {
+        total: api_response.results.hits.total,
+      };
+
+      api_response.results.hits = [];
+
+      // only return the field 'name' as the results
+      hits.forEach(function(hit)  {
+        api_response.results.hits.push(hit._source.name);
+        // delete hit._index;
+        // delete hit._type;
+        // delete hit._id;
+        // delete hit._score;
+        // delete hit.sort;
+      });//hits.forEach
+    }//if
+
+    callback(api_response);
+
+  });//generate_api_response
+
+}//opencalais_get_url_events
 
 
 function generate_api_response(url, query, doc_index, doc_type, callback)  {
@@ -637,9 +859,15 @@ function search(doc_index, doc_type, query, callback)  {
 
 
 module.exports = {
-  start: start,
-  search: search,
-  opencalais_search_by_url: opencalais_search_by_url,
-  opencalais_tags_by_url: opencalais_tags_by_url,
-  opencalais_instances_by_url: opencalais_instances_by_url,
+  start                       : start,
+  search                      : search,
+  opencalais_get_url_summary  : opencalais_get_url_summary,
+  opencalais_get_url_tags     : opencalais_get_url_tags,
+  opencalais_get_url_instances: opencalais_get_url_instances,
+  opencalais_get_url_people   : opencalais_get_url_people,
+  opencalais_get_url_places   : opencalais_get_url_places,
+  opencalais_get_url_things   : opencalais_get_url_things,
+  opencalais_get_url_relations: opencalais_get_url_relations,
+  opencalais_get_url_companies: opencalais_get_url_companies,
+  opencalais_get_url_events   : opencalais_get_url_events,
 };//module.exports
