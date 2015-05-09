@@ -28,7 +28,7 @@ function google_news(root_path)  {
 
       kimono.googlenews_handler(webhook, function(response) {
         // http://hapijs.com/tutorials/logging
-        request.log(['kimono', 'webhook'], response);
+        request.log(['info', 'kimono', 'webhook'], response);
 
         reply("Ok");
       });//kimono_googlenews_handler
