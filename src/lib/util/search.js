@@ -25,7 +25,7 @@ var util = require('util');
 var search_api = require('_/util/search-api.js');
 var client = search_api.client;
 
-var config = require('config');
+var index_config = require('config').get('elasticsearch').get('app').get('index');
 
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
@@ -185,7 +185,8 @@ function process_opencalais_message(json, message) {
 function split_up_opencalais(url, opencalais, message)  {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
-  var doc_type = 'opencalais';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
 
   var children = [];
 
@@ -230,7 +231,9 @@ function index_readability(json, message) {
 
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
-  var doc_type = 'readability';
+  // var doc_type = 'readability';
+  var doc_type = index_config.get(doc_index).get('readability');
+
   var doc_id = hash(url);
 
   if(date_published === null) {
@@ -433,7 +436,8 @@ function filter_bulk_index_errors(response) {
 function opencalais_instances_by_url(url, callback) {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
-  var doc_type = 'opencalais';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
 
   var query = queries.opencalais_instances_by_url(url);
 
@@ -469,7 +473,8 @@ function opencalais_instances_by_url(url, callback) {
 function opencalais_search_by_url(url, callback)  {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
-  var doc_type = 'opencalais';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
 
   var query = queries.opencalais_search_by_url(url);
 
@@ -505,7 +510,8 @@ function opencalais_search_by_url(url, callback)  {
 function opencalais_tags_by_url(url, callback)  {
   // elasticsearch index and type settings
   var doc_index = 'newscuria';
-  var doc_type = 'opencalais';
+  // var doc_type = 'opencalais';
+  var doc_type = index_config.get(doc_index).get('opencalais');
 
   var query = queries.opencalais_tags_by_url(url);
 
