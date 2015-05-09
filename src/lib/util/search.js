@@ -550,7 +550,7 @@ function opencalais_get_url_people(url, callback)  {
   // var doc_type = 'opencalais';
   var doc_type = index_config.get(doc_index).get('opencalais');
 
-  var query = queries.opencalais_get_url_tags(url);
+  var query = queries.opencalais_get_url_people(url);
 
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
@@ -587,7 +587,7 @@ function opencalais_get_url_places(url, callback)  {
   // var doc_type = 'opencalais';
   var doc_type = index_config.get(doc_index).get('opencalais');
 
-  var query = queries.opencalais_get_url_tags(url);
+  var query = queries.opencalais_get_url_places(url);
 
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
@@ -624,7 +624,7 @@ function opencalais_get_url_things(url, callback)  {
   // var doc_type = 'opencalais';
   var doc_type = index_config.get(doc_index).get('opencalais');
 
-  var query = queries.opencalais_get_url_tags(url);
+  var query = queries.opencalais_get_url_things(url);
 
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
@@ -661,7 +661,7 @@ function opencalais_get_url_relations(url, callback)  {
   // var doc_type = 'opencalais';
   var doc_type = index_config.get(doc_index).get('opencalais');
 
-  var query = queries.opencalais_get_url_tags(url);
+  var query = queries.opencalais_get_url_relations(url);
 
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
@@ -698,7 +698,7 @@ function opencalais_get_url_companies(url, callback)  {
   // var doc_type = 'opencalais';
   var doc_type = index_config.get(doc_index).get('opencalais');
 
-  var query = queries.opencalais_get_url_tags(url);
+  var query = queries.opencalais_get_url_companies(url);
 
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
@@ -735,7 +735,7 @@ function opencalais_get_url_events(url, callback)  {
   // var doc_type = 'opencalais';
   var doc_type = index_config.get(doc_index).get('opencalais');
 
-  var query = queries.opencalais_get_url_tags(url);
+  var query = queries.opencalais_get_url_events(url);
 
   generate_api_response(url, query, doc_index, doc_type, function(api_response) {
     // only modify/trim API responses which returned results
