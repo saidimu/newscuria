@@ -16,7 +16,193 @@
  */
 'use strict';
 
-function opencalais_people_by_url(url)  {
+function opencalais_get_url_instances(url) {
+  var query = {
+  	"from": 0,
+  	"size": 200,
+  	"query": {
+  		"filtered": {
+  			"filter": {
+  				"bool": {
+  					"must": {
+  						"bool": {
+  							"must": [
+  								{
+  									"query": {
+  										"match": {
+  											"parent_url": {
+  												"query": url,
+  												"type": "phrase"
+  											}
+  										}
+  									}
+  								},
+  								{
+  									"range": {
+  										"relevance": {
+  											"from": "0.3",
+  											"to": null,
+  											"include_lower": false,
+  											"include_upper": true
+  										}
+  									}
+  								}
+  							]
+  						}
+  					}
+  				}
+  			}
+  		}
+  	},
+  	"_source": {
+  		"includes": [
+  			"name",
+  			"relevance",
+  			"instances"
+  		],
+  		"excludes": []
+  	},
+  	"sort": [
+  		{
+  			"relevance": {
+  				"order": "desc"
+  			}
+  		}
+  	]
+  };
+
+  return query;
+}//opencalais_get_url_instances
+
+
+function opencalais_get_url_tags(url) {
+  var query = {
+  	"from": 0,
+  	"size": 200,
+  	"query": {
+  		"filtered": {
+  			"filter": {
+  				"bool": {
+  					"must": {
+  						"bool": {
+  							"must": [
+  								{
+  									"query": {
+  										"match": {
+  											"parent_url": {
+  												"query": url,
+  												"type": "phrase"
+  											}
+  										}
+  									}
+  								},
+  								{
+  									"bool": {
+  										"should": [
+  											{
+  												"range": {
+  													"importance": {
+  														"from": 1,
+  														"to": null,
+  														"include_lower": false,
+  														"include_upper": true
+  													}
+  												}
+  											},
+  											{
+  												"range": {
+  													"relevance": {
+  														"from": "0.5",
+  														"to": null,
+  														"include_lower": true,
+  														"include_upper": true
+  													}
+  												}
+  											}
+  										]
+  									}
+  								}
+  							]
+  						}
+  					}
+  				}
+  			}
+  		}
+  	},
+  	"_source": {
+  		"includes": [
+  			"name",
+  			"commonname",
+  			"importance",
+  			"relevance"
+  		],
+  		"excludes": []
+  	},
+  	"sort": [
+  		{
+  			"importance": {
+  				"order": "desc"
+  			}
+  		},
+  		{
+  			"relevance": {
+  				"order": "desc"
+  			}
+  		}
+  	]
+  };
+
+  return query;
+}//opencalais_get_url_tags
+
+
+function opencalais_get_url_summary(url) {
+  var query = {
+  	"from": 0,
+  	"size": 200,
+  	"query": {
+  		"filtered": {
+  			"filter": {
+  				"bool": {
+  					"must": {
+  						"query": {
+  							"match": {
+  								"parent_url": {
+  									"query": url,
+  									"type": "phrase"
+  								}
+  							}
+  						}
+  					}
+  				}
+  			}
+  		}
+  	},
+  	"_source": {
+  		"includes": [
+  			"name",
+  			"relevance",
+  			"_type",
+  			"_typeGroup",
+  			"instances",
+  			"resolutions"
+  		],
+  		"excludes": []
+  	},
+  	"sort": [
+  		{
+  			"relevance": {
+  				"order": "desc"
+  			}
+  		}
+  	]
+  };//query
+
+  return query;
+}//opencalais_get_url_summary
+
+
+function opencalais_get_url_people(url)  {
   var query = {
   	"from": 0,
   	"size": 200,
@@ -188,196 +374,10 @@ function opencalais_people_by_url(url)  {
   };//query
 
   return query;
-}//opencalais_people_by_url
+}//opencalais_get_url_people
 
 
-function opencalais_instances_by_url(url) {
-  var query = {
-  	"from": 0,
-  	"size": 200,
-  	"query": {
-  		"filtered": {
-  			"filter": {
-  				"bool": {
-  					"must": {
-  						"bool": {
-  							"must": [
-  								{
-  									"query": {
-  										"match": {
-  											"parent_url": {
-  												"query": url,
-  												"type": "phrase"
-  											}
-  										}
-  									}
-  								},
-  								{
-  									"range": {
-  										"relevance": {
-  											"from": "0.3",
-  											"to": null,
-  											"include_lower": false,
-  											"include_upper": true
-  										}
-  									}
-  								}
-  							]
-  						}
-  					}
-  				}
-  			}
-  		}
-  	},
-  	"_source": {
-  		"includes": [
-  			"name",
-  			"relevance",
-  			"instances"
-  		],
-  		"excludes": []
-  	},
-  	"sort": [
-  		{
-  			"relevance": {
-  				"order": "desc"
-  			}
-  		}
-  	]
-  };
-
-  return query;
-}//opencalais_instances_by_url
-
-
-function opencalais_tags_by_url(url) {
-  var query = {
-  	"from": 0,
-  	"size": 200,
-  	"query": {
-  		"filtered": {
-  			"filter": {
-  				"bool": {
-  					"must": {
-  						"bool": {
-  							"must": [
-  								{
-  									"query": {
-  										"match": {
-  											"parent_url": {
-  												"query": url,
-  												"type": "phrase"
-  											}
-  										}
-  									}
-  								},
-  								{
-  									"bool": {
-  										"should": [
-  											{
-  												"range": {
-  													"importance": {
-  														"from": 1,
-  														"to": null,
-  														"include_lower": false,
-  														"include_upper": true
-  													}
-  												}
-  											},
-  											{
-  												"range": {
-  													"relevance": {
-  														"from": "0.5",
-  														"to": null,
-  														"include_lower": true,
-  														"include_upper": true
-  													}
-  												}
-  											}
-  										]
-  									}
-  								}
-  							]
-  						}
-  					}
-  				}
-  			}
-  		}
-  	},
-  	"_source": {
-  		"includes": [
-  			"name",
-  			"commonname",
-  			"importance",
-  			"relevance"
-  		],
-  		"excludes": []
-  	},
-  	"sort": [
-  		{
-  			"importance": {
-  				"order": "desc"
-  			}
-  		},
-  		{
-  			"relevance": {
-  				"order": "desc"
-  			}
-  		}
-  	]
-  };
-
-  return query;
-}//opencalais_tags_by_url
-
-
-function opencalais_search_by_url(url) {
-  var query = {
-  	"from": 0,
-  	"size": 200,
-  	"query": {
-  		"filtered": {
-  			"filter": {
-  				"bool": {
-  					"must": {
-  						"query": {
-  							"match": {
-  								"parent_url": {
-  									"query": url,
-  									"type": "phrase"
-  								}
-  							}
-  						}
-  					}
-  				}
-  			}
-  		}
-  	},
-  	"_source": {
-  		"includes": [
-  			"name",
-  			"relevance",
-  			"_type",
-  			"_typeGroup",
-  			"instances",
-  			"resolutions"
-  		],
-  		"excludes": []
-  	},
-  	"sort": [
-  		{
-  			"relevance": {
-  				"order": "desc"
-  			}
-  		}
-  	]
-  };//query
-
-  return query;
-}//opencalais_search_by_url
-
-
-function opencalais_places_by_url(url)  {
+function opencalais_get_url_places(url)  {
   var query = {
   	"from": 0,
   	"size": 200,
@@ -509,10 +509,10 @@ function opencalais_places_by_url(url)  {
   };//query
 
   return query;
-}//opencalais_places_by_url
+}//opencalais_get_url_places
 
 
-function opencalais_things_by_url(url)  {
+function opencalais_get_url_things(url)  {
   var query = {
     "from": 0,
     "size": 200,
@@ -784,10 +784,10 @@ function opencalais_things_by_url(url)  {
     };//query
 
   return query;
-}//opencalais_things_by_url
+}//opencalais_get_url_things
 
 
-function opencalais_relations_by_url(url) {
+function opencalais_get_url_relations(url) {
   var query = {
   	"from": 0,
   	"size": 200,
@@ -930,10 +930,10 @@ function opencalais_relations_by_url(url) {
   };//query
 
   return query;
-}//opencalais_relations_by_url
+}//opencalais_get_url_relations
 
 
-function opencalais_companies_by_url(url) {
+function opencalais_get_url_companies(url) {
   var query = {
   	"from": 0,
   	"size": 200,
@@ -1105,10 +1105,10 @@ function opencalais_companies_by_url(url) {
   };//query
 
   return query;
-}//opencalais_companies_by_url
+}//opencalais_get_url_companies
 
 
-function opencalais_events_by_url(url)  {
+function opencalais_get_url_events(url)  {
   var query = {
   	"from": 0,
   	"size": 200,
@@ -1800,17 +1800,17 @@ function opencalais_events_by_url(url)  {
   };//query
 
   return query;
-}//opencalais_events_by_url
+}//opencalais_get_url_events
 
 
 module.exports  = {
-  opencalais_search_by_url   : opencalais_search_by_url,
-  opencalais_tags_by_url     : opencalais_tags_by_url,
-  opencalais_instances_by_url: opencalais_instances_by_url,
-  opencalais_people_by_url   : opencalais_people_by_url,
-  opencalais_places_by_url   : opencalais_places_by_url,
-  opencalais_things_by_url   : opencalais_things_by_url,
-  opencalais_relations_by_url: opencalais_relations_by_url,
-  opencalais_companies_by_url: opencalais_companies_by_url,
-  opencalais_events_by_url   : opencalais_events_by_url,
+  opencalais_get_url_summary  : opencalais_get_url_summary,
+  opencalais_get_url_tags     : opencalais_get_url_tags,
+  opencalais_get_url_instances: opencalais_get_url_instances,
+  opencalais_get_url_people   : opencalais_get_url_people,
+  opencalais_get_url_places   : opencalais_get_url_places,
+  opencalais_get_url_things   : opencalais_get_url_things,
+  opencalais_get_url_relations: opencalais_get_url_relations,
+  opencalais_get_url_companies: opencalais_get_url_companies,
+  opencalais_get_url_events   : opencalais_get_url_events,
 };//module.exports
