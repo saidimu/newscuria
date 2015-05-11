@@ -20,10 +20,6 @@ var path = require('path');
 
 var search = require('_/util/search.js');
 
-// var opencalais_get_url_summary    = require('_/util/search.js').opencalais_get_url_summary;
-// var opencalais_get_url_tags      = require('_/util/search.js').opencalais_get_url_tags;
-// var opencalais_get_url_instances = require('_/util/search.js').opencalais_get_url_instances;
-
 var routes = {
   URL: '/url/',
   TAGS: '/url/tags/',
