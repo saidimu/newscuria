@@ -799,9 +799,10 @@ function generate_api_response(url, query, doc_index, doc_type, callback)  {
 
     } else {
 
+      // FIXME: How to differentiate a URL that exists but doesn't match query vs. a URL that doesn't exist?
       if (results.hits.total === 0)  {
         response.statusCode = 404;
-        response.message = "URL could not be found.";
+        response.message = "No URL found that matches the query submitted.";
         response.error = response.message;
         response.results.hits = [];
 
