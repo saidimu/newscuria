@@ -1,5 +1,4 @@
-## ShiptIt config file https://github.com/shipitjs/shipit
-shipitfile.js
+*.csv
 
 ## NewRelic.com config file
 newrelic.js
