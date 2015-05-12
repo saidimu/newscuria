@@ -23,6 +23,8 @@ var Hapi = require('hapi');
 var routes = require('_/util/api-hapi-routes.js');
 var handlers = require('_/util/api-websockets-handlers.js');
 
+var version_plugin = require('_/util/hapi-plugins/info');
+
 // http://hapijs.com/api#server
 var server = new Hapi.Server({
   debug: {
@@ -66,7 +68,7 @@ server.route(routes);
 
 // register plugins
 server.register({
-  register: require(''),
+  register: version_plugin,
 }, {
   routes: {
     prefix: '/plugins'
