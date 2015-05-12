@@ -64,6 +64,24 @@ io.on('connection', function (socket) {
 // set up API routes
 server.route(routes);
 
+// register plugins
+server.register({
+  register: require(''),
+}, {
+  routes: {
+    prefix: '/plugins'
+  }//routes
+}, function(err)  {
+
+  if(err) {
+    log.err({
+      err: err,
+    }, "Failed to load one or more HapiJS server plugins.");
+  }//if
+
+});//server.register
+
+
 server.start(function () {
     log.info({
       info: server.info.url,
