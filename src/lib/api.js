@@ -23,7 +23,8 @@ var Hapi = require('hapi');
 var routes = require('_/util/api-hapi-routes.js');
 var handlers = require('_/util/api-websockets-handlers.js');
 
-var version_plugin = require('_/util/hapi-plugins/info');
+var info_plugin = require('_/util/hapi-plugins/info');
+var kimono_plugin = require('_/util/hapi-plugins/kimono');
 
 // http://hapijs.com/api#server
 var server = new Hapi.Server({
@@ -66,24 +67,19 @@ io.on('connection', function (socket) {
 // set up API routes
 server.route(routes);
 
-// register plugins
-server.register({
-  register: version_plugin,
-}, {
-  routes: {
-    prefix: '/plugins'
-  }//routes
-}, function(err)  {
-
+var plugin_register_callback = function(err)  {
   if(err) {
     log.err({
       err: err,
-    }, "Failed to load one or more HapiJS server plugins.");
+    }, "Failed to load HapiJS server plugin.");
   }//if
+};//plugin_register_callback
 
-});//server.register
+// register plugins
+server.register({ register: info_plugin }, { routes: { prefix: '/info' }}, plugin_register_callback);
+server.register({ register: kimono_plugin }, { routes: { prefix: '/' }}, plugin_register_callback);
 
-
+// start the API server
 server.start(function () {
     log.info({
       info: server.info.url,

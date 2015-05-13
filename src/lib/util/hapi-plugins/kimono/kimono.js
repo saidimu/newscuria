@@ -16,10 +16,16 @@
  */
 'use strict';
 
-module.exports = function(request, reply) {
-  reply({
-    name: 'newscuria API',
-    version: '0.4'
-  });//reply
+var kimono = require('_/util/kimono.js');
 
+module.exports = function (request, reply) {
+  var webhook = request.payload || undefined;
+
+  kimono.googlenews_handler(webhook, function(response) {
+    // http://hapijs.com/tutorials/logging
+    request.log(['info', 'kimono', 'webhook'], response);
+
+    reply("Ok");
+  });//kimono_googlenews_handler
+  
 };//module.exports

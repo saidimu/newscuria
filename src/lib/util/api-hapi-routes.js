@@ -19,11 +19,11 @@
 var API_VERSION_PATH = "/v1";
 
 var opencalais = require('_/util/api-opencalais-routes.js');
-var kimono = require('_/util/api-kimono-routes.js');
+// var kimono = require('_/util/api-kimono-routes.js');
 var websockets = require('_/util/api-websockets-handlers.js');
 
 var opencalais_root_path = API_VERSION_PATH + "/url";
-var kimono_root_path = "";
+// var kimono_root_path = "";
 var websockets_root_path = API_VERSION_PATH + "/realtime";
 
 module.exports = [
@@ -39,5 +39,5 @@ module.exports = [
   opencalais.get_url_companies(opencalais_root_path),
   opencalais.get_url_events(opencalais_root_path),
 
-  kimono.google_news(kimono_root_path),
+  // kimono.google_news(kimono_root_path),
 ];//module.exports
