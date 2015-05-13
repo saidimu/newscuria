@@ -77,7 +77,7 @@ var plugin_register_callback = function(err)  {
 
 // register plugins
 server.register({ register: info_plugin }, { routes: { prefix: '/info' }}, plugin_register_callback);
-server.register({ register: kimono_plugin }, { routes: { prefix: '/' }}, plugin_register_callback);
+server.register({ register: kimono_plugin }, plugin_register_callback);
 
 // start the API server
 server.start(function () {
