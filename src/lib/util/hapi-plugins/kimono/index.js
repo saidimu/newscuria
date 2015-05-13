@@ -16,10 +16,19 @@
  */
 'use strict';
 
-module.exports = function(request, reply) {
-  reply({
-    name: 'newscuria API',
-    version: '0.4'
-  });//reply
+exports.register = function(server, options, next)  {
 
-};//module.exports
+  server.route({
+    method: 'POST',
+    path: '/googlenews',
+    handler: require('./kimono')
+  });//server.route
+
+  next();
+
+};//exports.register
+
+
+exports.register.attributes = {
+  pkg: require('./plugin.json')
+};//exports.register.attributes
