@@ -30,7 +30,8 @@
     "limitd": "^4.1.2",
     "measured": "^1.0.0",
     "oh-crap": "^1.0.1",
-    "hapi": "^8.4.0"
+    "hapi": "^8.4.0",
+    "hapi-io": "0.0.5"
   },
   "devDependencies": {},
   "scripts": {
