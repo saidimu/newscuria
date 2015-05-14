@@ -20,11 +20,16 @@ var appname = "api";
 var log = require('_/util/logging.js')(appname);
 
 var Hapi = require('hapi');
-var routes = require('_/util/api-hapi-routes.js');
-var handlers = require('_/util/api-websockets-handlers.js');
+var hapio = require('hapi-io');
+
+// var routes = require('_/util/api-hapi-routes.js');
+// var handlers = require('_/util/api-websockets-handlers.js');
 
 var info_plugin = require('_/util/hapi-plugins/info');
 var kimono_plugin = require('_/util/hapi-plugins/kimono');
+var opencalais_plugin = require('_/util/hapi-plugins/opencalais');
+
+var API_VERSION_PATH = "/v1";
 
 // http://hapijs.com/api#server
 var server = new Hapi.Server({
@@ -37,51 +42,62 @@ server.connection({
   port: 3000
 });//server.connection
 
-var io = require('socket.io')(server.listener);
-
-// websockets 'routes'
-io.on('connection', function (socket) {
-  log.info({
-    client_id: socket.id,
-    handshake: socket.handshake,
-  }, "Client connected to SocketIO server.");
-
-  socket.emit(handlers.routes.STATUS, {
-    message: 'Oh hii!'
-  });//socket.emit
-
-  socket.on(handlers.routes.URL, function(data) {
-    handlers.get_url_summary(socket, data, handlers.routes.URL);
-  });//socket.on
-
-  socket.on(handlers.routes.TAGS, function(data) {
-    handlers.get_url_tags(socket, data, handlers.routes.TAGS);
-  });//socket.on
-
-  socket.on(handlers.routes.INSTANCES, function(data) {
-    handlers.get_url_instances(socket, data, handlers.routes.INSTANCES);
-  });//socket.on
-
-});//io.on
+// var io = require('socket.io')(server.listener);
+//
+// // websockets 'routes'
+// io.on('connection', function (socket) {
+//   log.info({
+//     client_id: socket.id,
+//     handshake: socket.handshake,
+//   }, "Client connected to SocketIO server.");
+//
+//   socket.emit(handlers.routes.STATUS, {
+//     message: 'Oh hii!'
+//   });//socket.emit
+//
+//   socket.on(handlers.routes.URL, function(data) {
+//     handlers.get_url_summary(socket, data, handlers.routes.URL);
+//   });//socket.on
+//
+//   socket.on(handlers.routes.TAGS, function(data) {
+//     handlers.get_url_tags(socket, data, handlers.routes.TAGS);
+//   });//socket.on
+//
+//   socket.on(handlers.routes.INSTANCES, function(data) {
+//     handlers.get_url_instances(socket, data, handlers.routes.INSTANCES);
+//   });//socket.on
+//
+// });//io.on
 
 // set up API routes
-server.route(routes);
+// server.route(routes);
 
 var plugin_register_callback = function(err)  {
   if(err) {
     log.err({
       err: err,
     }, "Failed to load HapiJS server plugin.");
+
+    throw new Error(err);
   }//if
+
+  // start the API server if no error
+  server.start(function () {
+      log.info({
+        info: server.info.url,
+      }, "API server listening...");
+  });//server.start
+
 };//plugin_register_callback
 
-// register plugins
-server.register({ register: info_plugin }, { routes: { prefix: '/info' }}, plugin_register_callback);
+// a basic info/version plugin
+server.register({ register: info_plugin }, { routes: { prefix: API_VERSION_PATH + '/info' }}, plugin_register_callback);
+
+// a plugin for Kimonolabs.com webhooks
 server.register({ register: kimono_plugin }, plugin_register_callback);
 
-// start the API server
-server.start(function () {
-    log.info({
-      info: server.info.url,
-    }, "API server listening...");
-});
+// a SocketIO plugin
+server.register({ register: hapio }, plugin_register_callback);
+
+// all things Opencalais plugin
+server.register({ register: opencalais_plugin }, { routes: { prefix: API_VERSION_PATH + '/url' }}, plugin_register_callback);
