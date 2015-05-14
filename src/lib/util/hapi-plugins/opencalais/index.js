@@ -16,11 +16,11 @@
  */
 'use strict';
 
+var routes = require('./opencalais');
+
 exports.register = function(server, options, next)  {
 
-  server.route(
-    require('./opencalais')
-  );//server.route
+  server.route(routes);
 
   next();
 
