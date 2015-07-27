@@ -218,13 +218,13 @@ function get_url_events()  {
 
 // export an array of routes to be imported into a HapiJS server.route() call
 module.exports = [
-  get_url_summary,
-  get_url_tags,
-  get_url_instances,
-  get_url_people,
-  get_url_places,
-  get_url_things,
-  get_url_relations,
-  get_url_companies,
-  get_url_events,
+  get_url_summary(),
+  get_url_tags(),
+  get_url_instances(),
+  get_url_people(),
+  get_url_places(),
+  get_url_things(),
+  get_url_relations(),
+  get_url_companies(),
+  get_url_events(),
 ];//module.exports
