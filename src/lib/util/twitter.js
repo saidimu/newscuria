@@ -93,23 +93,23 @@ function user_streams() {
     stringify_friend_ids: STRING_IDS
   };//options
 
-  client.stream(ENDPOINT, options, function(stream)  {
-    stream.on('message', function(message) {
+  var stream = client.stream(ENDPOINT, options);
 
-      log.info(message);
+  stream.on('message', function(message) {
 
-    });//stream.on('data')
+    log.info(message);
 
-    stream.on('error', function(err) {
-      log.info({
-        err          : err,
-        log_type     : log.types.twitter.STREAM_ERROR,
-        endpoint     : ENDPOINT,
-        options: options,
-      }, 'Twitter User Streams error.');
+  });//stream.on('data')
 
-    });//stream.on('error')
-  });//client.stream
+  stream.on('error', function(err) {
+    log.info({
+      err          : err,
+      log_type     : log.types.twitter.STREAM_ERROR,
+      endpoint     : ENDPOINT,
+      options: options,
+    }, 'Twitter User Streams error.');
+
+  });//stream.on('error')
 
 }//user_streams()
 
@@ -145,35 +145,35 @@ function public_streams() {
     options: options,
   }, 'Twitter Public Streams is ENABLED.');
 
-  client.stream(ENDPOINT, options, function(stream)  {
-    stream.on('tweet', function(tweet) {
+  var stream = client.stream(ENDPOINT, options);
 
-      metrics.meter(metrics.types.twitter.TWEET_RECEIVED, {
-        filter_level      : FILTER_LEVEL,
-        language          : LANGUAGE,
-        track_terms       : TRACK_TERMS,
-      });
+  stream.on('tweet', function(tweet) {
 
-      process_tweet(tweet);
+    metrics.meter(metrics.types.twitter.TWEET_RECEIVED, {
+      filter_level      : FILTER_LEVEL,
+      language          : LANGUAGE,
+      track_terms       : TRACK_TERMS,
+    });
 
-    });//stream.on('data')
+    process_tweet(tweet);
 
-    stream.on('error', function(err) {
-      log.info({
-        err          : err,
-        log_type     : log.types.twitter.STREAM_ERROR,
-        endpoint     : ENDPOINT,
-        options: options,
-      }, 'Twitter Public Streams error.');
+  });//stream.on('data')
 
-      metrics.meter(metrics.types.twitter.STREAM_ERROR, {
-        filter_level      : FILTER_LEVEL,
-        language          : LANGUAGE,
-        track_terms       : TRACK_TERMS,
-      });
+  stream.on('error', function(err) {
+    log.info({
+      err          : err,
+      log_type     : log.types.twitter.STREAM_ERROR,
+      endpoint     : ENDPOINT,
+      options: options,
+    }, 'Twitter Public Streams error.');
 
-    });//stream.on('error')
-  });//client.stream
+    metrics.meter(metrics.types.twitter.STREAM_ERROR, {
+      filter_level      : FILTER_LEVEL,
+      language          : LANGUAGE,
+      track_terms       : TRACK_TERMS,
+    });
+
+  });//stream.on('error')
 
 }//public_streams()
 
