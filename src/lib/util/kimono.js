@@ -16,8 +16,13 @@
  */
 'use strict';
 
+var appname = "kimono";
+var log = require('_/util/logging.js')(appname);
+
 var queue = require('_/util/queue.js');
 var topics = queue.topics;
+
+var config = require('config').get('kimono');
 
 queue.connect(function() {});
 
@@ -36,7 +41,17 @@ function googlenews_handler(webhook, callback)  {
 
   callback(webhook_header);
 
-  process_googlenews_webhook(webhook);
+  // only process if config file allows
+  if(config.get('googlenews').get('enabled')) {
+    process_googlenews_webhook(webhook);
+
+  } else {
+
+    log.info({
+      log_type          : log.types.webhook.GOOGLE_NEWS,
+    }, 'Kimono GoogleNews processing is DISABLED.');
+
+  }//if-else
 
 }//googlenews_handler
 
