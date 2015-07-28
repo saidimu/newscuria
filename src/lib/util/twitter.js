@@ -23,17 +23,13 @@ var queue = require('_/util/queue.js');
 var topics = queue.topics;
 
 var config = require('config').get('twitter');
-var Twitter = require('twat');
+var Twitter = require('twit');
 var metrics = require('_/util/metrics.js');
 
 var CONSUMER_KEY        = config.get('consumer_key');
 var CONSUMER_SECRET     = config.get('consumer_secret');
 var ACCESS_TOKEN_KEY    = config.get('access_token_key');
 var ACCESS_TOKEN_SECRET = config.get('access_token_secret');
-var STREAMING_ENDPOINT  = config.get('streaming_endpoint');
-var FILTER_LEVEL        = config.get('filter_level');
-var LANGUAGE            = config.get('language');
-var TRACK_TERMS         = config.get('track');
 
 var client = new Twitter({
   consumer_key        : CONSUMER_KEY,
@@ -45,38 +41,111 @@ var client = new Twitter({
 
 function start()    {
   if(config.get('enabled')) { // only run if config file allows
-    log.info({
-      log_type          : log.types.twitter.STREAM_INFO,
-      streaming_endpoint: STREAMING_ENDPOINT,
-      filter_level      : FILTER_LEVEL,
-      language          : LANGUAGE,
-      track_terms       : TRACK_TERMS,
-    }, 'Twitter Streaming is ENABLED.');
 
-    stream();
+    user_streams();
+    public_streams();
 
   } else{
 
     log.info({
-      log_type          : log.types.twitter.STREAM_INFO,
-      streaming_endpoint: STREAMING_ENDPOINT,
-      filter_level      : FILTER_LEVEL,
-      language          : LANGUAGE,
-      track_terms       : TRACK_TERMS,
-    }, 'Twitter Streaming DISABLED.');
+      log_type : log.types.twitter.INFO,
+    }, 'Twitter is DISABLED.');
 
   }//if-else
 }//start()
 
 
-function stream() {
+function user_streams() {
+  var user_streams_config = config.get('user_streams');
+
+  // only run if config file allows
+  if(!user_streams_config.get('enabled')) {
+
+    log.info({
+      log_type : log.types.twitter.USER_STREAMS,
+    }, 'Twitter User Streams is DISABLED.');
+
+    return;
+  }//if-else
+
+  var ENDPOINT     = user_streams_config.get('endpoint');
+  var FILTER_LEVEL = user_streams_config.get('filter_level');
+  var LANGUAGE     = user_streams_config.get('language');
+  var WITH         = user_streams_config.get('with');
+  var REPLIES      = user_streams_config.get('replies');
+  var STRING_IDS   = user_streams_config.get('stringify_friend_ids');
+
+  log.info({
+    log_type            : log.types.twitter.USER_STREAMS,
+    endpoint            : ENDPOINT,
+    filter_level        : FILTER_LEVEL,
+    language            : LANGUAGE,
+    with                : WITH,
+    replies             : REPLIES,
+    stringify_friend_ids: STRING_IDS
+  }, 'Twitter User Streams is ENABLED.');
+
+  var options = {
+    filter_level        : FILTER_LEVEL,
+    language            : LANGUAGE,
+    with                : WITH,
+    replies             : REPLIES,
+    stringify_friend_ids: STRING_IDS
+  };//options
+
+  client.stream(ENDPOINT, options, function(stream)  {
+    stream.on('message', function(message) {
+
+      log.info(message);
+
+    });//stream.on('data')
+
+    stream.on('error', function(err) {
+      log.info({
+        err          : err,
+        log_type     : log.types.twitter.STREAM_ERROR,
+        endpoint     : ENDPOINT,
+        options: options,
+      }, 'Twitter User Streams error.');
+
+    });//stream.on('error')
+  });//client.stream
+
+}//user_streams()
+
+
+
+function public_streams() {
+  var public_streams_config = config.get('public_streams');
+
+  // only run if config file allows
+  if(!public_streams_config.get('enabled')) {
+
+    log.info({
+      log_type : log.types.twitter.PUBLIC_STREAMS,
+    }, 'Twitter Public Streams is DISABLED.');
+
+    return;
+  }//if-else
+
+  var ENDPOINT     = public_streams_config.get('endpoint');
+  var FILTER_LEVEL = public_streams_config.get('filter_level');
+  var LANGUAGE     = public_streams_config.get('language');
+  var TRACK_TERMS  = public_streams_config.get('track');
+
   var options = {
     track: TRACK_TERMS,
     language: LANGUAGE,
     filter_level: FILTER_LEVEL,
   };//options
 
-  client.stream(STREAMING_ENDPOINT, options, function(stream)  {
+  log.info({
+    log_type     : log.types.twitter.PUBLIC_STREAMS,
+    endpoint     : ENDPOINT,
+    options: options,
+  }, 'Twitter Public Streams is ENABLED.');
+
+  client.stream(ENDPOINT, options, function(stream)  {
     stream.on('tweet', function(tweet) {
 
       metrics.meter(metrics.types.twitter.TWEET_RECEIVED, {
@@ -91,13 +160,11 @@ function stream() {
 
     stream.on('error', function(err) {
       log.info({
-        err: err,
-        log_type: log.types.twitter.STREAM_ERROR,
-        streaming_endpoint: STREAMING_ENDPOINT,
-        filter_level      : FILTER_LEVEL,
-        language          : LANGUAGE,
-        track_terms       : TRACK_TERMS,
-      }, 'Twitter Streaming error.');
+        err          : err,
+        log_type     : log.types.twitter.STREAM_ERROR,
+        endpoint     : ENDPOINT,
+        options: options,
+      }, 'Twitter Public Streams error.');
 
       metrics.meter(metrics.types.twitter.STREAM_ERROR, {
         filter_level      : FILTER_LEVEL,
@@ -108,7 +175,7 @@ function stream() {
     });//stream.on('error')
   });//client.stream
 
-}//stream
+}//public_streams()
 
 
 function process_tweet(tweet) {
