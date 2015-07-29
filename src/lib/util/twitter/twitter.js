@@ -129,7 +129,7 @@ function process_tweet(tweet) {
           }, 'Error replying to tweet.');
 
         } else {
-          log.info({
+          log.debug({
             data: data,
             response: response,
           }, 'Data and response of tweet reply.');
