@@ -112,7 +112,16 @@ function process_tweet(tweet) {
         data: res,
       }, 'Data from url in tweet');
 
-      tweet_utils.reply_to_tweet(tweet, res.results.hits, twitter_client, function(err, data, response) {
+      var url_data = res.results.hits || '';
+      if(!url_data) {
+        log.error({
+          response: res,
+        }, 'Empty results in URL data fetch');
+
+        return;
+      }//if
+
+      tweet_utils.reply_to_tweet(tweet, url_data, twitter_client, function(err, data, response) {
         if(err) {
 
           log.error({
