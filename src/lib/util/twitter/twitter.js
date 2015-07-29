@@ -80,14 +80,9 @@ function start()    {
 
 
 function process_tweet(tweet) {
-  if(tweet && tweet.entities) {
-    log.info({
-      tweet_id: tweet.id_str || tweet.source.id_str || '',
-    }, 'Tweet.');
-
-  } else{
+  if(!(tweet) || !(tweet.entities)) {
     log.error({
-      tweet_id: tweet.id_str || tweet.source.id_str || '',
+      tweet: tweet,
     }, 'Error. Empty Tweet entities.');
 
     return;
