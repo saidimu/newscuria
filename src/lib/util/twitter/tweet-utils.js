@@ -90,6 +90,14 @@ function get_tweet_user(tweet)  {
 function get_url_tags(url, callback)  {
   var endpoint = "http://api-rien1ceeheinah2o.nuzli.com/v1/url/tags/";
 
+  if(!callback) {
+    return;
+  }//if
+
+  if(!url)  {
+    callback(new Error("Empty URL."), null, null);
+  }//if
+
   request
     .post(endpoint)
     .send({
