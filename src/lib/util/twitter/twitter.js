@@ -36,7 +36,7 @@ var CONSUMER_SECRET     = config.get('consumer_secret');
 var ACCESS_TOKEN_KEY    = config.get('access_token_key');
 var ACCESS_TOKEN_SECRET = config.get('access_token_secret');
 
-var client = new Twitter({
+var twitter_client = new Twitter({
   consumer_key        : CONSUMER_KEY,
   consumer_secret     : CONSUMER_SECRET,
   access_token        : ACCESS_TOKEN_KEY,
@@ -47,7 +47,7 @@ var client = new Twitter({
 function start()    {
   if(config.get('enabled')) { // only run if config file allows
 
-    user_streams.start(client, function(err, tweet) {
+    user_streams.start(twitter_client, function(err, tweet) {
       if(err) {
         log.error({
           err: err,
@@ -59,7 +59,7 @@ function start()    {
       }//if-else
     });//user_streams
 
-    // public_streams.start(client, function(err, tweet)  {
+    // public_streams.start(twitter_client, function(err, tweet)  {
     //   if(err) {
     //     log.error({
     //       err: err,
@@ -92,11 +92,11 @@ function process_tweet(tweet) {
 
   // URLS
   var url_options = ['expanded_url'];
-  var urls = tweet_utils.extract_urls(tweet, url_options);
+  var urls = tweet_utils.get_urls(tweet, url_options);
   var url = urls[0]['expanded_url'];
 
   // HASHTAGS
-  var hashtags = tweet_utils.extract_hashtags(tweet);
+  var hashtags = tweet_utils.get_hashtags(tweet);
 
   // fetch URL data and reply to tweet
   tweet_utils.get_url_tags(url, function(err, res)  {
@@ -110,8 +110,22 @@ function process_tweet(tweet) {
         url: url,
         data: res,
       }, 'Data from url in tweet');
-      
-      tweet_utils.reply_to_tweet(tweet, res);
+
+      tweet_utils.reply_to_tweet(tweet, res.results.hits, twitter_client, function(err, data, response) {
+        if(err) {
+
+          log.error({
+            err: err,
+          }, 'Error replying to tweet.');
+
+        } else {
+          log.info({
+            data: data,
+            response: response,
+          }, 'Data and response of tweet reply.');
+
+        }//if-else
+      });//tweet_utils.reply
 
     }//if-else
   });//get_url_tags

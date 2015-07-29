@@ -18,7 +18,7 @@
 
 var request = require('superagent');
 
-function extract_urls(tweet, options)  {
+function get_urls(tweet, options)  {
   var extracted_urls = [];
 
   if(!(tweet) || !(tweet.entities) || !(tweet.entities.urls)) {
@@ -47,10 +47,10 @@ function extract_urls(tweet, options)  {
   });//tweet.forEach
 
   return extracted_urls;
-}//extract_urls
+}//get_urls
 
 
-function extract_hashtags(tweet) {
+function get_hashtags(tweet) {
   var extracted_hashtags = [];
 
   if(!(tweet) || !(tweet.entities) || !(tweet.entities.hashtags)) {
@@ -66,7 +66,25 @@ function extract_hashtags(tweet) {
   });//tweet.forEach
 
   return extracted_hashtags;
-}//extract_hashtags
+}//get_hashtags
+
+
+function get_tweet_user(tweet)  {
+  var user = {
+    id: '',
+    username: ''
+  };
+
+  if(!(tweet) || !(tweet.user))  {
+    return user;
+  }//if
+
+
+  user.id_str = tweet.user.id_str;
+  user.screen_name = tweet.user.screen_name;
+
+  return user;
+}//get_tweet_user
 
 
 function get_url_tags(url, callback)  {
@@ -87,14 +105,26 @@ function get_url_tags(url, callback)  {
 }//get_url_tags
 
 
-function reply_to_tweet(tweet, response)  {
+function reply_to_tweet(tweet, url_data, twitter_client, callback)  {
+  var user = get_tweet_user(tweet);
+
+  var message = "@" + user.screen_name + ": #What" + url_data;
+
+  console.log(message);
+
+  twitter_client.post('statuses/update', {
+    status: message,
+    in_reply_to_id_str: user.id_str,
+  }, function(err, data, response) {
+    callback(err, data, response);
+  });//twitter_client.post
 
 }//reply_to_tweet
 
 
 module.exports = {
-  extract_urls: extract_urls,
-  extract_hashtags: extract_hashtags,
+  get_urls: get_urls,
+  get_hashtags: get_hashtags,
   get_url_tags: get_url_tags,
   reply_to_tweet: reply_to_tweet
 };
