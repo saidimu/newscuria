@@ -59,11 +59,11 @@ function start(client, callback) {
 
   var stream = client.stream(ENDPOINT, options);
 
-  stream.on('tweet', function(tweet) {
+  stream.on('message', function(message) {
 
     metrics.meter(metrics.types.twitter.TWEET_RECEIVED, options);
 
-    callback(null, tweet);
+    callback(null, message);
 
   });//stream.on('data')
 
