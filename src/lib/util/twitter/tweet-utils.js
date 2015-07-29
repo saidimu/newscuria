@@ -16,6 +16,7 @@
  */
 'use strict';
 
+var request = require('superagent');
 
 function extract_urls(tweet, options)  {
   var extracted_urls = [];
@@ -68,7 +69,32 @@ function extract_hashtags(tweet) {
 }//extract_hashtags
 
 
+function get_url_tags(url, callback)  {
+  var endpoint = "http://api-rien1ceeheinah2o.nuzli.com/v1/url/tags/";
+
+  request
+    .post(endpoint)
+    .send({
+      url: url
+    })
+    .end(function(err, res) {
+      if(err) {
+        callback(err, null);
+      } else {
+        callback(null, res.body);
+      }//if-else
+    });//request
+}//get_url_tags
+
+
+function reply_to_tweet(tweet, response)  {
+
+}//reply_to_tweet
+
+
 module.exports = {
   extract_urls: extract_urls,
   extract_hashtags: extract_hashtags,
+  get_url_tags: get_url_tags,
+  reply_to_tweet: reply_to_tweet
 };

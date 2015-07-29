@@ -93,9 +93,28 @@ function process_tweet(tweet) {
   // URLS
   var url_options = ['expanded_url'];
   var urls = tweet_utils.extract_urls(tweet, url_options);
+  var url = urls[0]['expanded_url'];
 
   // HASHTAGS
   var hashtags = tweet_utils.extract_hashtags(tweet);
+
+  // fetch URL data and reply to tweet
+  tweet_utils.get_url_tags(url, function(err, res)  {
+    if(err) {
+      log.error({
+        err: err,
+      }, 'Error fetching data on tweet url(s)');
+
+    } else {
+      log.info({
+        url: url,
+        data: res,
+      }, 'Data from url in tweet');
+      
+      tweet_utils.reply_to_tweet(tweet, res);
+
+    }//if-else
+  });//get_url_tags
 
 }//process_tweet()
 
