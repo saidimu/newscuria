@@ -46,19 +46,29 @@ function start()    {
   queue.connect(function()  {
     if(config.get('enabled')) { // only run if config file allows
 
-      user_streams.start(function(err, tweet) {
+      user_streams.start(client, function(err, tweet) {
         if(err) {
           log.error({
             err: err,
           }, 'Error getting tweet from User Stream');
-          
+
         } else {
           process_tweet(tweet);
 
         }//if-else
       });//user_streams
 
-      // public_streams.start();
+      // public_streams.start(client, function(err, tweet)  {
+      //   if(err) {
+      //     log.error({
+      //       err: err,
+      //     }, 'Error getting tweet from Public Stream');
+      //
+      //   } else {
+      //     process_tweet(tweet);
+      //
+      //   }//if-else
+      // });//public_streams
 
     } else{
 
