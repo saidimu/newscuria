@@ -19,8 +19,8 @@
 var appname = "twitter";
 var log = require('_/util/logging.js')(appname);
 
-var queue = require('_/util/queue.js');
-var topics = queue.topics;
+// var queue = require('_/util/queue.js');
+// var topics = queue.topics;
 
 var config = require('config').get('twitter');
 var Twitter = require('twit');
@@ -43,41 +43,39 @@ var client = new Twitter({
 
 
 function start()    {
-  queue.connect(function()  {
-    if(config.get('enabled')) { // only run if config file allows
+  if(config.get('enabled')) { // only run if config file allows
 
-      user_streams.start(client, function(err, tweet) {
-        if(err) {
-          log.error({
-            err: err,
-          }, 'Error getting tweet from User Stream');
+    user_streams.start(client, function(err, tweet) {
+      if(err) {
+        log.error({
+          err: err,
+        }, 'Error getting tweet from User Stream');
 
-        } else {
-          process_tweet(tweet);
+      } else {
+        process_tweet(tweet);
 
-        }//if-else
-      });//user_streams
+      }//if-else
+    });//user_streams
 
-      // public_streams.start(client, function(err, tweet)  {
-      //   if(err) {
-      //     log.error({
-      //       err: err,
-      //     }, 'Error getting tweet from Public Stream');
-      //
-      //   } else {
-      //     process_tweet(tweet);
-      //
-      //   }//if-else
-      // });//public_streams
+    // public_streams.start(client, function(err, tweet)  {
+    //   if(err) {
+    //     log.error({
+    //       err: err,
+    //     }, 'Error getting tweet from Public Stream');
+    //
+    //   } else {
+    //     process_tweet(tweet);
+    //
+    //   }//if-else
+    // });//public_streams
 
-    } else{
+  } else{
 
-      log.info({
-        log_type : log.types.twitter.INFO,
-      }, 'Twitter is DISABLED.');
+    log.info({
+      log_type : log.types.twitter.INFO,
+    }, 'Twitter is DISABLED.');
 
-    }//if-else
-  });//queue.connect
+  }//if-else
 }//start()
 
 
@@ -85,7 +83,7 @@ function process_tweet(tweet) {
   log.debug({
     tweet: tweet,
   }, 'Tweet.');
-  
+
   // URLS
   tweet.entities.urls.forEach(function(url_object)  {
     var url = url_object.expanded_url || "";
