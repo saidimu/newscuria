@@ -80,9 +80,18 @@ function start()    {
 
 
 function process_tweet(tweet) {
-  log.debug({
-    tweet: tweet,
-  }, 'Tweet.');
+  if(tweet && tweet.entities) {
+    log.info({
+      tweet: tweet,
+    }, 'Tweet.');
+
+  } else{
+    log.error({
+      tweet: tweet,
+    }, 'Error. Empty Tweet entities.');
+
+    return;
+  }//if-else
 
   // URLS
   tweet.entities.urls.forEach(function(url_object)  {
