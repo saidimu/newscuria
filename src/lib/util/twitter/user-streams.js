@@ -30,7 +30,7 @@ function start(client, callback) {
   if(!config.get('enabled')) {
 
     log.info({
-      // log_type : log.types.twitter.USER_STREAMS,
+      log_type : log.types.twitter.USER_STREAMS,
     }, 'Twitter User Streams is DISABLED.');
 
     return;

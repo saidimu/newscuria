@@ -81,118 +81,11 @@ function start()    {
 }//start()
 
 
-// function user_streams() {
-//   var user_streams_config = config.get('user_streams');
-//
-//   // only run if config file allows
-//   if(!user_streams_config.get('enabled')) {
-//
-//     log.info({
-//       log_type : log.types.twitter.USER_STREAMS,
-//     }, 'Twitter User Streams is DISABLED.');
-//
-//     return;
-//   }//if-else
-//
-//   var ENDPOINT     = user_streams_config.get('endpoint');
-//   var FILTER_LEVEL = user_streams_config.get('filter_level');
-//   var LANGUAGE     = user_streams_config.get('language');
-//   var WITH         = user_streams_config.get('with');
-//   var REPLIES      = user_streams_config.get('replies');
-//   var STRING_IDS   = user_streams_config.get('stringify_friend_ids');
-//
-//   var options = {
-//     filter_level        : FILTER_LEVEL,
-//     language            : LANGUAGE,
-//     with                : WITH,
-//     replies             : REPLIES,
-//     stringify_friend_ids: STRING_IDS
-//   };//options
-//
-//   log.info({
-//     log_type : log.types.twitter.USER_STREAMS,
-//     endpoint : ENDPOINT,
-//     options  : options,
-//   }, 'Twitter User Streams is ENABLED.');
-//
-//   var stream = client.stream(ENDPOINT, options);
-//
-//   stream.on('message', function(message) {
-//
-//     log.info(message);
-//
-//   });//stream.on('data')
-//
-//   stream.on('error', function(err) {
-//     log.info({
-//       err          : err,
-//       log_type     : log.types.twitter.STREAM_ERROR,
-//       endpoint     : ENDPOINT,
-//       options: options,
-//     }, 'Twitter User Streams error.');
-//
-//   });//stream.on('error')
-//
-// }//user_streams()
-
-
-
-// function public_streams() {
-//   var public_streams_config = config.get('public_streams');
-//
-//   // only run if config file allows
-//   if(!public_streams_config.get('enabled')) {
-//
-//     log.info({
-//       log_type : log.types.twitter.PUBLIC_STREAMS,
-//     }, 'Twitter Public Streams is DISABLED.');
-//
-//     return;
-//   }//if-else
-//
-//   var ENDPOINT     = public_streams_config.get('endpoint');
-//   var FILTER_LEVEL = public_streams_config.get('filter_level');
-//   var LANGUAGE     = public_streams_config.get('language');
-//   var TRACK_TERMS  = public_streams_config.get('track');
-//
-//   var options = {
-//     track: TRACK_TERMS,
-//     language: LANGUAGE,
-//     filter_level: FILTER_LEVEL,
-//   };//options
-//
-//   log.info({
-//     log_type     : log.types.twitter.PUBLIC_STREAMS,
-//     endpoint     : ENDPOINT,
-//     options: options,
-//   }, 'Twitter Public Streams is ENABLED.');
-//
-//   var stream = client.stream(ENDPOINT, options);
-//
-//   stream.on('tweet', function(tweet) {
-//
-//     metrics.meter(metrics.types.twitter.TWEET_RECEIVED, options);
-//
-//     process_tweet(tweet);
-//
-//   });//stream.on('data')
-//
-//   stream.on('error', function(err) {
-//     log.info({
-//       err          : err,
-//       log_type     : log.types.twitter.STREAM_ERROR,
-//       endpoint     : ENDPOINT,
-//       options: options,
-//     }, 'Twitter Public Streams error.');
-//
-//     metrics.meter(metrics.types.twitter.STREAM_ERROR, options);
-//
-//   });//stream.on('error')
-//
-// }//public_streams()
-
-
 function process_tweet(tweet) {
+  log.debug({
+    tweet: tweet,
+  }, 'Tweet.');
+  
   // URLS
   tweet.entities.urls.forEach(function(url_object)  {
     var url = url_object.expanded_url || "";
@@ -200,9 +93,6 @@ function process_tweet(tweet) {
       log.info({
         url: url,
       });
-      // queue.publish_message(topics.URLS_RECEIVED, {
-      //   url: url
-      // });//queue.publish_message
     }//if
   });//tweet.forEach
 
