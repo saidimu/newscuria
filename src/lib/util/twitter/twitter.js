@@ -29,6 +29,8 @@ var metrics = require('_/util/metrics.js');
 var user_streams = require('./user-streams.js');
 // var public_streams = require('./public-streams.js');
 
+var tweet_utils = require('./tweet-utils.js');
+
 var CONSUMER_KEY        = config.get('consumer_key');
 var CONSUMER_SECRET     = config.get('consumer_secret');
 var ACCESS_TOKEN_KEY    = config.get('access_token_key');
@@ -89,26 +91,11 @@ function process_tweet(tweet) {
   }//if-else
 
   // URLS
-  tweet.entities.urls.forEach(function(url_object)  {
-    var url = url_object.expanded_url || "";
-    if(url) {
-      log.info({
-        url: url,
-      });
-    }//if
-  });//tweet.forEach
+  var url_options = ['expanded_url'];
+  var urls = tweet_utils.extract_urls(tweet, url_options);
 
   // HASHTAGS
-  tweet.entities.hashtags.forEach(function(hashtag_object)  {
-    var text = hashtag_object.text || "";
-    var indices = hashtag_object.indices || [];
-
-    if(text) {
-      log.info({
-        hashtag: text,
-      });
-    }//if
-  });//tweet.forEach
+  var hashtags = tweet_utils.extract_hashtags(tweet);
 
 }//process_tweet()
 
