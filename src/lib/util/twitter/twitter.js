@@ -93,7 +93,7 @@ function process_tweet(tweet) {
   // URLS
   var url_options = ['expanded_url'];
   var urls = tweet_utils.get_urls(tweet, url_options);
-  var url = urls[0]['expanded_url'];
+  var url = urls[0]['expanded_url'] || '';
 
   // HASHTAGS
   var hashtags = tweet_utils.get_hashtags(tweet);
@@ -102,6 +102,7 @@ function process_tweet(tweet) {
   tweet_utils.get_url_tags(url, function(err, res)  {
     if(err) {
       log.error({
+        url: url,
         err: err,
       }, 'Error fetching data on tweet url(s)');
 
