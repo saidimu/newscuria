@@ -29,6 +29,8 @@ var metrics = require('_/util/metrics.js');
 var user_streams = require('./user-streams.js');
 // var public_streams = require('./public-streams.js');
 
+var tweet_utils = require('./tweet-utils.js');
+
 var CONSUMER_KEY        = config.get('consumer_key');
 var CONSUMER_SECRET     = config.get('consumer_secret');
 var ACCESS_TOKEN_KEY    = config.get('access_token_key');
@@ -89,26 +91,30 @@ function process_tweet(tweet) {
   }//if-else
 
   // URLS
-  tweet.entities.urls.forEach(function(url_object)  {
-    var url = url_object.expanded_url || "";
-    if(url) {
-      log.info({
-        url: url,
-      });
-    }//if
-  });//tweet.forEach
+  var url_options = ['expanded_url'];
+  var urls = tweet_utils.extract_urls(tweet, url_options);
+  var url = urls[0]['expanded_url'];
 
   // HASHTAGS
-  tweet.entities.hashtags.forEach(function(hashtag_object)  {
-    var text = hashtag_object.text || "";
-    var indices = hashtag_object.indices || [];
+  var hashtags = tweet_utils.extract_hashtags(tweet);
 
-    if(text) {
+  // fetch URL data and reply to tweet
+  tweet_utils.get_url_tags(url, function(err, res)  {
+    if(err) {
+      log.error({
+        err: err,
+      }, 'Error fetching data on tweet url(s)');
+
+    } else {
       log.info({
-        hashtag: text,
-      });
-    }//if
-  });//tweet.forEach
+        url: url,
+        data: res,
+      }, 'Data from url in tweet');
+      
+      tweet_utils.reply_to_tweet(tweet, res);
+
+    }//if-else
+  });//get_url_tags
 
 }//process_tweet()
 
