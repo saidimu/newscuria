@@ -26,7 +26,7 @@ var config = require('config').get('twitter');
 var Twitter = require('twit');
 var metrics = require('_/util/metrics.js');
 
-var user_streams = require('./public-streams.js');
+var user_streams = require('./user-streams.js');
 // var public_streams = require('./public-streams.js');
 
 var CONSUMER_KEY        = config.get('consumer_key');
