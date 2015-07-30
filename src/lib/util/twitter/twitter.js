@@ -109,23 +109,22 @@ function process_tweet(tweet) {
         return;
       }//if
 
-      tweet_utils.reply_to_tweet(tweet, url_data, twitter_client, function(err, data, response) {
-        if(err) {
-
-          log.error({
-            err: err,
-            data: data,
-            response: response,
-          }, 'Error replying to tweet.');
-
-        } else {
-          log.debug({
-            data: data,
-            response: response,
-          }, 'Data and response of tweet reply.');
-
-        }//if-else
-      });//tweet_utils.reply
+      // tweet_utils.reply_to_tweet(tweet, url_data, twitter_client, function(err, data, response) {
+      //   if(err) {
+      //
+      //     log.error({
+      //       err: err,
+      //       data: data,
+      //       response: response,
+      //     }, 'Error replying to tweet.');
+      //
+      //   } else {
+      //     log.info({
+      //       data: data,
+      //     }, 'Data and response of tweet reply.');
+      //
+      //   }//if-else
+      // });//tweet_utils.reply
 
     }//if-else
   });//get_url_tags
