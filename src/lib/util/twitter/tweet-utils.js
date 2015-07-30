@@ -128,6 +128,11 @@ function reply_to_tweet(tweet, url_data, twitter_client, callback)  {
   var user = get_tweet_user(tweet);
   var tweet_id_str = get_tweet_id(tweet);
 
+  // FIXME: HACK: TODO: only reply to @saidimu tweets
+  if(user.screen_name !== 'saidimu')  {
+    return;
+  }//if
+
   // if not status id to reply to, return with an error
   if(!tweet_id_str) {
     callback(new Error('Missing or empty status_id_str. Must specify to reply to a tweet.'), null, null);
