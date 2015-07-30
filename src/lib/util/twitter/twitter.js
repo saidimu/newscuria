@@ -59,18 +59,6 @@ function start()    {
       }//if-else
     });//user_streams
 
-    // public_streams.start(twitter_client, function(err, tweet)  {
-    //   if(err) {
-    //     log.error({
-    //       err: err,
-    //     }, 'Error getting tweet from Public Stream');
-    //
-    //   } else {
-    //     process_tweet(tweet);
-    //
-    //   }//if-else
-    // });//public_streams
-
   } else{
 
     log.info({
@@ -126,6 +114,8 @@ function process_tweet(tweet) {
 
           log.error({
             err: err,
+            data: data,
+            response: response,
           }, 'Error replying to tweet.');
 
         } else {

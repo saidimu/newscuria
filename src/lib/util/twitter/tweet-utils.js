@@ -94,9 +94,7 @@ function get_tweet_id(tweet)  {
     return id_str;
   }//if
 
-  id_str = tweet.id_str;
-
-  return id_str;
+  return tweet.id_str;
 }//get_tweet_id
 
 
@@ -130,9 +128,12 @@ function reply_to_tweet(tweet, url_data, twitter_client, callback)  {
   var user = get_tweet_user(tweet);
   var tweet_id_str = get_tweet_id(tweet);
 
-  var message = ".@" + user.screen_name + ": #What" + url_data;
+  // if not status id to reply to, return with an error
+  if(!tweet_id_str) {
+    callback(new Error('Missing or empty status_id_str. Must specify to reply to a tweet.'), null, null);
+  }//if
 
-  console.log(message);
+  var message = ".@" + user.screen_name + ": #What" + url_data;
 
   twitter_client.post('statuses/update', {
     status: message,
