@@ -95,13 +95,16 @@ function process_tweet(tweet) {
       }, 'Error fetching data on tweet url(s)');
 
     } else {
+
       log.info({
         url: url,
         data: res,
       }, 'Data from url in tweet');
 
       var url_data = res.results.hits || [];
-      if(url_data === []) {
+
+      // bail out if empty results
+      if(url_data.length === 0) {
         log.error({
           response: res,
         }, 'Empty results in URL data fetch');
