@@ -145,4 +145,5 @@ function process_tweet(tweet) {
 
 module.exports = {
   start: start,
+  client: twitter_client,
 };//module.exports

@@ -87,6 +87,19 @@ function get_tweet_user(tweet)  {
 }//get_tweet_user
 
 
+function get_tweet_id(tweet)  {
+  var id_str;
+
+  if(!tweet)  {
+    return id_str;
+  }//if
+
+  id_str = tweet.id_str;
+
+  return id_str;
+}//get_tweet_id
+
+
 function get_url_tags(url, callback)  {
   var endpoint = "http://api-rien1ceeheinah2o.nuzli.com/v1/url/tags/";
 
@@ -115,14 +128,15 @@ function get_url_tags(url, callback)  {
 
 function reply_to_tweet(tweet, url_data, twitter_client, callback)  {
   var user = get_tweet_user(tweet);
+  var tweet_id_str = get_tweet_id(tweet);
 
-  var message = "@" + user.screen_name + ": #What" + url_data;
+  var message = ".@" + user.screen_name + ": #What" + url_data;
 
   console.log(message);
 
   twitter_client.post('statuses/update', {
     status: message,
-    in_reply_to_id_str: user.id_str,
+    in_reply_to_status_id_str: tweet_id_str,
   }, function(err, data, response) {
     callback(err, data, response);
   });//twitter_client.post
