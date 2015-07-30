@@ -19,8 +19,8 @@
 var appname = "twitter";
 var log = require('_/util/logging.js')(appname);
 
-// var queue = require('_/util/queue.js');
-// var topics = queue.topics;
+var queue = require('_/util/queue.js');
+var topics = queue.topics;
 
 var config = require('config').get('twitter');
 var Twitter = require('twit');
@@ -86,6 +86,9 @@ function process_tweet(tweet) {
   // HASHTAGS
   var hashtags = tweet_utils.get_hashtags(tweet);
 
+  // post URL to message queue
+  publish_url_message(url);
+
   // fetch URL data and reply to tweet
   tweet_utils.get_url_tags(url, function(err, res)  {
     if(err) {
@@ -133,6 +136,13 @@ function process_tweet(tweet) {
   });//get_url_tags
 
 }//process_tweet()
+
+
+function publish_url_message(url) {
+  queue.publish_message(topics.URLS_RECEIVED, {
+    url: url
+  });
+}//publish_url_message
 
 
 module.exports = {
