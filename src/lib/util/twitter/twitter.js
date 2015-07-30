@@ -104,7 +104,7 @@ function process_tweet(tweet) {
         data: res,
       }, 'Data from url in tweet');
 
-      var url_data = res.results.hits || [];
+      var url_data = res.results ? res.results.hits : [];
 
       // bail out if empty results
       if(url_data.length === 0) {
