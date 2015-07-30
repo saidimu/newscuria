@@ -133,7 +133,7 @@ function reply_to_tweet(tweet, url_data, twitter_client, callback)  {
     callback(new Error('Missing or empty status_id_str. Must specify to reply to a tweet.'), null, null);
   }//if
 
-  var message = ".@" + user.screen_name + " " + url_data;
+  var message = "@" + user.screen_name + " " + url_data;
 
   twitter_client.post('statuses/update', {
     status: message,
