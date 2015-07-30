@@ -81,7 +81,7 @@ function process_tweet(tweet) {
   // URLS
   var url_options = ['expanded_url'];
   var urls = tweet_utils.get_urls(tweet, url_options);
-  var url = urls[0]['expanded_url'] || '';
+  var url = urls[0] ? urls[0]['expanded_url'] : '';
 
   // HASHTAGS
   var hashtags = tweet_utils.get_hashtags(tweet);
