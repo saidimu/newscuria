@@ -16,7 +16,7 @@
  */
 'use strict';
 
-var kimono = require('_/util/kimono.js');
+var kimono = require('./kimono-utils.js');
 
 module.exports = function (request, reply) {
   var webhook = request.payload || undefined;
@@ -27,5 +27,5 @@ module.exports = function (request, reply) {
 
     reply("Ok");
   });//kimono_googlenews_handler
-  
+
 };//module.exports
