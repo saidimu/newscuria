@@ -58,7 +58,7 @@ var plugin_register_callback = function(err)  {
 };//plugin_register_callback
 
 // hapi-io: a SocketIO plugin
-server.register({ register: hapio }, plugin_register_callback);
+server.register({ register: hapio },  { routes: { prefix: API_VERSION_PATH }}, plugin_register_callback);
 
 // a basic info/version plugin
 server.register({ register: info_plugin }, { routes: { prefix: API_VERSION_PATH + '/info' }}, plugin_register_callback);
