@@ -57,14 +57,14 @@ var plugin_register_callback = function(err)  {
 
 };//plugin_register_callback
 
+// hapi-io: a SocketIO plugin
+server.register({ register: hapio }, plugin_register_callback);
+
 // a basic info/version plugin
 server.register({ register: info_plugin }, { routes: { prefix: API_VERSION_PATH + '/info' }}, plugin_register_callback);
 
 // a plugin for Kimonolabs.com webhooks
 server.register({ register: kimono_plugin }, plugin_register_callback);
-
-// a SocketIO plugin
-server.register({ register: hapio }, plugin_register_callback);
 
 // all things Opencalais plugin
 server.register({ register: opencalais_plugin }, { routes: { prefix: API_VERSION_PATH + '/url' }}, plugin_register_callback);
