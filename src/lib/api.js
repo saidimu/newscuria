@@ -58,6 +58,7 @@ var plugin_register_callback = function(err)  {
 };//plugin_register_callback
 
 // hapi-io: a SocketIO plugin
+// route prefixing doesn't appear to work: https://github.com/sibartlett/hapi-io/issues/9
 server.register({ register: hapio },  { routes: { prefix: API_VERSION_PATH }}, plugin_register_callback);
 
 // a basic info/version plugin
