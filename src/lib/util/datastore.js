@@ -35,14 +35,15 @@ function start()    {
   // connect to the message queue
   queue.connect(function onQueueConnect()  {
     // listen_to_urls_received();
-    listen_to_readability();
+    listen_to_augmented_readability();
+    // listen_to_readability();
     listen_to_opencalais();
   });//queue.connect
 }//start
 
 
-function listen_to_urls_received()  {
-  var topic = topics.URLS_RECEIVED;
+function listen_to_augmented_readability()  {
+  var topic = topics.AUGMENTED_READABILITY;
   var channel = "save-to-datastore";
 
   // https://github.com/auth0/limitd
@@ -70,7 +71,7 @@ function listen_to_urls_received()  {
 
         } else {
 
-          process_url_received_message(json, message);
+          process_augmented_readability_message(json, message);
 
         }//if-else(expected_wait_time)
 
@@ -78,47 +79,7 @@ function listen_to_urls_received()  {
 
     }//if
   });
-}//listen_to_urls_received
-
-
-function listen_to_readability()  {
-  var topic = topics.READABILITY;
-  var channel = "save-to-datastore";
-
-  // https://github.com/auth0/limitd
-  var limit_options = {
-    bucket: appname,
-    // key: 1, // TODO: FIXME: os.hostname()?
-    num_tokens: 1,
-  };//options
-
-  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
-    if(!err) {
-
-      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
-        topic  : topic,
-        channel: channel,
-        app    : appname,
-      });
-
-      ratelimiter.limit_app(limit_options, function(expected_wait_time) {
-        if(expected_wait_time)  {
-          // now backing-off to prevent other messages from being pushed from the server
-          // initially wasn't backing-off to prevent "punishment" by the server
-          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
-          message.requeue(expected_wait_time, true);
-
-        } else {
-
-          process_readability_message(json, message);
-
-        }//if-else(expected_wait_time)
-
-      });//ratelimiter.limit_app
-
-    }//if
-  });
-}//listen_to_readability
+}//listen_to_augmented_readability
 
 
 function listen_to_opencalais()  {
@@ -161,6 +122,204 @@ function listen_to_opencalais()  {
 }//listen_to_opencalais
 
 
+function listen_to_readability()  {
+  var topic = topics.READABILITY;
+  var channel = "save-to-datastore";
+
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
+  };//options
+
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
+    if(!err) {
+
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
+      ratelimiter.limit_app(limit_options, function(expected_wait_time) {
+        if(expected_wait_time)  {
+          // now backing-off to prevent other messages from being pushed from the server
+          // initially wasn't backing-off to prevent "punishment" by the server
+          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+          message.requeue(expected_wait_time, true);
+
+        } else {
+
+          process_readability_message(json, message);
+
+        }//if-else(expected_wait_time)
+
+      });//ratelimiter.limit_app
+
+    }//if
+  });
+}//listen_to_readability
+
+
+function listen_to_urls_received()  {
+  var topic = topics.URLS_RECEIVED;
+  var channel = "save-to-datastore";
+
+  // https://github.com/auth0/limitd
+  var limit_options = {
+    bucket: appname,
+    // key: 1, // TODO: FIXME: os.hostname()?
+    num_tokens: 1,
+  };//options
+
+  queue.read_message(topic, channel, function onReadMessage(err, json, message) {
+    if(!err) {
+
+      metrics.meter(metrics.types.queue.reader.MESSAGE_RECEIVED, {
+        topic  : topic,
+        channel: channel,
+        app    : appname,
+      });
+
+      ratelimiter.limit_app(limit_options, function(expected_wait_time) {
+        if(expected_wait_time)  {
+          // now backing-off to prevent other messages from being pushed from the server
+          // initially wasn't backing-off to prevent "punishment" by the server
+          // https://groups.google.com/forum/#!topic/nsq-users/by5PqJsgFKw
+          message.requeue(expected_wait_time, true);
+
+        } else {
+
+          process_url_received_message(json, message);
+
+        }//if-else(expected_wait_time)
+
+      });//ratelimiter.limit_app
+
+    }//if
+  });
+}//listen_to_urls_received
+
+
+function process_augmented_readability_message(json, message) {
+  var readability = json;
+
+  var url = readability.url;
+
+    // convert Readability date string into an ISO date object
+  var date_published = readability.date_published || null;
+  readability.date_published = date_string_to_iso_object(date_published);
+
+  var author = readability.author || '';
+  var domain = readability.domain || '';
+  var word_count = readability.word_count || 0;
+
+  if(date_published === null) {
+		log.error({
+      url: url,
+    }, "Empty 'date_published' in Readability object.");
+
+    metrics.meter(metrics.types.readability.EMPTY_DATE_PUBLISHED, {
+      url_domain: domain,
+      url_host  : urls.parse(url).hostname,
+    });
+
+  }//if
+
+  if(author === '') {
+		log.error({
+      url: url,
+    }, "Empty 'author' in Readability object.");
+
+    metrics.meter(metrics.types.readability.EMPTY_AUTHOR, {
+      url_domain: domain,
+      url_host  : urls.parse(url).hostname,
+    });
+
+  }//if
+
+  if(domain === '') {
+		log.error({
+      url: url,
+    }, "Empty 'domain' in Readability object.");
+
+    metrics.meter(metrics.types.readability.EMPTY_DOMAIN, {
+      url_host  : urls.parse(url).hostname,
+    });
+
+  }//if
+
+  // save Readability object to datastore
+  save_document(
+    readability,
+    url,
+    date_published,
+    "readability"
+  );//save_document
+
+  // save author metadata to datastore
+  // save_author_metadata(
+  //   author,
+  //   url,
+  //   word_count,
+  //   date_published,
+  //   "author_urls"
+  // );//save_author_metadata
+
+  // save domain metadata to datastore
+  // save_domain_metadata(
+  //   domain,
+  //   url,
+  //   word_count,
+  //   date_published,
+  //   "domain_urls"
+  // );//save_domain_metadata
+
+  message.finish();
+
+}//process_augmented_readability_message
+
+
+function process_opencalais_message(json, message) {
+  var opencalais = json;
+  var url = opencalais.url || '';
+  var date_published = opencalais.date_published || null;
+
+  if(date_published === null) {
+		log.error({
+      url: url,
+    }, "Empty 'date_published' in Opencalais object.");
+
+    metrics.meter(metrics.types.opencalais.EMPTY_DATE_PUBLISHED, {
+      url_host: urls.parse(url).hostname,
+    });
+
+  }//if
+
+  if(!url)  {
+    log.error({
+      url: url,
+    }, "EMPTY url in Opencalais object. Cannot persist to datastore.");
+
+    metrics.meter(metrics.types.opencalais.EMPTY_URL, {});
+
+    return;
+  }//if
+
+  // persist Opencalais object to datastore
+  save_document(
+    opencalais,
+    url,
+    date_published,
+    "opencalais"
+  );//save_document
+
+  message.finish();
+
+}//process_opencalais_message
+
+
 function process_url_received_message(json, message) {
   var url = json.url || '';
   var table = 'received_urls';
@@ -200,7 +359,7 @@ function process_readability_message(json, message) {
     // convert Readability date string into an ISO date object
   var date_published = readability.date_published || null;
   readability.date_published = date_string_to_iso_object(date_published);
-  
+
   var author = readability.author || '';
   var domain = readability.domain || '';
   var word_count = readability.word_count || 0;
@@ -269,45 +428,6 @@ function process_readability_message(json, message) {
   message.finish();
 
 }//process_readability_message
-
-
-function process_opencalais_message(json, message) {
-  var opencalais = json;
-  var url = opencalais.url || '';
-  var date_published = opencalais.date_published || null;
-
-  if(date_published === null) {
-		log.error({
-      url: url,
-    }, "Empty 'date_published' in Opencalais object.");
-
-    metrics.meter(metrics.types.opencalais.EMPTY_DATE_PUBLISHED, {
-      url_host: urls.parse(url).hostname,
-    });
-
-  }//if
-
-  if(!url)  {
-    log.error({
-      url: url,
-    }, "EMPTY url in Opencalais object. Cannot persist to datastore.");
-
-    metrics.meter(metrics.types.opencalais.EMPTY_URL, {});
-
-    return;
-  }//if
-
-  // persist Opencalais object to datastore
-  save_document(
-    opencalais,
-    url,
-    date_published,
-    "opencalais"
-  );//save_document
-
-  message.finish();
-
-}//process_opencalais_message
 
 
 function save_domain_metadata(domain, url, word_count, date_published, table, callback) {

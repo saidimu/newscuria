@@ -39,6 +39,7 @@ process.env.NODE_ENV = "entities";
 
 var filter = require('_/util/filter.js');
 var readability = require('_/util/readability.js');
+var augment_readability = require('_/util/augment-readability-plaintext.js');
 var opencalais = require('_/util/opencalais.js');
 var datastore = require('_/util/datastore.js');
 // var entities = require('_/util/entities.js');
@@ -55,6 +56,7 @@ function start()    {
   twitter.start();
   filter.start();
   readability.start();
+  augment_readability.start();
   opencalais.start();
   datastore.start();
   // entities.start();
