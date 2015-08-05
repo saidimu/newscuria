@@ -16,7 +16,7 @@
  */
 'use strict';
 
-var appname = "augment-plaintext";
+var appname = "augment_readability";
 var log = require('_/util/logging.js')(appname);
 
 var queue = require('_/util/queue.js');
