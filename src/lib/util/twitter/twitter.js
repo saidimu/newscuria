@@ -99,18 +99,18 @@ function process_tweet(tweet) {
 
     } else {
 
-      log.info({
-        url: url,
-        data: res,
-      }, 'Data from url in tweet');
+      // log.info({
+      //   url: url,
+      //   data: res,
+      // }, 'Data from url in tweet');
 
       var url_data = res.results ? res.results.hits : [];
 
       // bail out if empty results
       if(url_data.length === 0) {
-        log.error({
-          response: res,
-        }, 'Empty results in URL data fetch');
+        // log.warn({
+        //   response: res,
+        // }, 'Empty results in URL data fetch');
 
         return;
       }//if
@@ -125,9 +125,9 @@ function process_tweet(tweet) {
           }, 'Error replying to tweet.');
 
         } else {
-          log.info({
-            data: data,
-          }, 'Data and response of tweet reply.');
+          // log.info({
+          //   data: data,
+          // }, 'Data and response of tweet reply.');
 
         }//if-else
       });//tweet_utils.reply
