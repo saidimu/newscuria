@@ -28,6 +28,8 @@ var urls = require('_/util/urls.js');
 
 var util = require('util');
 
+var weasel = require('weasel-words');
+
 function start()    {
   // connect to the message queue
   queue.connect(listen_to_readability);
@@ -76,13 +78,13 @@ function listen_to_readability()  {
 
 
 function process_readability_message(json, message)	{
-  augment_readability_plaintext(json);
+  augment_readability_plaintext(json, message.finish, message.requeue);
 
-  message.finish();
+  // message.finish();
 }//process_readability_message
 
 
-function augment_readability_plaintext(json)	{
+function augment_readability_plaintext(json, finish, requeue)	{
   var readability = json;
 
   var url = readability.url || '';
@@ -98,6 +100,7 @@ function augment_readability_plaintext(json)	{
       url_host: urls.parse(url).hostname,
     });
 
+    finish();
 		return;
 	}//if
 
@@ -111,21 +114,40 @@ function augment_readability_plaintext(json)	{
       url_host: urls.parse(url).hostname,
     });
 
+    finish();
     return;
   }//if
 
-  // pass-thru 'augmenting' as a placeholder
-  var augmented_readability = readability;
-  process_augmented_readability_object(augmented_readability);
+  var problems = weasel(text);
+  var snippet_padding = 40;
+  problems.forEach(function(problem) {
+    var calculated_start_index = problem.index - snippet_padding;
+    var start_index = (calculated_start_index  >= 0) ? calculated_start_index : 0;
+
+    var calculated_end_index = problem.index + snippet_padding;
+    var end_index = (calculated_end_index  <= text.length) ? calculated_end_index : text.length;
+
+    var snippet = text.slice(start_index, end_index);
+
+    problem.snippet = snippet;
+
+    console.log(problem);
+  });//problems.forEach
+
+
+  readability.weasel_words = problems;
+
+  queue.publish_message(topics.AUGMENTED_READABILITY, readability);
+  // process_augmented_readability_object(augmented_readability);
 
 }//augment_readability_plaintext
 
 
-function process_augmented_readability_object(augmented) {
-
-  // publish augmented object
-  queue.publish_message(topics.AUGMENTED_READABILITY, augmented);
-}//process_augmented_readability_object
+// function process_augmented_readability_object(augmented) {
+//
+//   // publish augmented object
+//   queue.publish_message(topics.AUGMENTED_READABILITY, augmented);
+// }//process_augmented_readability_object
 
 
 module.exports = {

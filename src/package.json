@@ -33,7 +33,8 @@
     "hapi": "^8.4.0",
     "hapi-io": "0.0.5",
     "twit": "^2.1.0",
-    "socket.io-client": "^1.3.6"
+    "socket.io-client": "^1.3.6",
+    "weasel-words": "^0.1.1"
   },
   "devDependencies": {},
   "scripts": {
