@@ -100,8 +100,17 @@ function augment_readability_plaintext(json, finish, requeue)	{
       url_host: urls.parse(url).hostname,
     });
 
-    finish();
-		return;
+    try {
+      finish();
+    } catch (err) {
+      log.error({
+        url: url,
+        err: err
+      });
+    } finally {
+      return;
+    }//try-catch-finish
+
 	}//if
 
   if(!text)	{
@@ -114,8 +123,17 @@ function augment_readability_plaintext(json, finish, requeue)	{
       url_host: urls.parse(url).hostname,
     });
 
-    finish();
-    return;
+    try {
+      finish();
+    } catch (err) {
+      log.error({
+        url: url,
+        err: err
+      });
+    } finally {
+      return;
+    }//try-catch-finish
+
   }//if
 
   var problems = weasel(text);
