@@ -119,17 +119,16 @@ function augment_readability_plaintext(json, finish, requeue)	{
   }//if
 
   var problems = weasel(text);
-  var snippet_padding = 40;
+  var snippet_padding = 50;
   problems.forEach(function(problem) {
     var calculated_start_index = problem.index - snippet_padding;
     var start_index = (calculated_start_index  >= 0) ? calculated_start_index : 0;
 
-    var calculated_end_index = problem.index + snippet_padding;
+    var calculated_end_index = problem.index + problem.offset + snippet_padding;
     var end_index = (calculated_end_index  <= text.length) ? calculated_end_index : text.length;
 
-    var snippet = text.slice(start_index, end_index);
-
-    problem.snippet = snippet;
+    problem.snippet = '...' + text.slice(start_index, end_index) + '...';
+    problem.instance = text.slice(problem.index, problem.index+problem.offset);
 
     console.log(problem);
   });//problems.forEach
