@@ -133,8 +133,8 @@ function augment_readability_plaintext(json, finish, requeue)	{
     console.log(problem);
   });//problems.forEach
 
-
-  readability.weasel_words = problems;
+  // skip saving the weasel-words until later
+  // readability.weasel_words = problems;
 
   queue.publish_message(topics.AUGMENTED_READABILITY, readability);
   // process_augmented_readability_object(augmented_readability);
