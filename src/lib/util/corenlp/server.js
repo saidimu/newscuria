@@ -116,8 +116,8 @@ function get_dependencies(options, callback)  {
   all_deps.map(function(d) {
     console.log(d.$.type, " : ", d.dependent._, d.governor._);
   });//deps.map
-  
-  callback(all_deps);
+
+  callback(null, all_deps);
 
 }//get_dependencies
 
