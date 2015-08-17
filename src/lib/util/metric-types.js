@@ -167,3 +167,12 @@ event_types.metrics = {
   STORE_ERROR    : 'metrics.store.error',
   METRICS_ERROR  : 'metrics.generic.error',
 };//event_types.metrics
+
+// Stanford CoreNLP events
+event_types.corenlp = {
+  CORENLP        : 'corenlp',
+  TWEET_RECEIVED : 'twitter.tweet.received',
+  USER_STREAMS   : 'twitter.streaming.user',
+  PUBLIC_STREAMS : 'twitter.streaming.public',
+  PROCESS_ERROR   : 'corenlp.process.error',
+};//event_types.twitter
