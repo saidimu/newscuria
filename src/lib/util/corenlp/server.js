@@ -36,8 +36,9 @@ if(!config.get('enabled')) {
 } else {
 
   coreNLP = new NLP.StanfordNLP({
-    'nlpPath': config.get('nlpPath'),
-    'version': config.get('version')
+    'nlpPath'   : config.get('nlpPath'),
+    'version'   : config.get('version'),
+    'annotators': config.get('annotators')
   });
 
   coreNLP.loadPipelineSync();
