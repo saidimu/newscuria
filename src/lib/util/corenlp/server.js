@@ -17,7 +17,7 @@
 'use strict';
 
 var appname = "stanford_corenlp";
-// var log = require('_/util/logging.js')(appname);
+var log = require('_/util/logging.js')(appname);
 
 var util = require('util');
 
@@ -26,35 +26,56 @@ var config = require('config').get('stanford_corenlp');
 var NLP = require('stanford-corenlp');
 var coreNLP;
 
-// only run if config file allows
-if(!config.get('enabled')) {
-  console.log();
-  // log.info({
-  //   log_type : log.types.corenlp.CORENLP,
-  // }, 'Stanford CoreNLP is DISABLED.');
 
-} else {
+function init(callback)  {
+  if(!callback) {
+    log.error({
+      log_type : log.types.corenlp.CORENLP,
+    }, 'No callback provided!');
+    throw new Error('Must provide callback function!');
+  }//if
 
-  coreNLP = new NLP.StanfordNLP({
-    'nlpPath'   : config.get('nlpPath'),
-    'version'   : config.get('version'),
-    'annotators': config.get('annotators')
-  });
+  // only run if config file allows
+  if(config.get('enabled') !== true) {
+    console.log('Stanford CoreNLP is DISABLED.');
+    log.info({
+      log_type : log.types.corenlp.CORENLP,
+    }, 'Stanford CoreNLP is DISABLED.');
 
-  coreNLP.loadPipelineSync();
+  } else {
 
-}//if-else
+    var options = {
+      'nlpPath'   : config.get('nlpPath'),
+      'version'   : config.get('version'),
+      'annotators': config.get('annotators')
+    };
 
+    // async loading
+    coreNLP = new NLP.StanfordNLP(options, function(err)  {
+      if(err) {
+        log.error({
+          err: err,
+          log_type : log.types.corenlp.CORENLP,
+        }, 'Error loading Stanford CoreNLP!');
 
-function start()  {
-}//start()
+        throw new Error(err);
+      } else {
+        callback();
+      }//if-else
+    });
+
+    // https://github.com/hiteshjoshi/node-stanford-corenlp/issues/8
+    // coreNLP.loadPipelineSync();
+
+  }//if-else
+}//init()
 
 
 function process(text, callback)  {
   if(!callback) {
-    // log.error({
-    //   log_type : log.types.corenlp.CORENLP,
-    // }, 'No callback provided!');
+    log.error({
+      log_type : log.types.corenlp.CORENLP,
+    }, 'No callback provided!');
 
     return;
   }//if
@@ -62,10 +83,10 @@ function process(text, callback)  {
   try {
     coreNLP.process(text, callback);
   } catch (e) {
-    // log.error({
-    //   err: e,
-    //   log_type : log.types.corenlp.PROCESS_ERROR,
-    // }, 'Error processing text.');
+    log.error({
+      err: e,
+      log_type : log.types.corenlp.PROCESS_ERROR,
+    }, 'Error processing text.');
   }//try-catch
 
 }//process
@@ -78,18 +99,18 @@ function get_dependencies(options, callback)  {
   var max_dependencies     = options.max_dependencies || config.get('max_dependencies');
 
   if(!nlp_result) {
-    // log.error({
-    //   log_type : log.types.corenlp.PROCESS_ERROR,
-    // }, 'Empty or missing CoreNLP results object!');
+    log.error({
+      log_type : log.types.corenlp.PROCESS_ERROR,
+    }, 'Empty or missing CoreNLP results object!');
 
     return;
   }//if
 
 
   if(!callback) {
-    // log.error({
-    //   log_type : log.types.corenlp.CORENLP,
-    // }, 'No callback provided!');
+    log.error({
+      log_type : log.types.corenlp.CORENLP,
+    }, 'No callback provided!');
 
     return;
   }//if
@@ -124,7 +145,7 @@ function get_dependencies(options, callback)  {
 
 
 module.exports = {
-  start: start,
+  init: init,
   process: process,
   get_dependencies: get_dependencies,
 };//module.exports
